@@ -1,0 +1,81 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.183.0/containers/python-3
+{
+  "name": "Python 3",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {
+      // Update 'VARIANT' to pick a Python version: 3, 3.6, 3.7, 3.8, 3.9
+      "VARIANT": "3.9",
+      // Options
+      "INSTALL_NODE": "true",
+      "NODE_VERSION": "lts/*"
+    }
+  },
+  "runArgs": [
+    "--network=host"
+  ],
+  "postCreateCommand": "bash ./.devcontainer/postCreateCommand.sh",
+  // Set *default* container specific settings.json values on container create.
+  "settings": {
+    "files.eol": "\n",
+    "editor.tabSize": 4,
+    "terminal.integrated.profiles.linux": {
+      "bash": {
+        "path": "bash"
+      },
+      "zsh": {
+        "path": "zsh"
+      },
+      "fish": {
+        "path": "fish"
+      },
+      "tmux": {
+        "path": "tmux",
+        "icon": "terminal-tmux"
+      },
+      "pwsh": {
+        "path": "pwsh",
+        "icon": "terminal-powershell"
+      }
+    },
+    "editor.formatOnSave": true,
+    "editor.formatOnType": false,
+    "python.pythonPath": "/usr/local/bin/python",
+    "python.languageServer": "Pylance",
+    "python.linting.enabled": true,
+    "editor.insertSpaces": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.provider": "black",
+    "python.formatting.blackPath": "/usr/local/bin/black",
+    "python.linting.flake8Path": "/usr/local/bin/flake8",
+    "python.linting.pycodestylePath": "/usr/local/lib/python3.9/site-packages/pydocstyle",
+    "python.linting.pydocstylePath": "/usr/local/bin/pydocstyle",
+    "python.linting.pylintPath": "/usr/local/bin/pylint"
+  },
+  // Add the IDs of extensions you want installed when the container is created.
+  "extensions": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "github.vscode-pull-request-github",
+    "visualstudioexptteam.vscodeintellicode",
+    "njpwerner.autodocstring",
+    "KevinRose.vsc-python-indent",
+    "littlefoxteam.vscode-python-test-adapter",
+    "donjayamanne.python-extension-pack",
+    "tal7aouy.theme",
+    "techer.open-in-browser"
+  ],
+  "appPort": [
+    "8001:8001"
+  ],
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [
+    8001
+  ]
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "pip3 install --user -r requirements.txt",
+  // Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  // "remoteUser": "vscode"
+}

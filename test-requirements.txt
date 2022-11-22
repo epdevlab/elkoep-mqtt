@@ -1,0 +1,3 @@
+flake8==4.0.1
+paho-mqtt==1.6.1
+attrs>=21.2.0
