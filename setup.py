@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="inels-mqtt",
-    version="0.0.51",
+    version="0.0.52",
     url="https://github.com/Nejezchleb/inels-mqtt",
     license="MIT",
     author="Elko EP s.r.o.",

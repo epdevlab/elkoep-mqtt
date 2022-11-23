@@ -356,14 +356,14 @@ class InelsMqtt:
         msg,
     ) -> None:
         """Special callback function used only in discover_all function
-        placed in on_message. It is the same as on_mesage callback func,
-        but do different things
+        placed in on_message. It is the same as on_message callback func,
+        but does different things
 
         Args:
             client (MqttClient): Mqtt broker instance
             msg (object): Topic with payload from broker
         """
-        # set discovery_start_time to now evry message was returned
+        # set discovery_start_time to now every message was returned
         # will be doing till messages will rising
         self.__discover_start_time = datetime.now()
 
