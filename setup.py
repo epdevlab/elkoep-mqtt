@@ -2,12 +2,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="inels-mqtt",
-    version="0.0.52",
-    url="https://github.com/Nejezchleb/inels-mqtt",
+    name="inels-mqtt-dev",
+    version="0.0.1",
+    url="https://github.com/zed4805/inels-mqtt-dev",
     license="MIT",
     author="Elko EP s.r.o.",
-    author_email="nejezchleb@elkoep.cz",
+    author_email="zed4805@gmail.com",
     description="Python library for iNels mqtt protocol",
     keywords=["iNels", "Elko EP", "Home assistant integration"],
     long_description_content_type="text/markdown",

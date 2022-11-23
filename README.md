@@ -11,7 +11,7 @@ Install
 =======
 Use PyPI repository
 ```
-pip install inels-mqtt
+pip install inels-mqtt-dev
 ```
 
 Testing
