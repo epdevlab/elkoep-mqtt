@@ -502,7 +502,7 @@ class DeviceValue(object):
                     self.__ha_value,
                     self.__last_value
                 )
-                self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
+                self.__inels_set_value = RELAY_SET.get(self.__ha_value)
             else:
                 # just a shortcut for setting it
                 # basically set the status from the ha value
