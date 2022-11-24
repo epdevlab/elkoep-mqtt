@@ -139,6 +139,34 @@ class DeviceValue(object):
                 self.__ha_value = new_object(on=(state == 0), temperature=temp)
                 # simplified the command to just on/off
                 self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]
+                
+            elif self.__inels_type is SA3_01B:
+                state = self.__trim_inels_status_values(RELAY_DATA, STATE, "")
+
+                temp = int(
+                    self.__trim_inels_status_values(
+                        RELAY_DATA, TEMP_IN, ""), 16
+                )/100
+
+                relay_overflow = (
+                    int(
+                        self.__trim_inels_status_values(
+                            RELAY_DATA, RELAY_OVERFLOW, ""
+                        ),
+                        16,
+                    )
+                )
+
+                self.__ha_value = new_object(
+                    on=(state == 0),
+                    temp=temp,
+                    
+                    # may not be important, but could cause problems if ignored
+                    relay_overflow=(relay_overflow == 0)
+                )
+                
+                self.inels_set_value = RELAY_SET[self.__ha_value.on]
+                self.inels_status_value = RELAY_DATA[self.__ha_value.on]
             else:
                 self.__ha_value = SWITCH_STATE[self.__inels_status_value]
                 self.__inels_set_value = SWITCH_SET[self.__ha_value]
