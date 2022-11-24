@@ -165,7 +165,6 @@ class DeviceValue(object):
                 )
                 
                 self.__inels_set_value = RELAY_SET[self.__ha_value.on]
-                #self.inels_status_value = RELAY_DATA[self.__ha_value.on]
             else:
                 self.__ha_value = SWITCH_STATE[self.__inels_status_value]
                 self.__inels_set_value = SWITCH_SET[self.__ha_value]
@@ -285,8 +284,8 @@ class DeviceValue(object):
                 # 0x07 -> turn on
 
                 # simplified to a on/off relay
-                self.inels_set_value = RELAY_SET[self.__ha_value.on]
-                self.inels_status_value = RELAY_DATA[self.__ha_value.on]
+                #self.inels_set_value = RELAY_SET[self.__ha_value.on]
+                #self.inels_status_value = RELAY_DATA[self.__ha_value.on]
             else:
                 # TODO review
                 self.__ha_value = RELAY_STATE[self.__inels_status_value]
