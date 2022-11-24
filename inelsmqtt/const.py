@@ -301,7 +301,7 @@ RELAY_OFF_STATE = "02\n00\n"
 
 # set
 RELAY_ON_SET = "01\n00\n00\n"
-RELAY_OFF_SET = "02\n00\n00\n"
+RELAY_OFF_SET = "00\n00\n00\n"
 
 RELAY_SET = {
     True: RELAY_ON_SET,
