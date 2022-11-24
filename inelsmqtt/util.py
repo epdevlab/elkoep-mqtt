@@ -156,7 +156,6 @@ class DeviceValue(object):
                         16,
                     )
                 )
-
                 self.__ha_value = new_object(
                     on=(state == 0),
                     temp=temp,
@@ -497,14 +496,22 @@ class DeviceValue(object):
     def __find_inels_value(self) -> None:
         """Find inels mqtt value for specific device."""
         if self.__device_type is SWITCH:
-            # just a shortcut for setting it
-            # basically set the status from the ha value
-            self.__inels_status_value = self.__find_keys_by_value(
-                SWITCH_STATE,  # str -> bool
-                self.__ha_value,
-                self.__last_value
-            )
-            self.__inels_set_value = SWITCH_SET.get(self.__ha_value)
+            if self.__inels_type is SA3_01B:
+                self.__inels_status_value = self.__find_keys_by_value(
+                    RELAY_STATE,  # str -> bool
+                    self.__ha_value.on,
+                    self.__last_value.on
+                )
+                self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
+            else:
+                # just a shortcut for setting it
+                # basically set the status from the ha value
+                self.__inels_status_value = self.__find_keys_by_value(
+                    SWITCH_STATE,  # str -> bool
+                    self.__ha_value,
+                    self.__last_value
+                )
+                self.__inels_set_value = SWITCH_SET.get(self.__ha_value)
         elif self.__device_type is LIGHT:
             if self.__inels_type is RFDAC_71B:
                 self.__inels_status_value = self.__find_keys_by_value(
