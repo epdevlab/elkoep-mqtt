@@ -165,7 +165,7 @@ class DeviceValue(object):
                     relay_overflow=(relay_overflow == 0)
                 )
                 
-                self.inels_set_value = RELAY_SET[self.__ha_value.on]
+                self.__inels_set_value = RELAY_SET[self.__ha_value.on]
                 self.inels_status_value = RELAY_DATA[self.__ha_value.on]
             else:
                 self.__ha_value = SWITCH_STATE[self.__inels_status_value]
