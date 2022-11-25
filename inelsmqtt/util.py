@@ -590,8 +590,8 @@ class DeviceValue(object):
                 out2 = round(self.__ha_value.out[1], -1)
                 out2 = out2 if out2 < 100 else 100
 
-                out1_str = hex(out1).lstrip('0x') + "\n"
-                out2_str = hex(out2).lstrip('0x') + "\n"
+                out1_str = f"{out1:02X}" + "\n"
+                out2_str = f"{out2:02X}" + "\n"
 
                 # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
                 self.__inels_set_value = "".join(["00\n" * 4, out1_str, out2_str])
