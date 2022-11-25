@@ -585,10 +585,10 @@ class DeviceValue(object):
                 self.__ha_value = DEVICE_TYPE_05_HEX_VALUES[self.__inels_status_value]
             elif self.__inels_type is DA3_22M:
                 # correct the values
-                out1 = round(self.__ha_value.out1, -1)
+                out1 = round(self.__ha_value.out[0], -1)
                 out1 = out1 if out1 < 100 else 100
 
-                out2 = round(self.__ha_value.out2, -1)
+                out2 = round(self.__ha_value.out[1], -1)
                 out2 = out2 if out2 < 100 else 100
 
                 # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
