@@ -69,7 +69,7 @@ from .const import (
     RELAY_STATE,
     RELAY_SET,
 
-    TWOCHANNELDIMMER_DIM_VALUES,
+    TWOCHANNELDIMMER_DIM_VALUES_TO_STR,
     TWOCHANNELDIMMER_RAMP_VAL,
 
     THERMOSTAT_SET_BACKLIT_DISPLAY,
@@ -591,8 +591,11 @@ class DeviceValue(object):
                 out2 = round(self.__ha_value.out[1], -1)
                 out2 = out2 if out2 < 100 else 100
 
+                out1_str = TWOCHANNELDIMMER_DIM_VALUES_TO_STR[out1]
+                out2_str = TWOCHANNELDIMMER_DIM_VALUES_TO_STR[out2]
+
                 # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
-                self.__inels_set_value = "".join(["00\n" * 4, out1, out2])
+                self.__inels_set_value = "".join(["00\n" * 4, out1_str, out2_str])
         elif self.__device_type is COVER:
             if self.__inels_type is RFJA_12:
                 self.__inels_status_value = self.__find_keys_by_value(

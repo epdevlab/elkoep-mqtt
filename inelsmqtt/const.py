@@ -322,7 +322,7 @@ RELAY_WITH_TEMP_SET = {
 }
 
 # TWO CHANNEL DIMMER (101)
-TWOCHANNELDIMMER_DIM_VALUES = {
+TWOCHANNELDIMMER_DIM_VALUES_TO_INT = {
     "D8\nEF\n": 0,
     "D1\n1F\n": 10,
     "C9\n4F\n": 20,
@@ -334,6 +334,20 @@ TWOCHANNELDIMMER_DIM_VALUES = {
     "9A\n6F\n": 80,
     "92\n9F\n": 90,
     "8A\nCF\n": 100,
+}
+
+TWOCHANNELDIMMER_DIM_VALUES_TO_STR = {
+    0  : "D8\nEF\n",
+    10 : "D1\n1F\n",
+    20 : "C9\n4F\n",
+    30 : "C1\n7F\n",
+    40 : "B9\nAF\n",
+    50 : "B1\nDF\n",
+    60 : "AA\n0F\n",
+    70 : "A2\n3F\n",
+    80 : "9A\n6F\n",
+    90 : "92\n9F\n",
+    100: "8A\nCF\n",
 }
 
 TWOCHANNELDIMMER_RAMP_VAL = "04\n"
