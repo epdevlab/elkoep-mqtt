@@ -159,7 +159,6 @@ class DeviceValue(object):
                 self.__ha_value = new_object(
                     on=(state == 0),
                     temp=temp,
-                    
                     # may not be important, but could cause problems if ignored
                     relay_overflow=(relay_overflow == 0)
                 )
@@ -189,6 +188,65 @@ class DeviceValue(object):
                 self.__inels_set_value = (  # "01 ?? ??"" sets this value to internal state
                     f"{ANALOG_REGULATOR_SET_BYTES[RFDAC_71B]} {trimmed_data}"
                 )
+            elif self.__inels_type is DA3_22M:
+                temp = int(
+                    self.__trim_inels_status_values(
+                        TWOCHANNELDIMMER_DATA, TEMP_IN, ""
+                    ), 16
+                ) / 100
+
+                state = self.__trim_inels_status_values(
+                    TWOCHANNELDIMMER_DATA, DA3_22M, "")
+                state_hex_str = f"0x{state}"
+                state_bin_str = f"{int(state_hex_str, 16):0>8b}"
+
+                out1 = int(
+                    self.__trim_inels_status_values(
+                        TWOCHANNELDIMMER_DATA, DIM_OUT_1, ""
+                    ), 16
+                )
+
+                out2 = int(
+                    self.__trim_inels_status_values(
+                        TWOCHANNELDIMMER_DATA, DIM_OUT_2, ""
+                    ), 16
+                )
+
+                out = [
+                    out1 if out1 > 100 else 100,
+                    out2 if out2 > 100 else 100,
+                ]
+                self.__ha_value = new_object(
+                    #May not be that interesting for HA
+                    sw1=state_bin_str[0] == "0",
+                    sw2=state_bin_str[1] == "0",
+
+                    in1=state_bin_str[2] == "0",
+                    in2=state_bin_str[3] == "0",
+
+                    ovt_alert_1=state_bin_str[4] == "0",
+                    ovt_alert_2=state_bin_str[5] == "0",
+
+                    ovlo_alert_1=state_bin_str[6] == "0",
+                    ovlo_alert_2=state_bin_str[7] == "0",
+
+                    # This might be important
+                    temp=temp,
+                    
+                    #generalization for multiple channel dimmers
+                    out=out, # array
+                    channel_number=2,
+                    #out1=out1 if out1 > 100 else 100,
+                    #out2=out2 if out2 > 100 else 100,
+                )
+                
+                _LOGGER.info("Logging dimmer ha value")
+                _LOGGER.info(self.__ha_value)
+                
+                set_val = "00\n00\n00\n00\n"
+                for i in range(self.__ha_value.channel_number):
+                    set_val += hex(self.__ha_value.out[i]) + "\n"
+                self.__inels_set_value = set_val
             else:
                 self.__ha_value = self.__inels_status_value
         elif self.__device_type is COVER:  # Shutters
@@ -299,7 +357,7 @@ class DeviceValue(object):
                 ) / 100
 
                 state = self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, DA3_22M, "")
+                    TWOCHANNELDIMMER_DATA, DA3_22M, "")
                 state_hex_str = f"0x{state}"
                 state_bin_str = f"{int(state_hex_str, 16):0>8b}"
 
@@ -525,6 +583,16 @@ class DeviceValue(object):
                     f"{ANALOG_REGULATOR_SET_BYTES[RFDAC_71B]} {trimmed_data}"
                 )
                 self.__ha_value = DEVICE_TYPE_05_HEX_VALUES[self.__inels_status_value]
+            elif self.__inels_type is DA3_22M:
+                # correct the values
+                out1 = round(self.__ha_value.out1, -1)
+                out1 = out1 if out1 < 100 else 100
+
+                out2 = round(self.__ha_value.out2, -1)
+                out2 = out2 if out2 < 100 else 100
+
+                # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
+                self.__inels_set_value = "".join(["00\n" * 4, out1, out2])
         elif self.__device_type is COVER:
             if self.__inels_type is RFJA_12:
                 self.__inels_status_value = self.__find_keys_by_value(
