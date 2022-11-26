@@ -235,8 +235,6 @@ class DeviceValue(object):
                     #generalization for multiple channel dimmers
                     out=out, # array
                     channel_number=2,
-                    #out1=out1 if out1 > 100 else 100,
-                    #out2=out2 if out2 > 100 else 100,
                 )
                 
                 _LOGGER.info("Logging dimmer ha value")
