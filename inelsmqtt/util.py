@@ -553,7 +553,7 @@ class DeviceValue(object):
             if self.__inels_type is SA3_01B:
                 self.__inels_status_value = self.__find_keys_by_value(
                     RELAY_STATE,  # str -> bool
-                    self.__ha_value,
+                    self.__ha_value.on,
                     self.__last_value
                 )
                 self.__inels_set_value = RELAY_SET.get(self.__ha_value)
