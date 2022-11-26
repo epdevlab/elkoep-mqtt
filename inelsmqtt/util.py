@@ -371,7 +371,12 @@ class DeviceValue(object):
                         TWOCHANNELDIMMER_DATA, DIM_OUT_2, ""
                     ), 16
                 )
-
+                
+                _LOGGER.debug("out1")
+                _LOGGER.debug(out1)
+                _LOGGER.debug("out2")
+                _LOGGER.debug(out2)
+                
                 out = [
                     out1 if out1 < 100 else 100,
                     out2 if out2 < 100 else 100,
