@@ -212,8 +212,8 @@ class DeviceValue(object):
                 )
                 
                 out = [
-                    out1 if out1 < 100 else 90,
-                    out2 if out2 < 100 else 90,
+                    out1 if out1 <= 100 else 100,
+                    out2 if out2 <= 100 else 100,
                 ]
                 self.__ha_value = new_object(
                     #May not be that interesting for HA
