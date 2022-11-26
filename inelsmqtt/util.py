@@ -244,7 +244,7 @@ class DeviceValue(object):
                 
                 set_val = "00\n00\n00\n00\n"
                 for i in range(self.__ha_value.channel_number):
-                    set_val += hex(self.__ha_value.out[i]) + "\n"
+                    set_val +=  f"{self.__ha_value.out[i]:02X}" + "\n"
                 self.__inels_set_value = set_val
             else:
                 self.__ha_value = self.__inels_status_value
@@ -371,11 +371,6 @@ class DeviceValue(object):
                         TWOCHANNELDIMMER_DATA, DIM_OUT_2, ""
                     ), 16
                 )
-                
-                _LOGGER.debug("out1")
-                _LOGGER.debug(out1)
-                _LOGGER.debug("out2")
-                _LOGGER.debug(out2)
                 
                 out = [
                     out1 if out1 < 100 else 100,
