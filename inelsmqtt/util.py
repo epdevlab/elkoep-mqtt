@@ -140,7 +140,8 @@ class DeviceValue(object):
                 self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]
                 
             elif self.__inels_type is SA3_01B:
-                state = int(self.__trim_inels_status_values(RELAY_DATA, STATE, ""), 16)
+                #state = int(self.__trim_inels_status_values(RELAY_DATA, STATE, ""), 16) #NOT WORKING
+                state = self.__trim_inels_status_values(RELAY_DATA, STATE, "")
 
                 temp = int(
                     self.__trim_inels_status_values(
@@ -553,7 +554,8 @@ class DeviceValue(object):
             if self.__inels_type is SA3_01B:
                 self.__inels_status_value = self.__find_keys_by_value(
                     RELAY_STATE,  # str -> bool
-                    self.__ha_value.on,
+                    #self.__ha_value.on, #NOT WORKING
+                    self.__ha_value,
                     self.__last_value
                 )
                 self.__inels_set_value = RELAY_SET.get(self.__ha_value)
