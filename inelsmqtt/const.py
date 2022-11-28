@@ -1,7 +1,7 @@
 """Constances of inels-mqtt."""
 from __future__ import annotations
 from typing import Final
-from enum import Enum
+from enum import IntEnum
 
 DISCOVERY_TIMEOUT_IN_SEC = 5
 
@@ -360,7 +360,7 @@ BUTTONARRAY_SET_BACKLIT = {
     True: "32\n",
 }
 
-class BusErrors(Enum) :
+class BusErrors(IntEnum) :
     """Bus errors in integer form"""
     BUS_2B_NOT_CALIBRATED = 0x7FFA,
     BUS_2B_NO_VALUE = 0x7FFB,
