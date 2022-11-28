@@ -181,29 +181,18 @@ CLIMATE_TYPE_09_DATA = {
 RELAY_DATA = {
     STATE: [0],
     # SPARE: [1],
-    TEMP_IN: [3, 2],
+    TEMP_IN: [2, 3],
     RELAY_OVERFLOW: [4]
 }
 
 TWOCHANNELDIMMER_DATA = {
-    TEMP_IN: [1, 0],
+    TEMP_IN: [0, 1],
     DA3_22M: [2],
     # TODO CHECK SPARE: [3],
     DIM_OUT_1: [4],
     DIM_OUT_2: [5],
 }
 
-THERMOSTAT_DATA_OLD = {
-    # FORCED_REPAIR: [0],
-    # SPARE: [1]
-    TEMP_IN: [3, 2],
-    GTR3_50: [6, 5, 4],
-    PLUS_MINUS_BUTTONS: [7],
-    LIGHT_IN: [11, 10, 9, 8],
-    AIN: [13, 12],
-    HUMIDITY: [15, 14],
-    DEW_POINT: [17, 16],
-}
 
 THERMOSTAT_DATA = {
     # FORCED_REPAIR: [0],
@@ -218,12 +207,12 @@ THERMOSTAT_DATA = {
 }
 
 BUTTONARRAY_DATA = {
-    GSB3_90SX: [1, 0],
-    TEMP_IN: [3, 2],
-    LIGHT_IN: [7, 6, 5, 4],
-    AIN: [9, 8],
-    HUMIDITY: [11, 10],
-    DEW_POINT: [13, 12],
+    GSB3_90SX: [0, 1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
+    HUMIDITY: [10, 11],
+    DEW_POINT: [12, 13],
 }
 
 NODATA_DATA = {
