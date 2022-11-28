@@ -179,29 +179,37 @@ class DeviceValue(object):
                 digital_inputs_hex_str = f"0x{digital_inputs}"
                 digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
 
-                temp = int(
-                    self.__trim_inels_status_values(
-                        THERMOSTAT_DATA, TEMP_IN, ""
-                    ), 16
-                )/100
+                #temp = int(
+                #    self.__trim_inels_status_values(
+                #        THERMOSTAT_DATA, TEMP_IN, ""
+                #    ), 16
+                #)/100
+
+                temp = self.__trim_inels_status_values(THERMOSTAT_DATA, TEMP_IN, "")
 
                 plusminus = self.__trim_inels_status_values(
                     THERMOSTAT_DATA, PLUS_MINUS_BUTTONS, "")
                 plusminus = f"0x{plusminus}"
                 plusminus = f"{int(plusminus, 16):0>8b}"
 
-                light_in = int(self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, LIGHT_IN, ""), 16)/100
+                #light_in = int(self.__trim_inels_status_values(
+                #    THERMOSTAT_DATA, LIGHT_IN, ""), 16)/100
+                light_in = self.__trim_inels_status_values(THERMOSTAT_DATA, LIGHT_IN, "")
 
-                ain = int(self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, AIN, ""), 16)/100
+                #ain = int(self.__trim_inels_status_values(
+                #    THERMOSTAT_DATA, AIN, ""), 16)/100
+                ain = self.__trim_inels_status_values(THERMOSTAT_DATA, AIN, "")
 
-                humidity = (int(self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, HUMIDITY, ""), 16)/100)
-                # TODO conversion
+                #humidity = (int(self.__trim_inels_status_values(
+                #    THERMOSTAT_DATA, HUMIDITY, ""), 16)/100)
+                
+                humidity = self.__trim_inels_status_values(THERMOSTAT_DATA, HUMIDITY, "")
 
-                dewpoint = (int(self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, DEW_POINT, ""), 16)/100)
+
+                #dewpoint = (int(self.__trim_inels_status_values(
+                #    THERMOSTAT_DATA, DEW_POINT, ""), 16)/100)
+                dewpoint = self.__trim_inels_status_values(THERMOSTAT_DATA, DEW_POINT, "")
+
 
                 self.ha_value = new_object(
                     # May not be important to notify HA of this
