@@ -172,6 +172,67 @@ class DeviceValue(object):
                 # interpretation of the values is done elsewhere.
                 # No output.
                 self.__ha_value = self.__inels_status_value
+            
+            elif self.__device_type is GTR3_50:
+                digital_inputs = self.__trim_inels_status_values(
+                    THERMOSTAT_DATA, GTR3_50, "")
+                digital_inputs_hex_str = f"0x{digital_inputs}"
+                digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
+
+                temp = int(
+                    self.__trim_inels_status_values(
+                        THERMOSTAT_DATA, TEMP_IN, ""
+                    ), 16
+                )/100
+
+                plusminus = self.__trim_inels_status_values(
+                    THERMOSTAT_DATA, PLUS_MINUS_BUTTONS, "")
+                plusminus = f"0x{plusminus}"
+                plusminus = f"{int(plusminus, 16):0>8b}"
+
+                light_in = int(self.__trim_inels_status_values(
+                    THERMOSTAT_DATA, LIGHT_IN, ""), 16)/100
+
+                ain = int(self.__trim_inels_status_values(
+                    THERMOSTAT_DATA, AIN, ""), 16)/100
+
+                humidity = (int(self.__trim_inels_status_values(
+                    THERMOSTAT_DATA, HUMIDITY, ""), 16)/100)
+                # TODO conversion
+
+                dewpoint = (int(self.__trim_inels_status_values(
+                    THERMOSTAT_DATA, DEW_POINT, ""), 16)/100)
+
+                self.ha_value = new_object(
+                    # May not be important to notify HA of this
+                    # digital inputs
+                    din1=digital_inputs_bin_str[0] == "0",
+                    din2=digital_inputs_bin_str[1] == "0",
+                    sw1=digital_inputs_bin_str[2] == "0",
+                    sw2=digital_inputs_bin_str[3] == "0",
+                    sw3=digital_inputs_bin_str[4] == "0",
+                    sw4=digital_inputs_bin_str[5] == "0",
+                    sw5=digital_inputs_bin_str[6] == "0",
+                    # plus minus
+                    plus=plusminus[0] == "0",  # plus button
+                    minus=plusminus[1] == "0",  # minus button
+                    
+                    # Actually important
+                    # temperature
+                    temp=temp,
+
+                    light_in=light_in,
+
+                    ain=ain,
+
+                    humidity=humidity,
+
+                    dewpoint=dewpoint,
+
+                    # my addition
+                    # backlit
+                    backlit=False,
+                )
             else:
                 self.__ha_value = self.__inels_status_value
         elif self.__device_type is LIGHT:  # dimmer
