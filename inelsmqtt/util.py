@@ -258,11 +258,7 @@ class DeviceValue(object):
                     f"{ANALOG_REGULATOR_SET_BYTES[RFDAC_71B]} {trimmed_data}"
                 )
             elif self.__inels_type is DA3_22M:
-                temp = int(
-                    self.__trim_inels_status_values(
-                        TWOCHANNELDIMMER_DATA, TEMP_IN, ""
-                    ), 16
-                ) / 100
+                temp = self.__trim_inels_status_values(TWOCHANNELDIMMER_DATA, TEMP_IN, "")
 
                 state = self.__trim_inels_status_values(
                     TWOCHANNELDIMMER_DATA, DA3_22M, "")
