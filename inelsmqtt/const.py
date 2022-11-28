@@ -193,7 +193,7 @@ TWOCHANNELDIMMER_DATA = {
     DIM_OUT_2: [5],
 }
 
-THERMOSTAT_DATA = {
+THERMOSTAT_DATA_OLD = {
     # FORCED_REPAIR: [0],
     # SPARE: [1]
     TEMP_IN: [3, 2],
@@ -203,6 +203,18 @@ THERMOSTAT_DATA = {
     AIN: [13, 12],
     HUMIDITY: [15, 14],
     DEW_POINT: [17, 16],
+}
+
+THERMOSTAT_DATA = {
+    # FORCED_REPAIR: [0],
+    # SPARE: [1]
+    TEMP_IN: [2, 3],
+    GTR3_50: [4, 5, 6],
+    PLUS_MINUS_BUTTONS: [7],
+    LIGHT_IN: [8, 9, 10, 11],
+    AIN: [12, 13],
+    HUMIDITY: [14, 15],
+    DEW_POINT: [16, 17],
 }
 
 BUTTONARRAY_DATA = {
