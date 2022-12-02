@@ -173,6 +173,8 @@ class InelsMqtt:
         purposes.
         """
         if self.__client.is_connected() is False:
+            _LOGGER.warning("Host: %s, Port: %s\n", self.__host, self.__host)
+            
             self.__client.connect(self.__host, self.__port)
             self.__client.loop_start()
 
