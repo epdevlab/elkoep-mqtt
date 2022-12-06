@@ -304,7 +304,7 @@ class DeviceValue(object):
                 )
                 
                 _LOGGER.info("Logging dimmer ha value")
-                _LOGGER.info(self.__ha_value)
+                _LOGGER.info("out1: %d out2: %d", self.__ha_value.out[0], self.__ha_value.out[1])
                 
                 set_val = "00\n00\n00\n00\n"
                 for i in range(self.__ha_value.channel_number):
