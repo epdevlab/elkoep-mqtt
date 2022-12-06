@@ -370,9 +370,8 @@ class InelsMqtt:
         # set discovery_start_time to now every message was returned
         # will be doing till messages will rising
         if self.__discovered.get(msg.topic) is not None:
-            _LOGGER.info("Message: %s", str(self.__discovered[msg.topic]))
             _LOGGER.info("First time getting topic %s", msg.topic)
-            self.__discover_start_time = datetime.now()
+            #self.__discover_start_time = datetime.now()
 
         # pass only those who belongs to known device types
         fragments = msg.topic.split("/")
