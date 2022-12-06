@@ -173,7 +173,7 @@ class InelsMqtt:
         purposes.
         """
         if self.__client.is_connected() is False:
-            _LOGGER.warning("Host: %s, Port: %s\n", self.__host, self.__host)
+            _LOGGER.warning("Host: %s, Port: %s\n", self.__host, self.__port)
             
             self.__client.connect(self.__host, self.__port)
             self.__client.loop_start()
@@ -365,6 +365,8 @@ class InelsMqtt:
             client (MqttClient): Mqtt broker instance
             msg (object): Topic with payload from broker
         """
+        _LOGGER.info("Found device from topic %s\n", msg.topic)
+        
         # set discovery_start_time to now every message was returned
         # will be doing till messages will rising
         self.__discover_start_time = datetime.now()
@@ -378,7 +380,8 @@ class InelsMqtt:
             self.__discovered[msg.topic] = msg.payload
             self.__last_values[msg.topic] = msg.payload
             self.__is_subscribed_list[msg.topic] = True
-
+            _LOGGER.info("Device of type %s found.\n", device_type)
+            
     def __on_message(
         self,
         client: mqtt.Client,  # pylint: disable=unused-argument
