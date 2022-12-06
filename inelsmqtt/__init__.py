@@ -370,7 +370,8 @@ class InelsMqtt:
         
         # set discovery_start_time to now every message was returned
         # will be doing till messages will rising
-        self.__discover_start_time = datetime.now()
+        if self.__discovered.get(msg.topic) != None:
+            self.__discover_start_time = datetime.now()
 
         # pass only those who belongs to known device types
         fragments = msg.topic.split("/")
