@@ -361,16 +361,16 @@ class InelsMqtt:
         """Special callback function used only in discover_all function
         placed in on_message. It is the same as on_message callback func,
         but does different things
-
+        
         Args:
             client (MqttClient): Mqtt broker instance
             msg (object): Topic with payload from broker
         """
         _LOGGER.info("Found device from topic %s\n", msg.topic)
-        
         # set discovery_start_time to now every message was returned
         # will be doing till messages will rising
         if self.__discovered.get(msg.topic) is not None:
+            _LOGGER.info("First time getting topic %s", msg.topic)
             self.__discover_start_time = datetime.now()
 
         # pass only those who belongs to known device types
