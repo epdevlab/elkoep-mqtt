@@ -349,6 +349,7 @@ class InelsMqtt:
 
         self.__messages = self.__discovered.copy()
 
+        _LOGGER.info("Found %s devices", self.__discovered.__len__)
         return self.__discovered
 
     def __on_discover(
