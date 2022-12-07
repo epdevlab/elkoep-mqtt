@@ -73,7 +73,7 @@ class Device(object):
 
         # subscribe availability
         self.__mqtt.subscribe(self.__connected_topic, 0, None, None)
-        self.__mqtt.subscribe_listener(state_topic, self.__callback) # listener for subscriptions
+        self.__mqtt.subscribe_listener(state_topic, self._callback) # listener for subscriptions
 
     @property
     def unique_id(self) -> str:
@@ -243,7 +243,7 @@ class Device(object):
         """Set features to the device."""
         self.__features = features
 
-    def __callback(self, new_value: Any) -> None: #listener callback
+    def _callback(self, new_value: Any) -> None: #listener callback
         """Get value from mqtt when arrived."""
         self.update_value(new_value)
 
