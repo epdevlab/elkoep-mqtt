@@ -2,17 +2,16 @@
 import logging
 import json
 
-from typing import Any
+from typing import Any, Callable
 
 from inelsmqtt.util import DeviceValue
 from inelsmqtt import InelsMqtt
+from inelsmqtt.const import Platform, Element
 from inelsmqtt.const import (
     DEVICE_TYPE_DICT,
     FRAGMENT_DOMAIN,
     INELS_DEVICE_TYPE_DICT,
     MANUFACTURER,
-    SENSOR,
-    BUTTON,
     TOPIC_FRAGMENTS,
     FRAGMENT_DEVICE_TYPE,
     FRAGMENT_SERIAL_NUMBER,
@@ -49,10 +48,10 @@ class Device(object):
         fragments = state_topic.split("/")
 
         self.__mqtt = mqtt
-        self.__device_type = DEVICE_TYPE_DICT[
+        self.__device_type: Platform = DEVICE_TYPE_DICT[
             fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         ]
-        self.__inels_type = INELS_DEVICE_TYPE_DICT[
+        self.__inels_type: Element = INELS_DEVICE_TYPE_DICT[
             fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         ]
         self.__unique_id = fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]
@@ -60,7 +59,7 @@ class Device(object):
         self.__state_topic = state_topic
         self.__set_topic = None
 
-        if self.__device_type is not SENSOR and self.__device_type is not BUTTON:
+        if self.__device_type is not Platform.SENSOR and self.__device_type is not Platform.BUTTON:
             self.__set_topic = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]}/set/{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}/{fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]}/{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"  # noqa: E501
 
         self.__connected_topic = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]}/connected/{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}/{fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]}/{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"  # noqa: E501
@@ -68,9 +67,13 @@ class Device(object):
         self.__domain = fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]
         self.__state: Any = None
         self.__values: DeviceValue = None
+        
+        self.__features: dict[str] = None # feature list
+        self.__listeners: dict[str, Callable[[Any], Any]]() #listener
 
         # subscribe availability
         self.__mqtt.subscribe(self.__connected_topic, 0, None, None)
+        self.__mqtt.subscribe_listener(state_topic, self.__callback) # listener for subscriptions
 
     @property
     def unique_id(self) -> str:
@@ -89,6 +92,11 @@ class Device(object):
             bool: True/False
         """
         return self.__mqtt.is_subscribed(self.__state_topic)
+
+    @property
+    def listeners(self) -> dict[str, Callable[[Any], Any]]:
+        """List of registered listeners on device"""
+        return self.__listeners
 
     @property
     def inels_type(self) -> str:
@@ -134,6 +142,8 @@ class Device(object):
             bool: True/False
         """
         val = self.__mqtt.messages()[self._Device__connected_topic]
+        if val is None: # report device status as 'off' if it is not connected
+            val = "off\n"
         if isinstance(val, (bytes, bytearray)):
             val = val.decode()
 
@@ -156,6 +166,15 @@ class Device(object):
             str: string of the status topic
         """
         return self.__state_topic
+
+    @property
+    def connected_topic(self) -> str:
+        """Connected topic
+        
+        Returns:
+            str: stringof the connected topic
+        """
+        return self.__connected_topic
 
     @property
     def domain(self) -> str:
@@ -194,6 +213,15 @@ class Device(object):
         """Instnace of broker."""
         return self.__mqtt
 
+    @property # list of device features
+    def features(self) -> dict[str]:
+        """List of features of device."""
+        return self.__features
+
+    def subscribe_listener(self, topic: str, fnc: Callable[[Any], Any]) -> None:
+        """Append new item into data change listener""" # original: "datachage listener"
+        self.__listeners[topic] = fnc
+
     def update_value(self, new_value: Any) -> DeviceValue:
         """Update value after broker change it."""
         return self.__get_value(new_value)
@@ -210,6 +238,17 @@ class Device(object):
         self.__values = dev_value
 
         return dev_value
+    
+    def _set_features(self, features: dict[str]) -> dict[str]: #set features method
+        """Set features to the device."""
+        self.__features = features
+
+    def __callback(self, new_value: Any) -> None: #listener callback
+        """Get value from mqtt when arrived."""
+        self.update_value(new_value)
+
+        for listener in self.__listeners: #goes through the subscribed devices
+            self.__listeners[listener](new_value)
 
     def get_value(self) -> DeviceValue:
         """Get value from inels
