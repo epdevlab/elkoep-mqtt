@@ -98,144 +98,146 @@ class DeviceValue(object):
         # inels set values are for enforcing commands
         # inels status values are what comes from the broker
 
-        if self.__device_type is Platform.SWITCH:  # outlet switch
-            if self.__inels_type is Element.RFSTI_11B:
-                state = int(  # defines state of relay
-                    self.__trim_inels_status_values(DEVICE_TYPE_07_DATA, STATE, ""), 16
-                )
-
-                temp = (  # defines measured temperature (temp out)
-                    int(
-                        self.__trim_inels_status_values(
-                            DEVICE_TYPE_07_DATA, TEMP_OUT, ""
-                        ),
-                        16,
+        if len(self.__device_type) == 1:
+            device_type = self.__device_type[0]
+            if device_type is Platform.SWITCH:  # outlet switch
+                if self.__inels_type is Element.RFSTI_11B:
+                    state = int(  # defines state of relay
+                        self.__trim_inels_status_values(DEVICE_TYPE_07_DATA, STATE, ""), 16
                     )
-                    / 100
-                )
 
-                self.__ha_value = new_object(on=(state == 1), temperature=temp)
-                # simplified the command to just on/off
-                self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]
-            else:
-                self.__ha_value = new_object(on=SWITCH_STATE[self.__inels_status_value])
-                self.__inels_set_value = SWITCH_SET[self.__ha_value.on]
-        elif self.__device_type is Platform.SENSOR:  # temperature sensor
-            if self.__inels_type is Element.RFTI_10B:
-                hex_temp_in = self.__trim_inels_status_values(
-                    DEVICE_TYPE_10_DATA, TEMP_IN, ""
-                )
-                hex_temp_out = self.__trim_inels_status_values(
-                    DEVICE_TYPE_10_DATA, TEMP_OUT, ""
-                )
-                hex_battery = self.__trim_inels_status_values(
-                    DEVICE_TYPE_10_DATA, BATTERY, ""
-                )
-                
-                temp_in = int(hex_temp_in, 16) / 100
-                temp_out = int(hex_temp_out, 16) / 100
-                battery_level = 100 if int(hex_battery, 16) == 0 else 0
-                
-                # interpretation of the values is done elsewhere.
-                # No output.
-                self.__ha_value = new_object(
-                    temp_in=temp_in,
-                    temp_out=temp_out,
-                    battery=battery_level,
-                )
-            elif self.__inels_type is Element.RFTC_10_G:
-                hex_temp = self.__trim_inels_status_values(
-                    DEVICE_TYPE_12_DATA, TEMPERATURE, ""
-                )
-                hex_battery = self.__trim_inels_status_values(
-                    DEVICE_TYPE_12_DATA, BATTERY, ""
-                )
+                    temp = (  # defines measured temperature (temp out)
+                        int(
+                            self.__trim_inels_status_values(
+                                DEVICE_TYPE_07_DATA, TEMP_OUT, ""
+                            ),
+                            16,
+                        )
+                        / 100
+                    )
 
-                temperature = int(hex_temp, 16) * 0.5
-                battery_level = (
-                    0 if hex_battery == SENSOR_RFTC_10_G_LOW_BATTERY else 100
-                )
+                    self.__ha_value = new_object(on=(state == 1), temperature=temp)
+                    # simplified the command to just on/off
+                    self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]
+                else:
+                    self.__ha_value = new_object(on=SWITCH_STATE[self.__inels_status_value])
+                    self.__inels_set_value = SWITCH_SET[self.__ha_value.on]
+            elif device_type is Platform.SENSOR:  # temperature sensor
+                if self.__inels_type is Element.RFTI_10B:
+                    hex_temp_in = self.__trim_inels_status_values(
+                        DEVICE_TYPE_10_DATA, TEMP_IN, ""
+                    )
+                    hex_temp_out = self.__trim_inels_status_values(
+                        DEVICE_TYPE_10_DATA, TEMP_OUT, ""
+                    )
+                    hex_battery = self.__trim_inels_status_values(
+                        DEVICE_TYPE_10_DATA, BATTERY, ""
+                    )
+                    
+                    temp_in = int(hex_temp_in, 16) / 100
+                    temp_out = int(hex_temp_out, 16) / 100
+                    battery_level = 100 if int(hex_battery, 16) == 0 else 0
+                    
+                    # interpretation of the values is done elsewhere.
+                    # No output.
+                    self.__ha_value = new_object(
+                        temp_in=temp_in,
+                        temp_out=temp_out,
+                        battery=battery_level,
+                    )
+                elif self.__inels_type is Element.RFTC_10_G:
+                    hex_temp = self.__trim_inels_status_values(
+                        DEVICE_TYPE_12_DATA, TEMPERATURE, ""
+                    )
+                    hex_battery = self.__trim_inels_status_values(
+                        DEVICE_TYPE_12_DATA, BATTERY, ""
+                    )
 
-                self.__ha_value = new_object(
-                    temperature=temperature,
-                    battery=battery_level,
-                )
-            else:
-                self.__ha_value = self.__inels_status_value
-        elif self.__device_type is Platform.LIGHT:  # dimmer
-            if self.__inels_type is Element.RFDAC_71B:
-                # value in percentage to present in HA
-                self.__ha_value = DEVICE_TYPE_05_HEX_VALUES[self.__inels_status_value]
+                    temperature = int(hex_temp, 16) * 0.5
+                    battery_level = (
+                        0 if hex_battery == SENSOR_RFTC_10_G_LOW_BATTERY else 100
+                    )
 
-                # gets the hex values directly
-                trimmed_data = self.__trim_inels_status_values(
-                    DEVICE_TYPE_05_DATA, Element.RFDAC_71B, " "
-                )
+                    self.__ha_value = new_object(
+                        temperature=temperature,
+                        battery=battery_level,
+                    )
+                else:
+                    self.__ha_value = self.__inels_status_value
+            elif device_type is Platform.LIGHT:  # dimmer
+                if self.__inels_type is Element.RFDAC_71B:
+                    # value in percentage to present in HA
+                    self.__ha_value = DEVICE_TYPE_05_HEX_VALUES[self.__inels_status_value]
 
-                # simplified view of dimmer (sets brightness level)
-                self.__inels_set_value = (  # "01 ?? ??"" sets this value to internal state
-                    f"{ANALOG_REGULATOR_SET_BYTES[Element.RFDAC_71B]} {trimmed_data}"
-                )
-            else:
-                self.__ha_value = self.__inels_status_value
-        elif self.__device_type is Platform.COVER:  # Shutters
-            ha_val = SHUTTER_STATES.get(self.__inels_status_value)
+                    # gets the hex values directly
+                    trimmed_data = self.__trim_inels_status_values(
+                        DEVICE_TYPE_05_DATA, Element.RFDAC_71B, " "
+                    )
 
-            # if the state is not obtained, grab last one (not sure why it wouldn't)
-            self.__ha_value = ha_val if ha_val is not None else self.__last_value
-            # give the new instruction (ex. 03 00 00 00)
-            self.__inels_set_value = SHUTTER_SET[self.__ha_value]
-        elif self.__device_type is Platform.CLIMATE:  # thermovalve
-            if self.__inels_type is Element.RFATV_2:
-                # fetches all the status values and compacts them into a new object
-                temp_current_hex = self.__trim_inels_status_values(
-                    CLIMATE_TYPE_09_DATA, CURRENT_TEMP, ""
-                )
-                temp_current = int(temp_current_hex, 16) * 0.5
-                temp_required_hex = self.__trim_inels_status_values(
-                    CLIMATE_TYPE_09_DATA, REQUIRED_TEMP, ""
-                )
-                temp_required = int(temp_required_hex, 16) * 0.5
-                battery_hex = self.__trim_inels_status_values(
-                    CLIMATE_TYPE_09_DATA, BATTERY, ""
-                )
-                open_to_hex = self.__trim_inels_status_values(
-                    CLIMATE_TYPE_09_DATA, OPEN_IN_PERCENTAGE, ""
-                )
-                open_to_percentage = int(open_to_hex, 16) * 0.5
-                batter = int(battery_hex, 16)
-                self.__ha_value = new_object(
-                    battery=batter,
-                    current=temp_current,
-                    required=temp_required,
-                    open_in_percentage=open_to_percentage,
-                )
-            else:
-                self.__ha_value = self.__inels_status_value
-        elif self.__device_type is Platform.BUTTON:
-            if self.__inels_type is Element.RFGB_40:
-                state = self.__trim_inels_status_values(BUTTON_TYPE_19_DATA, STATE, "")
-                state_hex_str = f"0x{state}"  # 0xSTATE
-                # interpret the value and write it in binary
-                state_bin_str = f"{int(state_hex_str, 16):0>8b}"
+                    # simplified view of dimmer (sets brightness level)
+                    self.__inels_set_value = (  # "01 ?? ??"" sets this value to internal state
+                        f"{ANALOG_REGULATOR_SET_BYTES[Element.RFDAC_71B]} {trimmed_data}"
+                    )
+                else:
+                    self.__ha_value = self.__inels_status_value
+            elif device_type is Platform.COVER:  # Shutters
+                ha_val = SHUTTER_STATES.get(self.__inels_status_value)
 
-                # read which button was last pressed
-                identity = self.__trim_inels_status_values(
-                    BUTTON_TYPE_19_DATA, IDENTITY, ""
-                )
+                # if the state is not obtained, grab last one (not sure why it wouldn't)
+                self.__ha_value = ha_val if ha_val is not None else self.__last_value
+                # give the new instruction (ex. 03 00 00 00)
+                self.__inels_set_value = SHUTTER_SET[self.__ha_value]
+            elif device_type is Platform.CLIMATE:  # thermovalve
+                if self.__inels_type is Element.RFATV_2:
+                    # fetches all the status values and compacts them into a new object
+                    temp_current_hex = self.__trim_inels_status_values(
+                        CLIMATE_TYPE_09_DATA, CURRENT_TEMP, ""
+                    )
+                    temp_current = int(temp_current_hex, 16) * 0.5
+                    temp_required_hex = self.__trim_inels_status_values(
+                        CLIMATE_TYPE_09_DATA, REQUIRED_TEMP, ""
+                    )
+                    temp_required = int(temp_required_hex, 16) * 0.5
+                    battery_hex = self.__trim_inels_status_values(
+                        CLIMATE_TYPE_09_DATA, BATTERY, ""
+                    )
+                    open_to_hex = self.__trim_inels_status_values(
+                        CLIMATE_TYPE_09_DATA, OPEN_IN_PERCENTAGE, ""
+                    )
+                    open_to_percentage = int(open_to_hex, 16) * 0.5
+                    batter = int(battery_hex, 16)
+                    self.__ha_value = new_object(
+                        battery=batter,
+                        current=temp_current,
+                        required=temp_required,
+                        open_in_percentage=open_to_percentage,
+                    )
+                else:
+                    self.__ha_value = self.__inels_status_value
+            elif device_type is Platform.BUTTON:
+                if self.__inels_type is Element.RFGB_40:
+                    state = self.__trim_inels_status_values(BUTTON_TYPE_19_DATA, STATE, "")
+                    state_hex_str = f"0x{state}"  # 0xSTATE
+                    # interpret the value and write it in binary
+                    state_bin_str = f"{int(state_hex_str, 16):0>8b}"
 
-                self.__ha_value = new_object(
-                    number=BUTTON_NUMBER.get(identity),
-                    battery=100 if state_bin_str[4] == "0" else 0,  # checking low battery state
-                    pressing=state_bin_str[3] == "1",
-                    changed=state_bin_str[2] == "1",
-                    # reports the number of buttons
-                    amount=BUTTON_DEVICE_AMOUNT.get(self.__inels_type),
-                )
-        elif self.__device_type is Platform.BUS:
+                    # read which button was last pressed
+                    identity = self.__trim_inels_status_values(
+                        BUTTON_TYPE_19_DATA, IDENTITY, ""
+                    )
+
+                    self.__ha_value = new_object(
+                        number=BUTTON_NUMBER.get(identity),
+                        battery=100 if state_bin_str[4] == "0" else 0,  # checking low battery state
+                        pressing=state_bin_str[3] == "1",
+                        changed=state_bin_str[2] == "1",
+                        # reports the number of buttons
+                        amount=BUTTON_DEVICE_AMOUNT.get(self.__inels_type),
+                    )
+        else:
             if self.__inels_type is Element.SA3_01B: # Switch
                 state = int(self.__trim_inels_status_values(RELAY_DATA, STATE, ""), 16)
-                temp = (int(self.__trim_inels_status_values(RELAY_DATA, TEMP_IN, "")))/100
+                temp = self.__trim_inels_status_values(RELAY_DATA, TEMP_IN, "")
                 relay_overflow = int(self.__trim_inels_status_values(RELAY_DATA, RELAY_OVERFLOW, ""),16)
                 self.__ha_value = new_object(
                     on=(state == 1),
@@ -290,8 +292,8 @@ class DeviceValue(object):
                     channel_number=2,
                 )
                 
-                _LOGGER.info("Logging dimmer ha value")
-                _LOGGER.info("out1: %d out2: %d", self.__ha_value.out[0], self.__ha_value.out[1])
+                #_LOGGER.info("Logging dimmer ha value")
+                #_LOGGER.info("out1: %d out2: %d", self.__ha_value.out[0], self.__ha_value.out[1])
                 
                 set_val = "00\n00\n00\n00\n"
                 for i in range(self.__ha_value.channel_number):
@@ -301,12 +303,6 @@ class DeviceValue(object):
                 digital_inputs = self.__trim_inels_status_values(THERMOSTAT_DATA, Element.GTR3_50.value, "")
                 digital_inputs_hex_str = f"0x{digital_inputs}"
                 digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
-
-                #temp = int(
-                #    self.__trim_inels_status_values(
-                #        THERMOSTAT_DATA, TEMP_IN, ""
-                #    ), 16
-                #)/100
 
                 temp = self.__trim_inels_status_values(THERMOSTAT_DATA, TEMP_IN, "")
 
@@ -370,20 +366,20 @@ class DeviceValue(object):
                 digital_inputs = f"0x{digital_inputs}"
                 digital_inputs = f"{int(digital_inputs, 16):0>8b}"
 
-                temp = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, TEMP_IN, ""), 16)/100
+                temp = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, TEMP_IN, "")
 
-                light_in = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, LIGHT_IN, ""), 16)/100
+                light_in = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, LIGHT_IN, "")
 
-                ain = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, AIN, ""), 16)/100
+                ain = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, AIN, "")
 
-                humidity = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, HUMIDITY, ""), 16)/100
+                humidity = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, HUMIDITY, "")
 
-                dewpoint = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, DEW_POINT, ""), 16)/100
+                dewpoint = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, DEW_POINT, "")
 
                 #TODO make output
 
@@ -444,56 +440,54 @@ class DeviceValue(object):
     
     def __find_inels_value(self) -> None:
         """Find inels mqtt value for specific device."""
-        if self.__device_type is Platform.SWITCH:
-            if self.__inels_type == Element.RFSTI_11B:
-                self.__inels_set_value = SWITCH_WITH_TEMP_SET.get(self.__ha_value.on)
-            else:
-                # just a shortcut for setting it
-                # basically set the status from the ha value
-                self.__inels_set_value = SWITCH_SET.get(self.__ha_value.on)
-        elif self.__device_type is Platform.LIGHT:
-            if self.__inels_type is Element.RFDAC_71B:
-                self.__inels_status_value = self.__find_keys_by_value(
-                    DEVICE_TYPE_05_HEX_VALUES,  # str -> int
-                    round(self.__ha_value, -1),
-                    self.__last_value,
-                )
-                trimmed_data = self.__trim_inels_status_values(
-                    DEVICE_TYPE_05_DATA, Element.RFDAC_71B, " "
-                )
-                self.__inels_set_value = (  # 01 00 00
-                    f"{ANALOG_REGULATOR_SET_BYTES[Element.RFDAC_71B]} {trimmed_data}"
-                )
-                self.__ha_value = DEVICE_TYPE_05_HEX_VALUES[self.__inels_status_value]
-        elif self.__device_type is Platform.COVER:
-            if self.__inels_type is Element.RFJA_12:
-                self.__inels_status_value = self.__find_keys_by_value(
-                    SHUTTER_STATES,  # str -> str
-                    self.__ha_value,
-                    self.__last_value
-                )
-                self.__inels_set_value = SHUTTER_SET.get(self.__ha_value)
-                # special behavior. We need to find right HA state for the cover
-                prev_val = SHUTTER_STATES.get(self.__inels_status_value)
-                ha_val = (
-                    self.__ha_value
-                    if self.__ha_value in SHUTTER_STATE_LIST
-                    else prev_val
-                )
+        if len(self.__device_type) == 1:
+            device_type = self.__device_type[0]
+
+            if device_type is Platform.SWITCH:
+                if self.__inels_type == Element.RFSTI_11B:
+                    self.__inels_set_value = SWITCH_WITH_TEMP_SET.get(self.__ha_value.on)
+                else:
+                    # just a shortcut for setting it
+                    # basically set the status from the ha value
+                    self.__inels_set_value = SWITCH_SET.get(self.__ha_value.on)
+            elif device_type is Platform.LIGHT:
+                if self.__inels_type is Element.RFDAC_71B:
+                    self.__inels_status_value = self.__find_keys_by_value(
+                        DEVICE_TYPE_05_HEX_VALUES,  # str -> int
+                        round(self.__ha_value, -1),
+                        self.__last_value,
+                    )
+                    trimmed_data = self.__trim_inels_status_values(
+                        DEVICE_TYPE_05_DATA, Element.RFDAC_71B, " "
+                    )
+                    self.__inels_set_value = (  # 01 00 00
+                        f"{ANALOG_REGULATOR_SET_BYTES[Element.RFDAC_71B]} {trimmed_data}"
+                    )
+                    self.__ha_value = DEVICE_TYPE_05_HEX_VALUES[self.__inels_status_value]
+            elif device_type is Platform.COVER:
+                if self.__inels_type is Element.RFJA_12:
+                    self.__inels_status_value = self.__find_keys_by_value(
+                        SHUTTER_STATES,  # str -> str
+                        self.__ha_value,
+                        self.__last_value
+                    )
+                    self.__inels_set_value = SHUTTER_SET.get(self.__ha_value)
+                    # special behavior. We need to find right HA state for the cover
+                    prev_val = SHUTTER_STATES.get(self.__inels_status_value)
+                    ha_val = (
+                        self.__ha_value
+                        if self.__ha_value in SHUTTER_STATE_LIST
+                        else prev_val
+                    )
+                    self.__ha_value = ha_val
+            elif device_type is Platform.CLIMATE:
+                if self.__inels_type is Element.RFATV_2:
+                    required_temp = int(round(self.__ha_value.required * 2, 0))
+                    self.__inels_set_value = f"00 {required_temp:x} 00".upper()
+            elif device_type is Platform.BUTTON:
                 self.__ha_value = ha_val
-        elif self.__device_type is Platform.CLIMATE:
-            if self.__inels_type is Element.RFATV_2:
-                required_temp = int(round(self.__ha_value.required * 2, 0))
-                self.__inels_set_value = f"00 {required_temp:x} 00".upper()
-        elif self.__device_type is Platform.BUTTON:
-            self.__ha_value = ha_val
-        elif self.__device_type is Platform.BUS:
+        else:
             if self.__inels_type is Element.SA3_01B:
-                #self.__inels_status_value = self.__find_keys_by_value(
-                #    RELAY_STATE,  # str -> bool
-                #    self.__ha_value.on,
-                #    self.__last_value.on
-                #)
                 self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
             elif self.__inels_type is Element.DA3_22M:
                 # correct the values
