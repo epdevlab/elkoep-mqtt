@@ -46,18 +46,18 @@ class Element(Enum):
 # device types
 DEVICE_TYPE_DICT = {
     # RF
-    "02": Platform.SWITCH,
-    "03": Platform.COVER,
-    "05": Platform.LIGHT,
-    "07": Platform.SWITCH,
-    "09": Platform.CLIMATE,
-    "10": Platform.SENSOR,
-    "19": Platform.BUTTON,
+    "02": [Platform.SWITCH],
+    "03": [Platform.COVER],
+    "05": [Platform.LIGHT],
+    "07": [Platform.SWITCH],
+    "09": [Platform.CLIMATE],
+    "10": [Platform.SENSOR],
+    "19": [Platform.BUTTON],
     # BUS
-    "100": Platform.BUS,  # RELAY with temp sensor
-    "101": Platform.BUS,  # TWOCHANNELDIMMER
-    "102": Platform.BUS,  # THERMOSTAT
-    "103": Platform.BUS,  # BUTTONARRAY
+    "100": [Platform.SWITCH],  # RELAY with temp sensor
+    "101": [Platform.LIGHT, Platform.SENSOR],  # TWOCHANNELDIMMER
+    "102": [Platform.SENSOR],  # THERMOSTAT
+    "103": [Platform.SENSOR],  # BUTTONARRAY
 }
 
 

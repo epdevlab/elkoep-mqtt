@@ -48,7 +48,7 @@ class Device(object):
         fragments = state_topic.split("/")
 
         self.__mqtt = mqtt
-        self.__device_type: Platform = DEVICE_TYPE_DICT[
+        self.__device_type: list[Platform] = DEVICE_TYPE_DICT[
             fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         ]
         self.__inels_type: Element = INELS_DEVICE_TYPE_DICT[
@@ -99,7 +99,7 @@ class Device(object):
         return self.__listeners
 
     @property
-    def inels_type(self) -> str:
+    def inels_type(self) -> list[str]:
         """Get inels type of the device
 
         Returns:
