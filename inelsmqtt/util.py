@@ -249,7 +249,7 @@ class DeviceValue(object):
                 relay_overflow = int(self.__trim_inels_status_values(RELAY_DATA, RELAY_OVERFLOW, ""),16)
                 self.__ha_value = new_object(
                     on=(state == 1),
-                    temp=temp,
+                    temp_in=temp,
                     # may not be important, but could cause problems if ignored
                     relay_overflow=(relay_overflow == 1)
                 )
