@@ -411,6 +411,7 @@ class InelsMqtt:
             # update info that the topic is subscribed
             self.__is_subscribed_list[msg.topic] = True
 
+        
         if len(self.__listeners) > 0 and msg.topic in self.__listeners:
             # This pass data change directely into the device.
             self.__listeners[msg.topic](msg.payload)

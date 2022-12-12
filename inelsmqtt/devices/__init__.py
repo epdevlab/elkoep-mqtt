@@ -99,7 +99,11 @@ class Device(object):
 
     @property
     def listeners(self) -> dict[str, Callable[[Any], Any]]:
-        """List of registered listeners on device"""
+        """List of registered listeners on device
+        
+        Returns:
+            dict[str, Callable[[Any], Any]]: listener dictionary
+        """
         return self.__listeners
 
     @property
