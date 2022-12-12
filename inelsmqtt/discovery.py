@@ -5,7 +5,7 @@ from typing import Any
 
 from inelsmqtt import InelsMqtt
 from inelsmqtt.devices import Device
-from inelsmqtt.devices import sensor, light, switch
+from inelsmqtt.devices import sensor, light, switch, bus
 from inelsmqtt.const import (
     Platform,
     DEVICE_TYPE_DICT,
@@ -78,15 +78,7 @@ class InelsDiscovery(object):
                     dev = Device(self.__mqtt, item)
             else: #BUS
                 for dev_type in dev_types:
-                    dev = Device(self.__mqtt, item)
-                    if dev_type == Platform.SWITCH:
-                        dev._set_features(dev.features.update(light.LIST_OF_FEATURES[dev.inels_type]))
-                    elif dev_type == Platform.LIGHT:
-                        dev = light.Light(self.__mqtt, item)
-                    elif dev_type == Platform.SENSOR:
-                        dev = sensor.Sensor(self.__mqtt, item)
-                    else:
-                        dev = Device(self.__mqtt, item)
+                    dev = bus.BusDevice(self.__mqtt, item)
                 
             self.__devices.append(dev)
         
