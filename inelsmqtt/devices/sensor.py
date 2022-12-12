@@ -7,20 +7,11 @@ from inelsmqtt.const import (
     BATTERY,
     TEMP_IN,
     TEMP_OUT,
-    LIGHT_IN, 
-    AIN,
-    HUMIDITY,
-    DEW_POINT
 )
 
 LIST_OF_FEATURES = {
     Element.RFTC_10_G.value: [TEMPERATURE, BATTERY],
     Element.RFTI_10B.value: [TEMP_IN, TEMP_OUT, BATTERY],
-    
-    Element.SA3_01B.value: [TEMP_IN],
-    Element.DA3_22M.value: [TEMP_IN],
-    Element.GTR3_50.value: [TEMP_IN, LIGHT_IN, AIN, HUMIDITY, DEW_POINT],
-    Element.GSB3_90SX.value: [TEMP_IN, LIGHT_IN, AIN, HUMIDITY, DEW_POINT]
 }
 
 class Sensor(Device):

@@ -6,7 +6,6 @@ from inelsmqtt.const import Element, TEMPERATURE
 
 LIST_OF_FEATURES = {
     Element.RFSTI_11B.value: [TEMPERATURE],
-    #Element.SA3_01B.value: [TEMP_IN] -> define sensor
 }
 
 
@@ -14,7 +13,7 @@ class Switch(Device):
     """Carry switch stuff
 
     Args:
-        Device (_type_): it base class for all platforms
+        Device (_type_): base class for all platforms
     """
 
     def __init__(

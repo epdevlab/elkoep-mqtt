@@ -40,7 +40,11 @@ class Element(Enum):
     DA3_22M = "DA3-22M"
     GTR3_50 = "GTR3-50"
     GSB3_90SX = "GSB3-90SX"
-    
+ 
+class Archetype(Enum):
+    """Inels device archetype (bus/rf)"""
+    RF = "rf"
+    BUS = "bus"
 
 
 # device types
@@ -76,6 +80,24 @@ INELS_DEVICE_TYPE_DICT = {
     "102": Element.GTR3_50,
     "103": Element.GSB3_90SX,
 }
+
+DEVICE_ARCHETYPE_DICT = {
+    #RF
+    "02": Archetype.RF,
+    "03": Archetype.RF,
+    "05": Archetype.RF,
+    "07": Archetype.RF,
+    "09": Archetype.RF,
+    "10": Archetype.RF,
+    "19": Archetype.RF,
+    "12": Archetype.RF,
+    #BUS
+    "100": Archetype.BUS,
+    "101": Archetype.BUS,
+    "102": Archetype.BUS,
+    "103": Archetype.BUS,    
+}
+
 
 BATTERY = "battery"
 BRIGHTNESS = "brightness"

@@ -5,7 +5,6 @@ from inelsmqtt.const import Element, BRIGHTNESS
 
 LIST_OF_FEATURES = {
     Element.RFDAC_71B.value: [BRIGHTNESS],
-    Element.DA3_22M.value: [BRIGHTNESS],
 }
 
 class Light(Device):

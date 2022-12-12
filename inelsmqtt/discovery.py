@@ -11,6 +11,8 @@ from inelsmqtt.const import (
     DEVICE_TYPE_DICT,
     TOPIC_FRAGMENTS,
     FRAGMENT_DEVICE_TYPE,
+    Archetype,
+    DEVICE_ARCHETYPE_DICT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,22 +57,37 @@ class InelsDiscovery(object):
         for item in devs :
             fragments = item.split("/")
 
-            dev_type: Platform = DEVICE_TYPE_DICT[
-                fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
-            ]
+            device_type_val = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
 
-            if dev_type == Platform.SWITCH:
-                dev = switch.Switch(self.__mqtt, item)
-            elif dev_type == Platform.LIGHT:
-                dev = light.Light(self.__mqtt, item)
-            elif dev_type == Platform.SENSOR:
-                dev = sensor.Sensor(self.__mqtt, item)
-            elif dev_type == Platform.BUS: #BUS devices
-                dev = Device(self.__mqtt, item)
-                #TODO add coordinator
-            else:
-                dev = Device(self.__mqtt, item)
+            dev_types: list[Platform] = DEVICE_TYPE_DICT[device_type_val]
             
+            #DEVICE ARCHETYPE STUFF HERE
+            
+            dev_arch: Archetype = DEVICE_ARCHETYPE_DICT[device_type_val]
+            
+            if dev_arch == Archetype.RF:
+                dev_type = dev_types[0]
+                
+                if dev_type == Platform.SWITCH:
+                    dev = switch.Switch(self.__mqtt, item)
+                elif dev_type == Platform.LIGHT:
+                    dev = light.Light(self.__mqtt, item)
+                elif dev_type == Platform.SENSOR:
+                    dev = sensor.Sensor(self.__mqtt, item)
+                else:
+                    dev = Device(self.__mqtt, item)
+            else: #BUS
+                for dev_type in dev_types:
+                    dev = Device(self.__mqtt, item)
+                    if dev_type == Platform.SWITCH:
+                        dev._set_features(dev.features.update(light.LIST_OF_FEATURES[dev.inels_type]))
+                    elif dev_type == Platform.LIGHT:
+                        dev = light.Light(self.__mqtt, item)
+                    elif dev_type == Platform.SENSOR:
+                        dev = sensor.Sensor(self.__mqtt, item)
+                    else:
+                        dev = Device(self.__mqtt, item)
+                
             self.__devices.append(dev)
         
         #self.__devices = [Device(self.__mqtt, item) for item in devs]

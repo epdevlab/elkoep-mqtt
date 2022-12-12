@@ -6,8 +6,14 @@ from typing import Any, Dict
 
 from inelsmqtt.mqtt_client import GetMessageType
 
-from .const import SENSOR_RFTC_10_G_LOW_BATTERY, Platform, Element
 from .const import (
+    Platform,
+    Element,
+    Archetype,
+)
+
+from .const import (
+    SENSOR_RFTC_10_G_LOW_BATTERY,
     ANALOG_REGULATOR_SET_BYTES,
     BATTERY,
     DEVICE_TYPE_10_DATA,
@@ -73,6 +79,7 @@ class DeviceValue(object):
         self,
         device_type: Platform,
         inels_type: str,
+        device_archetype: str,
         inels_value: str = None,
         ha_value: Any = None,
         last_value: Any = None,
@@ -83,6 +90,7 @@ class DeviceValue(object):
         self.__ha_value = ha_value
         self.__device_type = device_type
         self.__inels_type = inels_type
+        self.__device_archetype = device_archetype
         self.__last_value = last_value
 
         if self.__ha_value is None:
@@ -98,7 +106,7 @@ class DeviceValue(object):
         # inels set values are for enforcing commands
         # inels status values are what comes from the broker
 
-        if len(self.__device_type) == 1:
+        if self.__device_archetype == Archetype.RF.value:
             device_type = self.__device_type[0]
             if device_type is Platform.SWITCH:  # outlet switch
                 if self.__inels_type is Element.RFSTI_11B:
@@ -234,7 +242,7 @@ class DeviceValue(object):
                         # reports the number of buttons
                         amount=BUTTON_DEVICE_AMOUNT.get(self.__inels_type),
                     )
-        else:
+        else: # BUS
             if self.__inels_type is Element.SA3_01B: # Switch
                 state = int(self.__trim_inels_status_values(RELAY_DATA, STATE, ""), 16)
                 temp = self.__trim_inels_status_values(RELAY_DATA, TEMP_IN, "")
@@ -440,7 +448,7 @@ class DeviceValue(object):
     
     def __find_inels_value(self) -> None:
         """Find inels mqtt value for specific device."""
-        if len(self.__device_type) == 1:
+        if self.__device_archetype == Archetype.RF.value:
             device_type = self.__device_type[0]
 
             if device_type is Platform.SWITCH:

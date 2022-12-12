@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from inelsmqtt.util import DeviceValue
 from inelsmqtt import InelsMqtt
-from inelsmqtt.const import Platform, Element
+from inelsmqtt.const import Platform, Element, Archetype
 from inelsmqtt.const import (
     DEVICE_TYPE_DICT,
     FRAGMENT_DOMAIN,
@@ -18,6 +18,7 @@ from inelsmqtt.const import (
     FRAGMENT_UNIQUE_ID,
     DEVICE_CONNECTED,
     VERSION,
+    DEVICE_ARCHETYPE_DICT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,6 +53,9 @@ class Device(object):
             fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         ]
         self.__inels_type: Element = INELS_DEVICE_TYPE_DICT[
+            fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
+        ]
+        self.__archetype: Archetype = DEVICE_ARCHETYPE_DICT[
             fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         ]
         self.__unique_id = fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]
@@ -97,6 +101,15 @@ class Device(object):
     def listeners(self) -> dict[str, Callable[[Any], Any]]:
         """List of registered listeners on device"""
         return self.__listeners
+
+    @property
+    def device_archetype(self) -> str:
+        """Get inels device archetype (RF/BUS)
+        
+        Returns:
+            str: Type
+        """
+        return self.__archetype
 
     @property
     def inels_type(self) -> list[str]:
@@ -231,6 +244,7 @@ class Device(object):
         dev_value = DeviceValue(
             self.__device_type,
             self.__inels_type,
+            self.__archetype,
             inels_value=(val.decode() if val is not None else None),
         )
 
@@ -271,6 +285,7 @@ class Device(object):
         dev = DeviceValue(
             self.__device_type,
             self.__inels_type,
+            device_archetype=self.__archetype,
             ha_value=value,
             last_value=self.__state,
         )
