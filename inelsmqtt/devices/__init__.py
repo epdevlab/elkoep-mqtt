@@ -73,7 +73,7 @@ class Device(object):
         self.__values: DeviceValue = None
         
         self.__features: dict[str] = None # feature list
-        self.__listeners: dict[str, Callable[[Any], Any]]() #listener
+        self.__listeners: dict[str, Callable[[Any], Any]]() = [] #listener
 
         # subscribe availability
         self.__mqtt.subscribe(self.__connected_topic, 0, None, None)
