@@ -65,7 +65,7 @@ class InelsDiscovery(object):
             
             dev_arch: Archetype = DEVICE_ARCHETYPE_DICT[device_type_val]
             
-            if dev_arch == Archetype.RF:
+            if dev_arch is Archetype.RF.value:
                 dev_type = dev_types[0]
                 
                 if dev_type == Platform.SWITCH:
