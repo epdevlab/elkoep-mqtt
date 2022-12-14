@@ -300,9 +300,6 @@ class DeviceValue(object):
                     channel_number=2,
                 )
                 
-                _LOGGER.info("Logging dimmer ha value")
-                _LOGGER.info(self.__ha_value)
-                
                 set_val = "00\n00\n00\n00\n"
                 for i in range(self.__ha_value.channel_number):
                     set_val +=  f"{self.__ha_value.out[i]:02X}" + "\n"
