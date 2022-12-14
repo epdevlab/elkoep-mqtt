@@ -162,7 +162,7 @@ class InelsMqtt:
 
     def subscribe_listener(self, topic: str, unique_id: str, fnc: Callable[[Any], Any]) -> None:
         """Append new item into the datachange listener."""
-        if topic not in self.__listeners[topic]:
+        if topic not in self.__listeners:
             self.__listeners[topic] = dict[str, Callable[[Any], Any]]()
         self.__listeners[topic][unique_id] = fnc
 
