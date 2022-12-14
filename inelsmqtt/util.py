@@ -235,7 +235,7 @@ class DeviceValue(object):
                     
                     # Actually important
                     # temperature
-                    temp=temp,
+                    temp_in=temp,
 
                     light_in=light_in,
 
