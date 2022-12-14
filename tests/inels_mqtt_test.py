@@ -5,8 +5,8 @@ from typing import Any
 from unittest.mock import patch, Mock
 from unittest import TestCase
 
-from inelsmqtt import InelsMqtt
-from inelsmqtt.const import (
+from inelsmqttnew import InelsMqtt
+from inelsmqttnew.const import (
     MQTT_HOST,
     MQTT_PASSWORD,
     MQTT_PORT,

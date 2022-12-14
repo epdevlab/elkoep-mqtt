@@ -1,109 +1,76 @@
 """Constances of inels-mqtt."""
 from __future__ import annotations
 from typing import Final
-from enum import IntEnum, Enum
+from enum import IntEnum
 
 DISCOVERY_TIMEOUT_IN_SEC = 5
 
 NAME = "inels-mqtt"
-KEY = "key"
-FEATURES = "features"
 
-class Platform(Enum):
-    """Entity platforms"""
-    #RF
-    SWITCH = "switch"
-    SENSOR = "sensor"
-    LIGHT = "light"
-    COVER = "cover"
-    CLIMATE = "climate"
-    BUTTON = "button"
-    #BUS
-    BUS = "other"
+SWITCH = "switch"
+SENSOR = "sensor"
+LIGHT = "light"
+COVER = "cover"
+CLIMATE = "climate"
+BUTTON = "button"
 
-class Element(Enum):
-    """Inels element names."""
-    # RF
-    RFSC_61 = "RFSC-61"
-    RFTI_10B = "RFTI-10B"
-    RFDAC_71B = "RFDAC-71B"
-    RFJA_12 = "RFJA-12"
-    RFATV_2 = "RFATV-2"
-    RFGB_40 = "RFGB-40"
-    RFKEY_40 = "RFKEY-40"
-    RFSTI_11B = "RFSTI-11B"
-    RFTC_10_G = "RFTC-10/G"
-
-
-    # BUS
-    SA3_01B = "SA3-01B"
-    DA3_22M = "DA3-22M"
-    GTR3_50 = "GTR3-50"
-    GSB3_90SX = "GSB3-90SX"
- 
-class Archetype(Enum):
-    """Inels device archetype (bus/rf)"""
-    RF = "rf"
-    BUS = "bus"
+RELAY = "relay"  # 100
+TWOCHANNELDIMMER = "two channel dimmer"  # 101
+THERMOSTAT = "thermostat"  # 102
+BUTTONARRAY = "button array"  # 103
 
 
 # device types
 DEVICE_TYPE_DICT = {
     # RF
-    "02": [Platform.SWITCH],
-    "03": [Platform.COVER],
-    "05": [Platform.LIGHT],
-    "07": [Platform.SWITCH],
-    "09": [Platform.CLIMATE],
-    "10": [Platform.SENSOR],
-    "19": [Platform.BUTTON],
+    "02": SWITCH,
+    "03": COVER,
+    "05": LIGHT,
+    "07": SWITCH,
+    "09": CLIMATE,
+    "10": SENSOR,
+    "19": BUTTON,
     # BUS
-    "100": [Platform.SWITCH],  # RELAY with temp sensor
-    "101": [Platform.LIGHT, Platform.SENSOR],  # TWOCHANNELDIMMER
-    "102": [Platform.SENSOR],  # THERMOSTAT
-    "103": [Platform.SENSOR],  # BUTTONARRAY
+    "100": SWITCH,  # RELAY with temp sensor
+    "101": LIGHT,  # TWOCHANNELDIMMER
+    "102": SENSOR,  # THERMOSTAT
+    #"103": BUTTON,  # BUTTONARRAY
 }
 
+# RF
+RFSC_61 = "RFSC-61"
+RFTI_10B = "RFTI-10B"
+RFDAC_71B = "RFDAC-71B"
+RFJA_12 = "RFJA-12"
+RFATV_2 = "RFATV-2"
+RFGB_40 = "RFGB-40"
+RFKEY_40 = "RFKEY-40"
+RFSTI_11B = "RFSTI-11B"
+
+# BUS
+SA3_01B = "SA3-01B"
+DA3_22M = "DA3-22M"
+GTR3_50 = "GTR3-50"
+GSB3_90SX = "GSB3-90SX"
 
 INELS_DEVICE_TYPE_DICT = {
-    "02": Element.RFSC_61,
-    "03": Element.RFJA_12,
-    "05": Element.RFDAC_71B,
-    "07": Element.RFSTI_11B,
-    "09": Element.RFATV_2,
-    "10": Element.RFTI_10B,
-    "19": Element.RFGB_40,
-    "12": Element.RFTC_10_G,
+    "02": RFSC_61,
+    "03": RFJA_12,
+    "05": RFDAC_71B,
+    "07": RFSTI_11B,
+    "09": RFATV_2,
+    "10": RFTI_10B,
+    "19": RFGB_40,
 
-    "100": Element.SA3_01B,
-    "101": Element.DA3_22M,
-    "102": Element.GTR3_50,
-    "103": Element.GSB3_90SX,
+    "100": SA3_01B,
+    "101": DA3_22M,
+    "102": GTR3_50,
+    "103": GSB3_90SX,
 }
-
-DEVICE_ARCHETYPE_DICT = {
-    #RF
-    "02": Archetype.RF,
-    "03": Archetype.RF,
-    "05": Archetype.RF,
-    "07": Archetype.RF,
-    "09": Archetype.RF,
-    "10": Archetype.RF,
-    "19": Archetype.RF,
-    "12": Archetype.RF,
-    #BUS
-    "100": Archetype.BUS,
-    "101": Archetype.BUS,
-    "102": Archetype.BUS,
-    "103": Archetype.BUS,    
-}
-
 
 BATTERY = "battery"
-BRIGHTNESS = "brightness"
 TEMP_IN = "temp_in"
 TEMP_OUT = "temp_out"
-TEMPERATURE = "temperature"
 CURRENT_TEMP = "current_temp"
 REQUIRED_TEMP = "required_temp"
 OPEN_IN_PERCENTAGE = "open_in_percentage"
@@ -116,7 +83,7 @@ PULL_UP = "pull_up"
 PUSH_BUTTON_DOWN = "push_button_down"
 PUSH_BUTTON_UP = "push_button_up"
 RELEASE_BUTTON_DOWN = "release_button_down"
-RELEASE_BUTTON_UP = "release_button_up"
+RELEASE_BUTTON_UP = "relese_button_up"
 SET_TIME_UP = "set_time_up"
 SET_TIME_DOWN = "set_time_down"
 STOP_DOWN = "stop_down"
@@ -129,7 +96,7 @@ ON = "on"
 STATE_OPEN = "open"
 STATE_CLOSED = "closed"
 
-# BUS KEYWORDS
+# MY KEYWORDS
 #SPARE = "spare"
 RELAY_OVERFLOW = "relay_overflow"
 DIMMER_OUT = "dimmer_out"
@@ -175,7 +142,7 @@ SHUTTER_SET = {
 
 # ANALOG REG CONSTANTS
 ANALOG_REGULATOR_SET_BYTES = {
-    Element.RFDAC_71B.value: "01",
+    RFDAC_71B: "01",
     RAMP_UP: "02",
     TIME_RAMP_UP: "05",
     TIME_RAMP_DOWN: "06",
@@ -200,9 +167,9 @@ DEVICE_TYPE_05_HEX_VALUES = {
 # DEVICE DATA
 #   RF
 DEVICE_TYPE_07_DATA = {STATE: [1], TEMP_OUT: [3, 2]}
-DEVICE_TYPE_05_DATA = {Element.RFDAC_71B.value: [0, 1]}
-DEVICE_TYPE_10_DATA = {BATTERY: [0], TEMP_IN: [2, 1], TEMP_OUT: [4, 3]}
-SHUTTER_TYPE_03_DATA = {Element.RFJA_12.value: [1]}
+DEVICE_TYPE_05_DATA = {RFDAC_71B: [0, 1]}
+TEMP_SENSOR_DATA = {BATTERY: [0], TEMP_IN: [2, 1], TEMP_OUT: [4, 3]}
+SHUTTER_TYPE_03_DATA = {RFJA_12: [1]}
 BUTTON_TYPE_19_DATA = {STATE: [0], IDENTITY: [1]}  # button identity (how many buttons it has?)
 CLIMATE_TYPE_09_DATA = {
     OPEN_IN_PERCENTAGE: [0],
@@ -210,25 +177,28 @@ CLIMATE_TYPE_09_DATA = {
     BATTERY: [2],
     REQUIRED_TEMP: [3],
 }
-DEVICE_TYPE_12_DATA = {TEMPERATURE: [0], BATTERY: [2]}
 #   BUS
 RELAY_DATA = {
     STATE: [0],
+    # SPARE: [1],
     TEMP_IN: [2, 3],
     RELAY_OVERFLOW: [4]
 }
 
 TWOCHANNELDIMMER_DATA = {
     TEMP_IN: [0, 1],
-    Element.DA3_22M.value: [2],
+    DA3_22M: [2],
+    # TODO CHECK SPARE: [3],
     DIM_OUT_1: [4],
     DIM_OUT_2: [5],
 }
 
 
 THERMOSTAT_DATA = {
+    # FORCED_REPAIR: [0],
+    # SPARE: [1]
     TEMP_IN: [2, 3],
-    Element.GTR3_50.value: [4, 5, 6],
+    GTR3_50: [4, 5, 6],
     PLUS_MINUS_BUTTONS: [7],
     LIGHT_IN: [8, 9, 10, 11],
     AIN: [12, 13],
@@ -237,7 +207,7 @@ THERMOSTAT_DATA = {
 }
 
 BUTTONARRAY_DATA = {
-    Element.GSB3_90SX.value: [0, 1],
+    GSB3_90SX: [0, 1],
     TEMP_IN: [2, 3],
     LIGHT_IN: [4, 5, 6, 7],
     AIN: [8, 9],
@@ -250,19 +220,18 @@ NODATA_DATA = {
 }
 
 INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
-    Element.RFSC_61 : DEVICE_TYPE_10_DATA,
-    Element.RFJA_12 : SHUTTER_TYPE_03_DATA,
-    Element.RFDAC_71B : DEVICE_TYPE_05_DATA,
-    Element.RFSTI_11B : DEVICE_TYPE_07_DATA,
-    Element.RFATV_2 : CLIMATE_TYPE_09_DATA,
-    Element.RFTI_10B : DEVICE_TYPE_10_DATA, #(?)
-    Element.RFGB_40 : BUTTON_TYPE_19_DATA,
-    Element.RFTC_10_G: DEVICE_TYPE_12_DATA,
+    RFSC_61 : TEMP_SENSOR_DATA,
+    RFJA_12 : SHUTTER_TYPE_03_DATA,
+    RFDAC_71B : DEVICE_TYPE_05_DATA,
+    RFSTI_11B : DEVICE_TYPE_07_DATA,
+    RFATV_2 : CLIMATE_TYPE_09_DATA,
+    RFTI_10B : TEMP_SENSOR_DATA, #(?)
+    RFGB_40 : BUTTON_TYPE_19_DATA,
     #BUS
-    Element.SA3_01B: RELAY_DATA,
-    Element.DA3_22M: TWOCHANNELDIMMER_DATA,
-    Element.GTR3_50: THERMOSTAT_DATA,
-    Element.GSB3_90SX: BUTTONARRAY_DATA
+    SA3_01B: RELAY_DATA,
+    DA3_22M: TWOCHANNELDIMMER_DATA,
+    GTR3_50: THERMOSTAT_DATA,
+    GSB3_90SX: BUTTONARRAY_DATA
 }
 
 # BUTTON CONSTANTS
@@ -275,7 +244,7 @@ BUTTON_NUMBER = {
     "32": 6,
 }
 
-BUTTON_DEVICE_AMOUNT = {Element.RFGB_40.value: 4}
+BUTTON_DEVICE_AMOUNT = {RFGB_40: 4}
 
 # FRAGMENT/MQTT CONSTANTS
 FRAGMENT_DOMAIN = "fragment_domain"
@@ -398,7 +367,7 @@ class BusErrors(IntEnum) :
     BUS_4B_NO_SENSOR = 0x7FFFFFFF,
     BUS_4B_NOT_COMMUNICATING = 0x7FFFFFF9,
 
-SENSOR_RFTC_10_G_LOW_BATTERY = "81"
+
 
 # MQTT/INELS CONSTANTS
 

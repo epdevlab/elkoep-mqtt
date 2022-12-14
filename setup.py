@@ -2,9 +2,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="inels-mqtt-dev",
-    version="0.0.64",
-    url="https://github.com/zed4805/inels-mqtt-dev",
+    name="inels-mqtt-new",
+    version="0.0.1",
+    url="https://github.com/zed4805/inels-mqtt-new",
     license="MIT",
     author="Elko EP s.r.o.",
     author_email="zed4805@gmail.com",

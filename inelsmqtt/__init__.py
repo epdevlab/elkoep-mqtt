@@ -88,7 +88,7 @@ class InelsMqtt:
         _t = config.get(MQTT_TIMEOUT)
         self.__timeout = _t if _t is not None else __DISCOVERY_TIMEOUT__
 
-        self.__listeners = dict[str, Callable[[Any], Any]]()
+        self.__listeners = dict[str, dict[str, Callable[[Any], Any]]]()
         self.__is_subscribed_list = dict[str, bool]()
         self.__last_values = dict[str, str]()
         self.__try_connect = False
@@ -114,7 +114,7 @@ class InelsMqtt:
         return self.__is_available
 
     @property
-    def list_of_listeners(self) -> dict[str, Callable[[Any], Any]]:
+    def list_of_listeners(self) -> dict[str, dict[str, Callable[[Any], Any]]]:
         """List of listeners."""
         return self.__listeners
 
@@ -160,9 +160,9 @@ class InelsMqtt:
 
         return self.__is_available
 
-    def subscribe_listener(self, topic: str, fnc: Callable[[Any], Any]) -> None:
+    def subscribe_listener(self, topic: str, unique_id: str, fnc: Callable[[Any], Any]) -> None:
         """Append new item into the datachange listener."""
-        self.__listeners[topic] = fnc
+        self.__listeners[topic][unique_id] = fnc
 
     def unsubscribe_listeners(self) -> bool:
         """Unsubscribe listeners."""
@@ -370,8 +370,9 @@ class InelsMqtt:
         # set discovery_start_time to now every message was returned
         # will be doing till messages will rising
         if self.__discovered.get(msg.topic) is not None:
+            _LOGGER.info("Message: %s", str(self.__discovered[msg.topic]))
             _LOGGER.info("First time getting topic %s", msg.topic)
-            #self.__discover_start_time = datetime.now()
+            self.__discover_start_time = datetime.now()
 
         # pass only those who belongs to known device types
         fragments = msg.topic.split("/")
@@ -411,10 +412,14 @@ class InelsMqtt:
             # update info that the topic is subscribed
             self.__is_subscribed_list[msg.topic] = True
 
-        
         if len(self.__listeners) > 0 and msg.topic in self.__listeners:
             # This pass data change directely into the device.
-            self.__listeners[msg.topic](msg.payload)
+            for topic in self.__listeners:
+                if len(self.__listeners[topic]) > 0:
+                    for unique_id in self.__listeners[topic]:
+                        self.__listeners[msg.topic][unique_id](msg.payload)
+            
+            #self.__listeners[msg.topic](msg.payload)
 
     def __on_subscribe(
         self,

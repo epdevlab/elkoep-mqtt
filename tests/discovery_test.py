@@ -5,7 +5,7 @@
 from unittest.mock import patch, Mock
 from unittest import TestCase
 
-from inelsmqtt.const import (
+from inelsmqttnew.const import (
     MQTT_HOST,
     MQTT_PASSWORD,
     MQTT_PORT,
@@ -13,8 +13,8 @@ from inelsmqtt.const import (
     PROTO_5,
     MQTT_PROTOCOL,
 )
-from inelsmqtt.discovery import InelsDiscovery
-from inelsmqtt import InelsMqtt
+from inelsmqttnew.discovery import InelsDiscovery
+from inelsmqttnew import InelsMqtt
 
 from tests.const import (
     TEST_HOST,

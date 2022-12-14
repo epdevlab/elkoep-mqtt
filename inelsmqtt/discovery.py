@@ -1,19 +1,9 @@
 """Discovery class handle find all device in broker and create devices."""
 import logging
-from typing import Any
-
 
 from inelsmqtt import InelsMqtt
 from inelsmqtt.devices import Device
-from inelsmqtt.devices import sensor, light, switch, bus
-from inelsmqtt.const import (
-    Platform,
-    DEVICE_TYPE_DICT,
-    TOPIC_FRAGMENTS,
-    FRAGMENT_DEVICE_TYPE,
-    Archetype,
-    DEVICE_ARCHETYPE_DICT,
-)
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,9 +14,9 @@ class InelsDiscovery(object):
     def __init__(self, mqtt: InelsMqtt) -> None:
         """Initialize inels mqtt discovery"""
         self.__mqtt = mqtt
-        self.__devices: list[Any] = []
+        self.__devices: list[Device] = []
         self.__coordinators: list[str] = []
-        self.__coordinators_with_devices: dict[str, list[Any]] = {}
+        self.__coordinators_with_devices: dict[str, list[Device]] = {}
 
     @property
     def coordinators(self) -> list[str]:
@@ -46,43 +36,14 @@ class InelsDiscovery(object):
         """
         return self.__devices
 
-    def discovery(self) -> dict[str, list[Any]]:
+    def discovery(self) -> dict[str, list[Device]]:
         """Discover and create device list
 
         Returns:
             list[Device]: List of Device object
         """
         devs = self.__mqtt.discovery_all()
-        
-        for item in devs :
-            fragments = item.split("/")
-
-            device_type_val = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
-
-            dev_types: list[Platform] = DEVICE_TYPE_DICT[device_type_val]
-            
-            #DEVICE ARCHETYPE STUFF HERE
-            
-            dev_arch: Archetype = DEVICE_ARCHETYPE_DICT[device_type_val]
-            
-            if dev_arch is Archetype.RF.value:
-                dev_type = dev_types[0]
-                
-                if dev_type == Platform.SWITCH:
-                    dev = switch.Switch(self.__mqtt, item)
-                elif dev_type == Platform.LIGHT:
-                    dev = light.Light(self.__mqtt, item)
-                elif dev_type == Platform.SENSOR:
-                    dev = sensor.Sensor(self.__mqtt, item)
-                else:
-                    dev = Device(self.__mqtt, item)
-            else: #BUS
-                for dev_type in dev_types:
-                    dev = bus.BusDevice(self.__mqtt, item)
-                
-            self.__devices.append(dev)
-        
-        #self.__devices = [Device(self.__mqtt, item) for item in devs]
+        self.__devices = [Device(self.__mqtt, item) for item in devs]
 
         for item in self.__devices:
             if item.parent_id not in self.__coordinators:
