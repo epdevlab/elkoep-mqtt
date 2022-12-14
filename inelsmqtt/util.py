@@ -143,10 +143,7 @@ class DeviceValue(object):
                 #state = int(self.__trim_inels_status_values(RELAY_DATA, STATE, ""), 16) #NOT WORKING
                 state = self.__trim_inels_status_values(RELAY_DATA, STATE, "")
 
-                temp = int(
-                    self.__trim_inels_status_values(
-                        RELAY_DATA, TEMP_IN, ""), 16
-                )/100
+                temp = self.__trim_inels_status_values(RELAY_DATA, TEMP_IN, "")
 
                 relay_overflow = (
                     int(
