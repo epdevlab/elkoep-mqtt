@@ -304,7 +304,7 @@ class DeviceValue(object):
                     ovlo_alert_2=state_bin_str[7] == "0",
 
                     # This might be important
-                    temp=temp,
+                    temp_in=temp,
                     
                     #generalization for multiple channel dimmers
                     out=out, # array
