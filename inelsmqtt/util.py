@@ -181,7 +181,7 @@ class DeviceValue(object):
                 # No output.
                 self.__ha_value = self.__inels_status_value
             
-            elif self.__device_type is GTR3_50:
+            elif self.__inels_type is GTR3_50:
                 digital_inputs = self.__trim_inels_status_values(
                     THERMOSTAT_DATA, GTR3_50, "")
                 digital_inputs_hex_str = f"0x{digital_inputs}"
