@@ -197,8 +197,8 @@ TWOCHANNELDIMMER_DATA = {
 THERMOSTAT_DATA = {
     # FORCED_REPAIR: [0],
     # SPARE: [1]
+    GTR3_50: [1],
     TEMP_IN: [2, 3],
-    GTR3_50: [4, 5, 6],
     PLUS_MINUS_BUTTONS: [7],
     LIGHT_IN: [8, 9, 10, 11],
     AIN: [12, 13],
