@@ -295,11 +295,14 @@ class DeviceValue(object):
                 ]
                 self.__ha_value = new_object(
                     #May not be that interesting for HA
-                    sw1=state_bin_str[0] == "0",
-                    sw2=state_bin_str[1] == "0",
-
-                    in1=state_bin_str[2] == "0",
-                    in2=state_bin_str[3] == "0",
+                    sw=[
+                        state_bin_str[0] == "1",
+                        state_bin_str[1] == "1",
+                    ],
+                    in_=[
+                        state_bin_str[2] == "1",
+                        state_bin_str[3] == "1"
+                    ],
 
                     ovt_alert_1=state_bin_str[4] == "0",
                     ovt_alert_2=state_bin_str[5] == "0",
