@@ -219,7 +219,7 @@ class DeviceValue(object):
                 dewpoint = self.__trim_inels_status_values(THERMOSTAT_DATA, DEW_POINT, "")
 
 
-                self.ha_value = new_object(
+                self.__ha_value = new_object(
                     # digital inputs
                     din=[# 2
                         digital_inputs_bin_str[0] == "1",
