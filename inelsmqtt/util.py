@@ -193,7 +193,7 @@ class DeviceValue(object):
                 #    ), 16
                 #)/100
 
-                temp = self.__trim_inels_status_values(THERMOSTAT_DATA, TEMP_IN, "")
+                temp_in = self.__trim_inels_status_values(THERMOSTAT_DATA, TEMP_IN, "")
 
                 plusminus = self.__trim_inels_status_values(
                     THERMOSTAT_DATA, PLUS_MINUS_BUTTONS, "")
@@ -220,22 +220,26 @@ class DeviceValue(object):
 
 
                 self.ha_value = new_object(
-                    # May not be important to notify HA of this
                     # digital inputs
-                    din1=digital_inputs_bin_str[0] == "0",
-                    din2=digital_inputs_bin_str[1] == "0",
-                    sw1=digital_inputs_bin_str[2] == "0",
-                    sw2=digital_inputs_bin_str[3] == "0",
-                    sw3=digital_inputs_bin_str[4] == "0",
-                    sw4=digital_inputs_bin_str[5] == "0",
-                    sw5=digital_inputs_bin_str[6] == "0",
-                    # plus minus
-                    plus=plusminus[0] == "0",  # plus button
-                    minus=plusminus[1] == "0",  # minus button
+                    din=[# 2
+                        digital_inputs_bin_str[0] == "1",
+                        digital_inputs_bin_str[1] == "1",
+                    ],
+                    sw=[# 5
+                        digital_inputs_bin_str[2] == "1",
+                        digital_inputs_bin_str[3] == "1",
+                        digital_inputs_bin_str[4] == "1",
+                        digital_inputs_bin_str[5] == "1",
+                        digital_inputs_bin_str[6] == "1",
+                    ],
+                    plusminus=[
+                        plusminus[0] == "1", # plus
+                        plusminus[1] == "1", # minus
+                    ],
                     
                     # Actually important
                     # temperature
-                    temp_in=temp,
+                    temp_in=temp_in,
 
                     light_in=light_in,
 
