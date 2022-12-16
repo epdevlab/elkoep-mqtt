@@ -299,16 +299,20 @@ class DeviceValue(object):
                         state_bin_str[0] == "1",
                         state_bin_str[1] == "1",
                     ],
-                    in_=[
+                    din=[
                         state_bin_str[2] == "1",
                         state_bin_str[3] == "1"
                     ],
 
-                    ovt_alert_1=state_bin_str[4] == "0",
-                    ovt_alert_2=state_bin_str[5] == "0",
+                    toa=[ # thermal overload alarm
+                        state_bin_str[4] == "1",
+                        state_bin_str[5] == "1",
 
-                    ovlo_alert_1=state_bin_str[6] == "0",
-                    ovlo_alert_2=state_bin_str[7] == "0",
+                    ],
+                    coa=[ # current overload alrm
+                        state_bin_str[6] == "1",
+                        state_bin_str[7] == "1",
+                    ],
 
                     # This might be important
                     temp_in=temp,
