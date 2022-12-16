@@ -636,19 +636,19 @@ class DeviceValue(object):
                 self.__inels_status_value = self.__find_keys_by_value(
                     RELAY_STATE,  # str -> bool
                     #self.__ha_value.on, #NOT WORKING
-                    self.__ha_value,
+                    self.__ha_value.on,
                     self.__last_value
                 )
-                self.__inels_set_value = RELAY_SET.get(self.__ha_value)
+                self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
             else:
                 # just a shortcut for setting it
                 # basically set the status from the ha value
                 self.__inels_status_value = self.__find_keys_by_value(
                     SWITCH_STATE,  # str -> bool
-                    self.__ha_value,
+                    self.__ha_value.on,
                     self.__last_value
                 )
-                self.__inels_set_value = SWITCH_SET.get(self.__ha_value)
+                self.__inels_set_value = SWITCH_SET.get(self.__ha_value.on)
         elif self.__device_type is LIGHT:
             if self.__inels_type is RFDAC_71B:
                 self.__inels_status_value = self.__find_keys_by_value(
