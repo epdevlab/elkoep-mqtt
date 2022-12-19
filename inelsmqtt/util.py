@@ -403,7 +403,7 @@ class DeviceValue(object):
                 dewpoint = self.__trim_inels_status_values(
                     BUTTONARRAY_DATA, DEW_POINT, "")
 
-                self.ha_value = new_object(
+                self.__ha_value = new_object(
                     sw=[
                         digital_inputs[0] == "0",
                         digital_inputs[1] == "0",
