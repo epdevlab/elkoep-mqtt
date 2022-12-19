@@ -34,7 +34,7 @@ DEVICE_TYPE_DICT = {
     "100": SWITCH,  # RELAY with temp sensor
     "101": LIGHT,  # TWOCHANNELDIMMER
     "102": SENSOR,  # THERMOSTAT
-    #"103": BUTTON,  # BUTTONARRAY
+    "103": BUTTON,  # BUTTONARRAY
 }
 
 # RF

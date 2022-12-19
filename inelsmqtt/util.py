@@ -382,7 +382,67 @@ class DeviceValue(object):
                     # reports the number of buttons
                     amount=BUTTON_DEVICE_AMOUNT.get(self.__inels_type),
                 )
-                
+            elif self.__inels_type is GSB3_90SX:
+                digital_inputs = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, GSB3_90SX, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+
+                temp = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, TEMP_IN, "")
+
+                light_in = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, LIGHT_IN, "")
+
+                ain = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, AIN, "")
+
+                humidity = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, HUMIDITY, "")
+
+                dewpoint = self.__trim_inels_status_values(
+                    BUTTONARRAY_DATA, DEW_POINT, "")
+
+                self.ha_value = new_object(
+                    sw=[
+                        digital_inputs[0] == "0",
+                        digital_inputs[1] == "0",
+                        digital_inputs[2] == "0",
+                        digital_inputs[3] == "0",
+                        digital_inputs[4] == "0",
+                        digital_inputs[5] == "0",
+                        digital_inputs[6] == "0",
+                        digital_inputs[7] == "0",
+                        digital_inputs[8] == "0",
+                    ],
+                    din=[
+                        digital_inputs[9] == "0",
+                        digital_inputs[10] == "0",
+                    ],
+                    prox=digital_inputs[11] == "0",
+
+                    # Actually important:
+                    # temperature
+                    temp_in=temp,
+
+                    # light in
+                    light_in=light_in,
+
+                    # AIN
+                    ain=ain,
+
+                    # humidity
+                    humidity=humidity,
+
+                    # dewpoint
+                    dewpoint=dewpoint,
+
+                    # my own additions
+                    # disabled
+                    disabled=False,
+                    # backlit
+                    backlit=False,
+                )
                 
         elif self.__device_type is RELAY:  # relay + temp sensor
             if self.__inels_type is SA3_01B:
@@ -697,7 +757,13 @@ class DeviceValue(object):
                 required_temp = int(round(self.__ha_value.required * 2, 0))
                 self.__inels_set_value = f"00 {required_temp:x} 00".upper()
         elif self.__device_type is BUTTON:
-            self.__ha_value = ha_val  # TODO: not implemented? typo?
+            if self.__inels_type is GSB3_90SX:
+                disabled = BUTTONARRAY_SET_DISABLED[self.__ha_value.disabled]
+                backlit = BUTTONARRAY_SET_BACKLIT[self.__ha_value.backlit]
+
+                self.__inels_set_value = "".join(["00\n" * 36, disabled, backlit])
+            else:
+                self.__ha_value = ha_val  # TODO: not implemented? typo?
         elif self.__device_type is RELAY:
             self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
         elif self.__device_type is TWOCHANNELDIMMER:
