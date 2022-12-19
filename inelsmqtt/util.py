@@ -386,7 +386,7 @@ class DeviceValue(object):
                 digital_inputs = self.__trim_inels_status_values(
                     BUTTONARRAY_DATA, GSB3_90SX, "")
                 digital_inputs = f"0x{digital_inputs}"
-                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+                digital_inputs = f"{int(digital_inputs, 16):0>16b}"
 
                 temp = self.__trim_inels_status_values(
                     BUTTONARRAY_DATA, TEMP_IN, "")
