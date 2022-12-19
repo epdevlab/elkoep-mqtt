@@ -462,12 +462,6 @@ class DeviceValue(object):
         """Find inels mqtt value for specific device."""
         if self.__device_type is SWITCH:
             if self.__inels_type is SA3_01B:
-                self.__inels_status_value = self.__find_keys_by_value(
-                    RELAY_STATE,  # str -> bool
-                    #self.__ha_value.on, #NOT WORKING
-                    self.__ha_value.on,
-                    self.__last_value
-                )
                 self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
             elif self.__inels_type is RFSTI_11B:
                 state = int(
