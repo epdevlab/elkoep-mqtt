@@ -30,6 +30,7 @@ DEVICE_TYPE_DICT = {
     "09": CLIMATE,
     "10": SENSOR,
     "19": BUTTON,
+    "12": SENSOR,
     # BUS
     "100": SWITCH,  # RELAY with temp sensor
     "101": LIGHT,  # TWOCHANNELDIMMER
@@ -46,6 +47,7 @@ RFATV_2 = "RFATV-2"
 RFGB_40 = "RFGB-40"
 RFKEY_40 = "RFKEY-40"
 RFSTI_11B = "RFSTI-11B"
+RFTC_10_G = "RFTC-10/G"
 
 # BUS
 SA3_01B = "SA3-01B"
@@ -61,6 +63,7 @@ INELS_DEVICE_TYPE_DICT = {
     "09": RFATV_2,
     "10": RFTI_10B,
     "19": RFGB_40,
+    "12": RFTC_10_G,
 
     "100": SA3_01B,
     "101": DA3_22M,
@@ -71,6 +74,7 @@ INELS_DEVICE_TYPE_DICT = {
 BATTERY = "battery"
 TEMP_IN = "temp_in"
 TEMP_OUT = "temp_out"
+TEMPERATURE = "temperature"
 CURRENT_TEMP = "current_temp"
 REQUIRED_TEMP = "required_temp"
 OPEN_IN_PERCENTAGE = "open_in_percentage"
@@ -177,6 +181,7 @@ CLIMATE_TYPE_09_DATA = {
     BATTERY: [2],
     REQUIRED_TEMP: [3],
 }
+DEVICE_TYPE_12_DATA = {TEMPERATURE: [0], BATTERY: [2]}
 #   BUS
 RELAY_DATA = {
     STATE: [0],

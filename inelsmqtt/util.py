@@ -469,6 +469,23 @@ class DeviceValue(object):
                     self.__last_value
                 )
                 self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
+            elif self.__inels_type is RFSTI_11B:
+                state = int(
+                    self.__trim_inels_status_values(DEVICE_TYPE_07_DATA, STATE, ""), 16
+                )
+
+                temp = (
+                    int(
+                        self.__trim_inels_status_values(
+                            DEVICE_TYPE_07_DATA, TEMP_OUT, ""
+                        ),
+                        16,
+                    )
+                    / 100
+                )
+
+                self.__ha_value = new_object(on=(state == 1), temperature=temp)
+                self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]
             else:
                 # just a shortcut for setting it
                 # basically set the status from the ha value
