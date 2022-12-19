@@ -186,7 +186,7 @@ class DeviceValue(object):
                     THERMOSTAT_DATA, GTR3_50, "")
                 digital_inputs_hex_str = f"0x{digital_inputs}"
                 digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
-
+                _LOGGER.info("GTR3-50: digital inputs: %s", digital_inputs_bin_str)
                 #temp = int(
                 #    self.__trim_inels_status_values(
                 #        THERMOSTAT_DATA, TEMP_IN, ""
@@ -387,6 +387,7 @@ class DeviceValue(object):
                     BUTTONARRAY_DATA, GSB3_90SX, "")
                 digital_inputs = f"0x{digital_inputs}"
                 digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+                _LOGGER.info("GTR3-50: digital inputs: %s", digital_inputs)
 
                 temp = self.__trim_inels_status_values(
                     BUTTONARRAY_DATA, TEMP_IN, "")
@@ -443,238 +444,6 @@ class DeviceValue(object):
                     # backlit
                     backlit=False,
                 )
-                
-        elif self.__device_type is RELAY:  # relay + temp sensor
-            if self.__inels_type is SA3_01B:
-                state = self.__trim_inels_status_values(RELAY_DATA, STATE, "")
-
-                temp = int(
-                    self.__trim_inels_status_values(
-                        RELAY_DATA, TEMP_IN, ""), 16
-                )/100
-
-                relay_overflow = (
-                    int(
-                        self.__trim_inels_status_values(
-                            RELAY_DATA, RELAY_OVERFLOW, ""
-                        ),
-                        16,
-                    )
-                )
-
-                self.__ha_value = new_object(
-                    on=(state == 0),
-                    temp=temp,
-                    
-                    # may not be important, but could cause problems if ignored
-                    relay_overflow=(relay_overflow == 0)
-                )
-
-                # TODO compose the value
-                #   0 - RE1 ON/OFF
-                # 1-3 - INSTRUCTION
-                # 4-7 - TIME
-
-                # TODO simplify into a on/off trigger
-                # 0b0000_011X
-                # 0x06 -> turn off
-                # 0x07 -> turn on
-
-                # simplified to a on/off relay
-                #self.inels_set_value = RELAY_SET[self.__ha_value.on]
-                #self.inels_status_value = RELAY_DATA[self.__ha_value.on]
-            else:
-                # TODO review
-                self.__ha_value = RELAY_STATE[self.__inels_status_value]
-                self.__inels_set_value = RELAY_SET[self.__ha_value]
-        elif self.__device_type is TWOCHANNELDIMMER: #TODO maybe generalize into a multi channel dimmer?
-            if self.__device_type is DA3_22M:
-                temp = int(
-                    self.__trim_inels_status_values(
-                        TWOCHANNELDIMMER_DATA, TEMP_IN, ""
-                    ), 16
-                ) / 100
-
-                state = self.__trim_inels_status_values(
-                    TWOCHANNELDIMMER_DATA, DA3_22M, "")
-                state_hex_str = f"0x{state}"
-                state_bin_str = f"{int(state_hex_str, 16):0>8b}"
-
-                out1 = int(
-                    self.__trim_inels_status_values(
-                        TWOCHANNELDIMMER_DATA, DIM_OUT_1, ""
-                    ), 16
-                )
-
-                out2 = int(
-                    self.__trim_inels_status_values(
-                        TWOCHANNELDIMMER_DATA, DIM_OUT_2, ""
-                    ), 16
-                )
-                
-                out = [
-                    out1 if out1 < 100 else 100,
-                    out2 if out2 < 100 else 100,
-                ]
-                self.__ha_value = new_object(
-                    #May not be that interesting for HA
-                    sw1=state_bin_str[0] == "0",
-                    sw2=state_bin_str[1] == "0",
-
-                    in1=state_bin_str[2] == "0",
-                    in2=state_bin_str[3] == "0",
-
-                    ovt_alert_1=state_bin_str[4] == "0",
-                    ovt_alert_2=state_bin_str[5] == "0",
-
-                    ovlo_alert_1=state_bin_str[6] == "0",
-                    ovlo_alert_2=state_bin_str[7] == "0",
-
-                    # This might be important
-                    temp=temp,
-                    
-                    #generalization for multiple channel dimmers
-                    out=out, # array
-                    channel_number=2,
-                    #out1=out1 if out1 > 100 else 100,
-                    #out2=out2 if out2 > 100 else 100,
-                )
-
-                # TODO needs set (kinda complicated)
-
-            else:
-                pass
-        elif self.__device_type is THERMOSTAT:
-            if self.__device_type is GTR3_50:
-                digital_inputs = self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, GTR3_50, "")
-                digital_inputs_hex_str = f"0x{digital_inputs}"
-                digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
-
-                temp = int(
-                    self.__trim_inels_status_values(
-                        THERMOSTAT_DATA, TEMP_IN, ""
-                    ), 16
-                )/100
-
-                plusminus = self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, PLUS_MINUS_BUTTONS, "")
-                plusminus = f"0x{plusminus}"
-                plusminus = f"{int(plusminus, 16):0>8b}"
-
-                light_in = int(self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, LIGHT_IN, ""), 16)/100
-
-                ain = int(self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, AIN, ""), 16)/100
-
-                humidity = (int(self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, HUMIDITY, ""), 16)/100)
-                # TODO conversion
-
-                dewpoint = (int(self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, DEW_POINT, ""), 16)/100)
-
-                self.ha_value = new_object(
-                    # May not be important to notify HA of this
-                    # digital inputs
-                    din1=digital_inputs_bin_str[0] == "0",
-                    din2=digital_inputs_bin_str[1] == "0",
-                    sw1=digital_inputs_bin_str[2] == "0",
-                    sw2=digital_inputs_bin_str[3] == "0",
-                    sw3=digital_inputs_bin_str[4] == "0",
-                    sw4=digital_inputs_bin_str[5] == "0",
-                    sw5=digital_inputs_bin_str[6] == "0",
-                    # plus minus
-                    plus=plusminus[0] == "0",  # plus button
-                    minus=plusminus[1] == "0",  # minus button
-                    
-                    # Actually important
-                    # temperature
-                    temp=temp,
-
-                    light_in=light_in,
-
-                    ain=ain,
-
-                    humidity=humidity,
-
-                    dewpoint=dewpoint,
-
-                    # my addition
-                    # backlit
-                    backlit=False,
-                )
-
-                # TODO make set value (maybe)
-
-            else:
-                pass
-        elif self.__device_type is BUTTONARRAY:
-            if self.__device_type is GSB3_90SX:
-                digital_inputs = self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, GSB3_90SX, "")
-                digital_inputs = f"0x{digital_inputs}"
-                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
-
-                temp = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, TEMP_IN, ""), 16)/100
-
-                light_in = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, LIGHT_IN, ""), 16)/100
-
-                ain = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, AIN, ""), 16)/100
-
-                humidity = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, HUMIDITY, ""), 16)/100
-
-                dewpoint = int(self.__trim_inels_status_values(
-                    BUTTONARRAY_DATA, DEW_POINT, ""), 16)/100
-
-                # TODO make output
-
-                self.ha_value = new_object(
-                    # may not be needed as it is overkill for HA
-                    # digital inputs
-                    sw1=digital_inputs[0] == "0",
-                    sw2=digital_inputs[1] == "0",
-                    sw3=digital_inputs[2] == "0",
-                    sw4=digital_inputs[3] == "0",
-                    sw5=digital_inputs[4] == "0",
-                    sw6=digital_inputs[5] == "0",
-                    sw7=digital_inputs[6] == "0",
-                    sw8=digital_inputs[7] == "0",
-                    sw9=digital_inputs[8] == "0",
-
-                    dn1=digital_inputs[9] == "0",
-                    dn2=digital_inputs[10] == "0",
-                    proxi=digital_inputs[11] == "0",
-
-                    # Actually important:
-                    # temperature
-                    temp=temp,
-
-                    # light in
-                    light_in=light_in,
-
-                    # AIN
-                    ain=ain,
-
-                    # humidity
-                    humidity=humidity,
-
-                    # dewpoint
-                    dewpoint=dewpoint,
-
-                    # my own additions
-                    # disabled
-                    disabled=False,
-                    # backlit
-                    backlit=False,
-                )
-
-                # TODO make output
             else:
                 pass
 
@@ -763,33 +532,7 @@ class DeviceValue(object):
 
                 self.__inels_set_value = "".join(["00\n" * 36, disabled, backlit])
             else:
-                self.__ha_value = ha_val  # TODO: not implemented? typo?
-        elif self.__device_type is RELAY:
-            self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
-        elif self.__device_type is TWOCHANNELDIMMER:
-            # correct the values
-            out1 = round(self.__ha_value.out1, -1)
-            out1 = out1 if out1 < 100 else 100
-
-            out2 = round(self.__ha_value.out2, -1)
-            out2 = out2 if out2 < 100 else 100
-
-            # EX: 04\n04\n00\n00\n64\n64\n
-            self.__inels_set_value = "".join([TWOCHANNELDIMMER_RAMP_VAL,  # 04\n
-                                              TWOCHANNELDIMMER_RAMP_VAL,
-                                              "00\n", "00\n",
-                                              out1, out2])
-        elif self.__device_type is THERMOSTAT:
-            # basically depending on the context of the functioning color the buttons
-            backlit_display = THERMOSTAT_SET_BACKLIT_DISPLAY[self.__ha_value.backlit]
-            backlit_buttons = THERMOSTAT_SET_BACKLIT_BUTTONS[self.__ha_value.backlit]
-            self.__inels_set_value = "".join([
-                "00\n"*3, backlit_display, "00\n"*7, backlit_buttons, "00\n" * 3])
-        elif self.__device_type is BUTTONARRAY:
-            disabled = BUTTONARRAY_SET_DISABLED[self.__ha_value.disabled]
-            backlit = BUTTONARRAY_SET_BACKLIT[self.__ha_value.backlit]
-
-            self.__inels_set_value = "".join(["00\n" * 36, disabled, backlit])
+                self.__ha_value = ha_val
 
     def __find_keys_by_value(self, array: dict, value, last_value) -> Any:
         """Return key from dict by value
