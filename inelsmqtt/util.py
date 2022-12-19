@@ -405,21 +405,21 @@ class DeviceValue(object):
 
                 self.__ha_value = new_object(
                     sw=[
-                        digital_inputs[0] == "0",
-                        digital_inputs[1] == "0",
-                        digital_inputs[2] == "0",
-                        digital_inputs[3] == "0",
-                        digital_inputs[4] == "0",
-                        digital_inputs[5] == "0",
-                        digital_inputs[6] == "0",
-                        digital_inputs[7] == "0",
-                        digital_inputs[8] == "0",
+                        digital_inputs[0] == "1",
+                        digital_inputs[1] == "1",
+                        digital_inputs[2] == "1",
+                        digital_inputs[3] == "1",
+                        digital_inputs[4] == "1",
+                        digital_inputs[5] == "1",
+                        digital_inputs[6] == "1",
+                        digital_inputs[7] == "1",
+                        digital_inputs[8] == "1",
                     ],
                     din=[
-                        digital_inputs[9] == "0",
-                        digital_inputs[10] == "0",
+                        digital_inputs[9] == "1",
+                        digital_inputs[10] == "1",
                     ],
-                    prox=digital_inputs[11] == "0",
+                    prox=digital_inputs[11] == "1",
 
                     # Actually important:
                     # temperature
