@@ -41,11 +41,6 @@ from .const import (
     SWITCH_WITH_TEMP_SET,
     TEMP_OUT,
 
-    RELAY,
-    TWOCHANNELDIMMER,
-    THERMOSTAT,
-    BUTTONARRAY,
-
     SA3_01B,
     DA3_22M,
     GTR3_50,
@@ -66,13 +61,7 @@ from .const import (
     HUMIDITY,
     DEW_POINT,
 
-    RELAY_STATE,
     RELAY_SET,
-
-    TWOCHANNELDIMMER_RAMP_VAL,
-
-    THERMOSTAT_SET_BACKLIT_DISPLAY,
-    THERMOSTAT_SET_BACKLIT_BUTTONS,
 
     BUTTONARRAY_SET_DISABLED,
     BUTTONARRAY_SET_BACKLIT,
@@ -144,41 +133,16 @@ class DeviceValue(object):
                 temp = self.__trim_inels_status_values(RELAY_DATA, TEMP_IN, "")
                 relay_overflow = int(self.__trim_inels_status_values(RELAY_DATA, RELAY_OVERFLOW, ""),16)
                 self.__ha_value = new_object(
-                    on=(state == 7), #7 for on, 6 for off
+                    on=((state & 1) == 1), #XXX1 -> on, XXX0 -> off
                     temp_in=temp,
-                    # may not be important, but could cause problems if ignored
                     relay_overflow=(relay_overflow == 1)
                 )
                 self.__inels_set_value = RELAY_SET[self.__ha_value.on]
-
-                #state = int(self.__trim_inels_status_values(RELAY_DATA, STATE, ""), 16) #NOT WORKING
-                #state = self.__trim_inels_status_values(RELAY_DATA, STATE, "")
-
-                #temp = self.__trim_inels_status_values(RELAY_DATA, TEMP_IN, "")
-
-                #relay_overflow = (
-                #    int(
-                #        self.__trim_inels_status_values(
-                #            RELAY_DATA, RELAY_OVERFLOW, ""
-                #        ),
-                #        16,
-                #    )
-                #)
-                #self.__ha_value = new_object(
-                #    on=(state == 0),
-                #    temp=temp,
-                #    # may not be important, but could cause problems if ignored
-                #    relay_overflow=(relay_overflow == 0)
-                #)
-                
-                #self.__inels_set_value = RELAY_SET[self.__ha_value.on]
             else:
                 self.__ha_value = new_object(on = (SWITCH_STATE[self.__inels_status_value]))
                 self.__inels_set_value = SWITCH_SET[self.__ha_value.on]
         elif self.__device_type is SENSOR:  # temperature sensor
             if self.__inels_type is RFTI_10B:
-                # interpretation of the values is done elsewhere.
-                # No output.
                 self.__ha_value = self.__inels_status_value
             
             elif self.__inels_type is GTR3_50:
@@ -188,11 +152,6 @@ class DeviceValue(object):
                 digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
                 if int(digital_inputs_bin_str, 2) != 0:
                     _LOGGER.info("GTR3-50: digital inputs: %s", digital_inputs_bin_str)
-                #temp = int(
-                #    self.__trim_inels_status_values(
-                #        THERMOSTAT_DATA, TEMP_IN, ""
-                #    ), 16
-                #)/100
 
                 temp_in = self.__trim_inels_status_values(THERMOSTAT_DATA, TEMP_IN, "")
 
@@ -202,46 +161,34 @@ class DeviceValue(object):
                 plusminus = f"{int(plusminus, 16):0>8b}"
                 if int(plusminus, 2) != 0:
                     _LOGGER.info("GTR3-50: plusminus: %s", plusminus)
-
-                #light_in = int(self.__trim_inels_status_values(
-                #    THERMOSTAT_DATA, LIGHT_IN, ""), 16)/100
+                    
                 light_in = self.__trim_inels_status_values(THERMOSTAT_DATA, LIGHT_IN, "")
 
-                #ain = int(self.__trim_inels_status_values(
-                #    THERMOSTAT_DATA, AIN, ""), 16)/100
                 ain = self.__trim_inels_status_values(THERMOSTAT_DATA, AIN, "")
-
-                #humidity = (int(self.__trim_inels_status_values(
-                #    THERMOSTAT_DATA, HUMIDITY, ""), 16)/100)
                 
                 humidity = self.__trim_inels_status_values(THERMOSTAT_DATA, HUMIDITY, "")
 
-
-                #dewpoint = (int(self.__trim_inels_status_values(
-                #    THERMOSTAT_DATA, DEW_POINT, ""), 16)/100)
                 dewpoint = self.__trim_inels_status_values(THERMOSTAT_DATA, DEW_POINT, "")
 
 
                 self.__ha_value = new_object(
                     # digital inputs
                     din=[# 2
-                        digital_inputs_bin_str[0] == "1",
-                        digital_inputs_bin_str[1] == "1",
-                    ],
-                    sw=[# 5
-                        digital_inputs_bin_str[2] == "1",
-                        digital_inputs_bin_str[3] == "1",
-                        digital_inputs_bin_str[4] == "1",
-                        digital_inputs_bin_str[5] == "1",
+                        digital_inputs_bin_str[7] == "1", #0 -> 7, reverse endianness
                         digital_inputs_bin_str[6] == "1",
                     ],
+                    sw=[# 5
+                        digital_inputs_bin_str[5] == "1",
+                        digital_inputs_bin_str[4] == "1",
+                        digital_inputs_bin_str[3] == "1",
+                        digital_inputs_bin_str[2] == "1",
+                        digital_inputs_bin_str[1] == "1", #6
+                    ],
                     plusminus=[
-                        plusminus[0] == "1", # plus
-                        plusminus[1] == "1", # minus
+                        plusminus[7] == "1", # plus
+                        plusminus[6] == "1", # minus
                     ],
                     
-                    # Actually important
-                    # temperature
                     temp_in=temp_in,
 
                     light_in=light_in,
@@ -252,7 +199,6 @@ class DeviceValue(object):
 
                     dewpoint=dewpoint,
 
-                    # my addition
                     # backlit
                     backlit=False,
                 )
@@ -299,22 +245,22 @@ class DeviceValue(object):
                 self.__ha_value = new_object(
                     #May not be that interesting for HA
                     sw=[
-                        state_bin_str[0] == "1",
-                        state_bin_str[1] == "1",
+                        state_bin_str[7] == "1", #0
+                        state_bin_str[6] == "1", #1
                     ],
                     din=[
-                        state_bin_str[2] == "1",
-                        state_bin_str[3] == "1"
+                        state_bin_str[5] == "1",
+                        state_bin_str[4] == "1"
                     ],
 
                     toa=[ # thermal overload alarm
-                        state_bin_str[4] == "1",
-                        state_bin_str[5] == "1",
+                        state_bin_str[3] == "1",
+                        state_bin_str[2] == "1",
 
                     ],
                     coa=[ # current overload alrm
-                        state_bin_str[6] == "1",
-                        state_bin_str[7] == "1",
+                        state_bin_str[1] == "1", #6
+                        state_bin_str[0] == "1", #7
                     ],
 
                     # This might be important
@@ -410,21 +356,21 @@ class DeviceValue(object):
 
                 self.__ha_value = new_object(
                     sw=[
-                        digital_inputs[0] == "1",
-                        digital_inputs[1] == "1",
-                        digital_inputs[2] == "1",
-                        digital_inputs[3] == "1",
-                        digital_inputs[4] == "1",
-                        digital_inputs[5] == "1",
+                        digital_inputs[7] == "1",#0
                         digital_inputs[6] == "1",
-                        digital_inputs[7] == "1",
-                        digital_inputs[8] == "1",
+                        digital_inputs[5] == "1",
+                        digital_inputs[4] == "1",
+                        digital_inputs[3] == "1",
+                        digital_inputs[2] == "1",
+                        digital_inputs[1] == "1",
+                        digital_inputs[0] == "1",
+                        digital_inputs[15] == "1",#8
                     ],
                     din=[
-                        digital_inputs[9] == "1",
-                        digital_inputs[10] == "1",
+                        digital_inputs[14] == "1",#9
+                        digital_inputs[13] == "1",#10
                     ],
-                    prox=digital_inputs[11] == "1",
+                    prox=digital_inputs[12] == "1",#11
 
                     # Actually important:
                     # temperature
@@ -460,8 +406,7 @@ class DeviceValue(object):
         selected = itemgetter(*selector[fragment])(data)
         return jointer.join(selected)
 
-    # TODO investigate this part
-    # essentially forms a set value from the ha value
+    # Forms a set value from the ha value
     def __find_inels_value(self) -> None:
         """Find inels mqtt value for specific device."""
         if self.__device_type is SWITCH:

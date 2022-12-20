@@ -14,30 +14,6 @@ COVER = "cover"
 CLIMATE = "climate"
 BUTTON = "button"
 
-RELAY = "relay"  # 100
-TWOCHANNELDIMMER = "two channel dimmer"  # 101
-THERMOSTAT = "thermostat"  # 102
-BUTTONARRAY = "button array"  # 103
-
-
-# device types
-DEVICE_TYPE_DICT = {
-    # RF
-    "02": SWITCH,
-    "03": COVER,
-    "05": LIGHT,
-    "07": SWITCH,
-    "09": CLIMATE,
-    "10": SENSOR,
-    "19": BUTTON,
-    "12": SENSOR,
-    # BUS
-    "100": SWITCH,  # RELAY with temp sensor
-    "101": LIGHT,  # TWOCHANNELDIMMER
-    "102": SENSOR,  # THERMOSTAT
-    "103": BUTTON,  # BUTTONARRAY
-}
-
 # RF
 RFSC_61 = "RFSC-61"
 RFTI_10B = "RFTI-10B"
@@ -54,6 +30,19 @@ SA3_01B = "SA3-01B"
 DA3_22M = "DA3-22M"
 GTR3_50 = "GTR3-50"
 GSB3_90SX = "GSB3-90SX"
+SA3_04M = "SA3-04M"
+SA3_012M = "SA3-012M"
+IM3_80B = "IM3-80B"
+IM3_140M = "IM3-140M"
+WSB3_20H = "WSB3-20H"
+GSB3_60S = "GSB3-60S"
+IDRT3_1 = "IDRT3-1"
+
+#Virtual bus
+VIRT_CONTR = "Virtual controller"
+HEAT_REG = "Heat virtual regulator"
+COOL_REG = "Cool virtual regulator"
+
 
 INELS_DEVICE_TYPE_DICT = {
     "02": RFSC_61,
@@ -69,7 +58,49 @@ INELS_DEVICE_TYPE_DICT = {
     "101": DA3_22M,
     "102": GTR3_50,
     "103": GSB3_90SX,
+    
+    "106": SA3_04M,
+    "108": SA3_012M,
+    "117": IM3_80B,
+    "121": IM3_140M,
+    "124": WSB3_20H,
+    "139": GSB3_60S,
+    "160": IDRT3_1,
+    "166": VIRT_CONTR,
+    "167": HEAT_REG,
+    "168": COOL_REG,
 }
+
+#TODO retire this system
+# device types
+DEVICE_TYPE_DICT = {
+    # RF
+    "02": SWITCH,
+    "03": COVER,
+    "05": LIGHT,
+    "07": SWITCH,
+    "09": CLIMATE,
+    "10": SENSOR,
+    "19": BUTTON,
+    "12": SENSOR,
+    # BUS
+    "100": SWITCH,
+    "101": LIGHT,
+    "102": SENSOR,
+    "103": BUTTON,
+    
+    "106": SWITCH,
+    #"108": SWITCH,
+    #"117":,
+    #"121":,
+    #"124": SENSOR,
+    #"139": BUTTON,
+    #"160": BUTTON,
+    #"166": CLIMATE,
+    #"167": SENSOR,
+    #"168": SENSOR,
+}
+
 
 BATTERY = "battery"
 TEMP_IN = "temp_in"
@@ -78,9 +109,9 @@ TEMPERATURE = "temperature"
 CURRENT_TEMP = "current_temp"
 REQUIRED_TEMP = "required_temp"
 OPEN_IN_PERCENTAGE = "open_in_percentage"
-RAMP_UP = "ramp_up"  # náběh
-TIME_RAMP_UP = "time_ramp"  # časový náběh
-TIME_RAMP_DOWN = "time_ramp_down"  # časový doběh
+RAMP_UP = "ramp_up"
+TIME_RAMP_UP = "time_ramp"
+TIME_RAMP_DOWN = "time_ramp_down"
 TEST_COMMUNICATION = "test_communication"
 PULL_DOWN = "pull_down"
 PULL_UP = "pull_up"
@@ -101,13 +132,12 @@ STATE_OPEN = "open"
 STATE_CLOSED = "closed"
 
 # MY KEYWORDS
-#SPARE = "spare"
 RELAY_OVERFLOW = "relay_overflow"
 DIMMER_OUT = "dimmer_out"
 DIM_OUT_1 = "dimmer_output_1"
 DIM_OUT_2 = "dimmer_output_2"
 LIGHT_IN = "light_in"
-FORCED_REPAIR = "forced_repair"  # Vnuceni oprava
+FORCED_REPAIR = "forced_repair"
 
 AIN = "analog_temperature_input"
 HUMIDITY = "humidity"
