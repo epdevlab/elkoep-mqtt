@@ -186,7 +186,7 @@ class DeviceValue(object):
                     THERMOSTAT_DATA, GTR3_50, "")
                 digital_inputs_hex_str = f"0x{digital_inputs}"
                 digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
-                if int(digital_inputs, 2) != 0:
+                if int(digital_inputs_bin_str, 2) != 0:
                     _LOGGER.info("GTR3-50: digital inputs: %s", digital_inputs_bin_str)
                 #temp = int(
                 #    self.__trim_inels_status_values(
@@ -200,7 +200,7 @@ class DeviceValue(object):
                     THERMOSTAT_DATA, PLUS_MINUS_BUTTONS, "")
                 plusminus = f"0x{plusminus}"
                 plusminus = f"{int(plusminus, 16):0>8b}"
-                if int(digital_inputs, 2) != 0:
+                if int(plusminus, 2) != 0:
                     _LOGGER.info("GTR3-50: plusminus: %s", plusminus)
 
                 #light_in = int(self.__trim_inels_status_values(
