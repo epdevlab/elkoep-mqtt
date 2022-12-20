@@ -417,7 +417,7 @@ class InelsMqtt:
         if len(self.__listeners) > 0 and msg.topic in self.__listeners:
             # This pass data change directely into the device.
             if len(self.__listeners[msg.topic]) > 0:
-                for unique_id in self.__listeners[msg.topic]:
+                for unique_id in list(self.__listeners[msg.topic]): #prevents the dictionary increased in size during iteration exception
                     self.__listeners[msg.topic][unique_id](msg.payload)
             
             #self.__listeners[msg.topic](msg.payload)
