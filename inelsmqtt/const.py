@@ -40,8 +40,8 @@ IDRT3_1 = "IDRT3-1"
 
 #Virtual bus
 VIRT_CONTR = "Virtual controller"
-HEAT_REG = "Heat virtual regulator"
-COOL_REG = "Cool virtual regulator"
+VIRT_HEAT_REG = "Heat virtual regulator"
+VIRT_COOL_REG = "Cool virtual regulator"
 
 
 INELS_DEVICE_TYPE_DICT = {
@@ -59,16 +59,16 @@ INELS_DEVICE_TYPE_DICT = {
     "102": GTR3_50,
     "103": GSB3_90SX,
     
-    "106": SA3_04M,
-    "108": SA3_012M,
-    "117": IM3_80B,
-    "121": IM3_140M,
-    "124": WSB3_20H,
-    "139": GSB3_60S,
-    "160": IDRT3_1,
-    "166": VIRT_CONTR,
-    "167": HEAT_REG,
-    "168": COOL_REG,
+    #"106": SA3_04M,
+    #"108": SA3_012M,
+    #"117": IM3_80B,
+    #"121": IM3_140M,
+    #"124": WSB3_20H,
+    #"139": GSB3_60S,
+    #"160": IDRT3_1,
+    #"166": VIRT_CONTR,
+    #"167": VIRT_HEAT_REG,
+    #"168": VIRT_COOL_REG,
 }
 
 #TODO retire this system
@@ -89,7 +89,7 @@ DEVICE_TYPE_DICT = {
     "102": SENSOR,
     "103": BUTTON,
     
-    "106": SWITCH,
+    #"106": SWITCH,
     #"108": SWITCH,
     #"117":,
     #"121":,
@@ -107,7 +107,16 @@ TEMP_IN = "temp_in"
 TEMP_OUT = "temp_out"
 TEMPERATURE = "temperature"
 CURRENT_TEMP = "current_temp"
+CRITICAL_TEMP = "critical_temp"
 REQUIRED_TEMP = "required_temp"
+REQUIRED_HEAT_TEMP = "required_heating_temp"
+REQUIRED_COOL_TEMP = "required_cooling_temp"
+CRITICAL_MAX_TEMP = "critical_max_temp"
+CRITICAL_MIN_TEMP = "critical_min_temp"
+MAX_TEMP = "max_temp"
+TEMP_CORRECTION = "temp_correction"
+PUBLIC_HOLIDAY = "public_holiday"
+CONTROL_MODE = "control_holiday"
 OPEN_IN_PERCENTAGE = "open_in_percentage"
 RAMP_UP = "ramp_up"
 TIME_RAMP_UP = "time_ramp"
@@ -127,6 +136,7 @@ STOP = "stop"
 STATE = "state"
 IDENTITY = "identity"
 ON = "on"
+RELAY = "relay"
 
 STATE_OPEN = "open"
 STATE_CLOSED = "closed"
@@ -215,7 +225,6 @@ DEVICE_TYPE_12_DATA = {TEMPERATURE: [0], BATTERY: [2]}
 #   BUS
 RELAY_DATA = {
     STATE: [0],
-    # SPARE: [1],
     TEMP_IN: [2, 3],
     RELAY_OVERFLOW: [4]
 }
@@ -223,15 +232,12 @@ RELAY_DATA = {
 TWOCHANNELDIMMER_DATA = {
     TEMP_IN: [0, 1],
     DA3_22M: [2],
-    # TODO CHECK SPARE: [3],
     DIM_OUT_1: [4],
     DIM_OUT_2: [5],
 }
 
 
 THERMOSTAT_DATA = {
-    # FORCED_REPAIR: [0],
-    # SPARE: [1]
     GTR3_50: [1],
     TEMP_IN: [2, 3],
     PLUS_MINUS_BUTTONS: [7],
@@ -250,23 +256,89 @@ BUTTONARRAY_DATA = {
     DEW_POINT: [12, 13],
 }
 
-NODATA_DATA = {
-    
+DEVICE_TYPE_106_DATA = {
+    RELAY: [0, 1, 2, 3], #relays
+    SA3_04M: [4], #switch inputs
+}
+
+DEVICE_TYPE_108_DATA = {
+    RELAY: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], #relays
+    SA3_012M: [12, 13], #switch inputs
+}
+
+DEVICE_TYPE_117_DATA = {
+    IM3_80B: [0, 1],
+    TEMP_IN: [2, 3],
+}
+
+DEVICE_TYPE_121_DATA = {
+    IM3_140M: [0, 1, 2, 3]
+}
+
+DEVICE_TYPE_124_DATA = {
+    WSB3_20H: [0, 1],
+    TEMP_IN: [2, 3],
+    AIN: [4, 5],
+    HUMIDITY: [6, 7],
+    DEW_POINT: [8, 9],
+}
+
+DEVICE_TYPE_139_DATA = {
+    GSB3_60S: [0, 1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
+}
+
+DEVICE_TYPE_160_DATA = {
+    IDRT3_1: [1],
+    TEMP_IN: [2, 3],
+    TEMP_OUT: [8, 9],
+}
+
+DEVICE_TYPE_166_DATA = {
+    CURRENT_TEMP: [0, 1, 2, 3],
+    CRITICAL_MAX_TEMP: [4, 5, 6, 7],
+    REQUIRED_HEAT_TEMP: [8, 9, 10, 11],
+    MAX_TEMP: [12, 13, 14, 15],
+    CRITICAL_MIN_TEMP: [16, 17, 18, 19],
+    REQUIRED_COOL_TEMP: [20, 21, 22, 23],
+    TEMP_CORRECTION: [24, 25, 26, 27],
+    PUBLIC_HOLIDAY: [28],
+    CONTROL_MODE: [29],
+    VIRT_CONTR: [30],
+}
+
+VIRT_REG_DATA = {
+    STATE: [0],
+    VIRT_HEAT_REG: [1],
 }
 
 INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
+    #RF
     RFSC_61 : TEMP_SENSOR_DATA,
     RFJA_12 : SHUTTER_TYPE_03_DATA,
     RFDAC_71B : DEVICE_TYPE_05_DATA,
     RFSTI_11B : DEVICE_TYPE_07_DATA,
     RFATV_2 : CLIMATE_TYPE_09_DATA,
-    RFTI_10B : TEMP_SENSOR_DATA, #(?)
+    RFTI_10B : TEMP_SENSOR_DATA,
     RFGB_40 : BUTTON_TYPE_19_DATA,
     #BUS
     SA3_01B: RELAY_DATA,
     DA3_22M: TWOCHANNELDIMMER_DATA,
     GTR3_50: THERMOSTAT_DATA,
-    GSB3_90SX: BUTTONARRAY_DATA
+    GSB3_90SX: BUTTONARRAY_DATA,
+    
+    SA3_04M: DEVICE_TYPE_106_DATA,
+    SA3_012M: DEVICE_TYPE_108_DATA,
+    IM3_80B: DEVICE_TYPE_117_DATA,
+    IM3_140M: DEVICE_TYPE_121_DATA,
+    WSB3_20H: DEVICE_TYPE_124_DATA,
+    GSB3_60S: DEVICE_TYPE_139_DATA,
+    IDRT3_1: DEVICE_TYPE_160_DATA,
+    VIRT_CONTR: DEVICE_TYPE_166_DATA,
+    VIRT_HEAT_REG: VIRT_REG_DATA,
+    VIRT_COOL_REG: VIRT_REG_DATA,
 }
 
 # BUTTON CONSTANTS
@@ -299,7 +371,6 @@ TOPIC_FRAGMENTS = {
     FRAGMENT_UNIQUE_ID: 4,
 }
 
-# TODO fix typo
 DEVICE_CONNECTED = {
     "on\n": True,
     "off\n": False,

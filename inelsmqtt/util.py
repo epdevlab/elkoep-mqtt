@@ -45,12 +45,31 @@ from .const import (
     DA3_22M,
     GTR3_50,
     GSB3_90SX,
+    SA3_04M,
+    #SA3_012M,
+    #IM3_80B,
+    #IM3_140M,
+    #WSB3_20H,
+    #GSB3_60S,
+    #IDRT3_1,
+    #VIRT_CONTR,
+    #VIRT_HEAT_REG,
+    #VIRT_COOL_REG,
 
     RELAY_DATA,
     TWOCHANNELDIMMER_DATA,
     THERMOSTAT_DATA,
     BUTTONARRAY_DATA,
+    DEVICE_TYPE_106_DATA,
+    #DEVICE_TYPE_108_DATA,
+    #DEVICE_TYPE_117_DATA,
+    #DEVICE_TYPE_121_DATA,
+    #DEVICE_TYPE_124_DATA,
+    #DEVICE_TYPE_139_DATA,
+    #DEVICE_TYPE_160_DATA,
+    #VIRT_REG_DATA,
 
+    RELAY,
     RELAY_OVERFLOW,
     TEMP_IN,
     DIM_OUT_1,
@@ -138,6 +157,30 @@ class DeviceValue(object):
                     relay_overflow=(relay_overflow == 1)
                 )
                 self.__inels_set_value = RELAY_SET[self.__ha_value.on]
+            elif self.__inels_type is SA3_04M:
+                re=[]
+                for relay in self.__trim_inels_status_bytes(DEVICE_TYPE_106_DATA, RELAY):
+                    re.append(int(relay, 16) == 1)
+
+                
+                digital_inputs = int(self.__trim_inels_status_values(
+                    DEVICE_TYPE_106_DATA, SA3_04M, ""))
+                
+                #TODO test new way of obtaining values
+                #RF guy might have been reversing the values with the string stuff
+                sw=[]
+                for i in range(4):
+                    sw.append(digital_inputs & (1 << i))
+                
+                self.__ha_value = new_object(
+                    re=re,
+                    sw=sw,
+                )
+                
+                set_val = ""
+                for r in re:
+                    set_val += "07\n" if r else "06\n"
+                self.__inels_set_value=set_val
             else:
                 self.__ha_value = new_object(on = (SWITCH_STATE[self.__inels_status_value]))
                 self.__inels_set_value = SWITCH_SET[self.__ha_value.on]
@@ -150,17 +193,14 @@ class DeviceValue(object):
                     THERMOSTAT_DATA, GTR3_50, "")
                 digital_inputs_hex_str = f"0x{digital_inputs}"
                 digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
-                if int(digital_inputs_bin_str, 2) != 0:
-                    _LOGGER.info("GTR3-50: digital inputs: %s", digital_inputs_bin_str)
-
+                
                 temp_in = self.__trim_inels_status_values(THERMOSTAT_DATA, TEMP_IN, "")
 
                 plusminus = self.__trim_inels_status_values(
                     THERMOSTAT_DATA, PLUS_MINUS_BUTTONS, "")
                 plusminus = f"0x{plusminus}"
                 plusminus = f"{int(plusminus, 16):0>8b}"
-                if int(plusminus, 2) != 0:
-                    _LOGGER.info("GTR3-50: plusminus: %s", plusminus)
+                
                     
                 light_in = self.__trim_inels_status_values(THERMOSTAT_DATA, LIGHT_IN, "")
 
@@ -335,10 +375,10 @@ class DeviceValue(object):
                 digital_inputs = self.__trim_inels_status_values(
                     BUTTONARRAY_DATA, GSB3_90SX, "")
                 digital_inputs = f"0x{digital_inputs}"
+                dig = int(digital_inputs, 16)
                 digital_inputs = f"{int(digital_inputs, 16):0>16b}"
-                if int(digital_inputs, 2) != 0:
-                    _LOGGER.info("GTR3-50: digital inputs: %s", digital_inputs)
-
+                
+                
                 temp = self.__trim_inels_status_values(
                     BUTTONARRAY_DATA, TEMP_IN, "")
 
@@ -356,21 +396,21 @@ class DeviceValue(object):
 
                 self.__ha_value = new_object(
                     sw=[
-                        digital_inputs[7] == "1",#0
-                        digital_inputs[6] == "1",
-                        digital_inputs[5] == "1",
-                        digital_inputs[4] == "1",
-                        digital_inputs[3] == "1",
-                        digital_inputs[2] == "1",
-                        digital_inputs[1] == "1",
-                        digital_inputs[0] == "1",
-                        digital_inputs[15] == "1",#8
+                        dig&(1<<0) != 0,#digital_inputs[7] == "1",#0
+                        dig&(1<<1) != 0,#digital_inputs[6] == "1",
+                        dig&(1<<2) != 0,#digital_inputs[5] == "1",
+                        dig&(1<<3) != 0,#digital_inputs[4] == "1",
+                        dig&(1<<4) != 0,#digital_inputs[3] == "1",
+                        dig&(1<<5) != 0,#digital_inputs[2] == "1",
+                        dig&(1<<6) != 0,#digital_inputs[1] == "1",
+                        dig&(1<<7) != 0,#digital_inputs[0] == "1",
+                        dig&(1<<8) != 0,#digital_inputs[15] == "1",#8
                     ],
                     din=[
-                        digital_inputs[14] == "1",#9
-                        digital_inputs[13] == "1",#10
+                        dig&(1<<9) != 0,#digital_inputs[14] == "1",#9
+                        dig&(1<<10) != 0,#digital_inputs[13] == "1",#10
                     ],
-                    prox=digital_inputs[12] == "1",#11
+                    prox=dig&(1<<11) != 0,#digital_inputs[12] == "1",#11
 
                     # Actually important:
                     # temperature
@@ -405,6 +445,14 @@ class DeviceValue(object):
 
         selected = itemgetter(*selector[fragment])(data)
         return jointer.join(selected)
+
+    def __trim_inels_status_bytes(
+        self, selector: "dict[str, Any]", fragment: str) -> list[str]:
+        """Split inels status section into its constituting bytes"""
+        data = self.__inels_status_value.split("\n")[:-1]
+
+        selected = itemgetter(*selector[fragment])(data)
+        return selected
 
     # Forms a set value from the ha value
     def __find_inels_value(self) -> None:
