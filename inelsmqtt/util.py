@@ -484,7 +484,7 @@ class DeviceValue(object):
         if self.__device_type is SWITCH:
             if self.__inels_type is SA3_01B:
                 self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
-            elif self.__inels_type is SA3_04M:
+            elif self.__inels_type is SA3_04M or self.__inels_type is SA3_012M:
                 value = ""
                 for re in self.__ha_value.re:
                     value += RELAY_SET[re]
