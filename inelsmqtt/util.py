@@ -46,7 +46,7 @@ from .const import (
     GTR3_50,
     GSB3_90SX,
     SA3_04M,
-    #SA3_012M,
+    SA3_012M,
     #IM3_80B,
     #IM3_140M,
     #WSB3_20H,
@@ -61,7 +61,7 @@ from .const import (
     THERMOSTAT_DATA,
     BUTTONARRAY_DATA,
     DEVICE_TYPE_106_DATA,
-    #DEVICE_TYPE_108_DATA,
+    DEVICE_TYPE_108_DATA,
     #DEVICE_TYPE_117_DATA,
     #DEVICE_TYPE_121_DATA,
     #DEVICE_TYPE_124_DATA,
@@ -81,6 +81,7 @@ from .const import (
     DEW_POINT,
 
     RELAY_SET,
+    RELAY_NUMBER,
 
     BUTTONARRAY_SET_DISABLED,
     BUTTONARRAY_SET_BACKLIT,
@@ -161,18 +162,40 @@ class DeviceValue(object):
                 re=[]
                 for relay in self.__trim_inels_status_bytes(DEVICE_TYPE_106_DATA, RELAY):
                     re.append((int(relay, 16) & 1) != 0)
-
                 
                 digital_inputs = self.__trim_inels_status_values(
                     DEVICE_TYPE_106_DATA, SA3_04M, "")
                 digital_inputs = f"0x{digital_inputs}"
                 digital_inputs = f"{int(digital_inputs, 16):0>8b}"
                 
-                #TODO test new way of obtaining values
-                #RF guy might have been reversing the values with the string stuff
                 sw=[]
                 for i in range(4):
                     sw.append(digital_inputs[7 - i] == "1")
+                
+                self.__ha_value = new_object(
+                    re=re,
+                    sw=sw,
+                )
+                
+                set_val = ""
+                for r in re:
+                    set_val += "07\n" if r else "06\n"
+                self.__inels_set_value=set_val
+            elif self.__inels_type is SA3_012M:
+                re=[]
+                for relay in self.__trim_inels_status_bytes(DEVICE_TYPE_108_DATA, RELAY):
+                    re.append((int(relay, 16) & 1) != 0)
+                
+                digital_inputs = self.__trim_inels_status_values(
+                    DEVICE_TYPE_108_DATA, SA3_012M, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+                
+                sw=[]
+                for i in range(8):
+                    sw.append(digital_inputs[7 - i] == "1")
+                for i in range(4):
+                    sw.append(digital_inputs[15 - i] == "1")
                 
                 self.__ha_value = new_object(
                     re=re,
