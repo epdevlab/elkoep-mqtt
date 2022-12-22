@@ -50,7 +50,7 @@ from .const import (
     #IM3_80B,
     #IM3_140M,
     WSB3_20H,
-    #GSB3_60S,
+    GSB3_60S,
     #IDRT3_1,
     #VIRT_CONTR,
     #VIRT_HEAT_REG,
@@ -65,7 +65,7 @@ from .const import (
     #DEVICE_TYPE_117_DATA,
     #DEVICE_TYPE_121_DATA,
     DEVICE_TYPE_124_DATA,
-    #DEVICE_TYPE_139_DATA,
+    DEVICE_TYPE_139_DATA,
     #DEVICE_TYPE_160_DATA,
     #VIRT_REG_DATA,
 
@@ -81,7 +81,6 @@ from .const import (
     DEW_POINT,
 
     RELAY_SET,
-    RELAY_NUMBER,
 
     BUTTONARRAY_SET_DISABLED,
     BUTTONARRAY_SET_BACKLIT,
@@ -486,6 +485,45 @@ class DeviceValue(object):
                     # backlit
                     backlit=False,
                 )
+            elif self.__inels_type is GSB3_60S:
+                digital_inputs = self.__trim_inels_status_values(
+                    DEVICE_TYPE_139_DATA, GSB3_60S, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+                
+                temp = self.__trim_inels_status_values(
+                    DEVICE_TYPE_139_DATA, TEMP_IN, "")
+
+                light_in = self.__trim_inels_status_values(
+                    DEVICE_TYPE_139_DATA, LIGHT_IN, "")
+
+                ain = self.__trim_inels_status_values(
+                    DEVICE_TYPE_139_DATA, AIN, "")
+
+                self.__ha_value = new_object(
+                    sw=[
+                        digital_inputs[7] == "1",#0
+                        digital_inputs[6] == "1",
+                        digital_inputs[5] == "1",
+                        digital_inputs[4] == "1",
+                        digital_inputs[3] == "1",
+                    ],
+                    din=[
+                        digital_inputs[15] == "1",#9
+                        digital_inputs[14] == "1",#10
+                    ],
+                    # temperature
+                    temp_in=temp,
+
+                    # light in
+                    light_in=light_in,
+
+                    # AIN
+                    ain=ain,
+                    
+                    # backlit
+                    # backlit=False,
+                )
             else:
                 pass
 
@@ -596,6 +634,8 @@ class DeviceValue(object):
                 backlit = BUTTONARRAY_SET_BACKLIT[self.__ha_value.backlit]
 
                 self.__inels_set_value = "".join(["00\n" * 36, disabled, backlit])
+            elif self.__inels_type is GSB3_60S:
+                self.__inels_set_value = "".join("00\n" * 10)
             else:
                 self.__ha_value = ha_val
 
