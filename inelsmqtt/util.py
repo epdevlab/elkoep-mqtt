@@ -49,7 +49,7 @@ from .const import (
     SA3_012M,
     #IM3_80B,
     #IM3_140M,
-    #WSB3_20H,
+    WSB3_20H,
     #GSB3_60S,
     #IDRT3_1,
     #VIRT_CONTR,
@@ -64,7 +64,7 @@ from .const import (
     DEVICE_TYPE_108_DATA,
     #DEVICE_TYPE_117_DATA,
     #DEVICE_TYPE_121_DATA,
-    #DEVICE_TYPE_124_DATA,
+    DEVICE_TYPE_124_DATA,
     #DEVICE_TYPE_139_DATA,
     #DEVICE_TYPE_160_DATA,
     #VIRT_REG_DATA,
@@ -219,13 +219,12 @@ class DeviceValue(object):
                 digital_inputs_hex_str = f"0x{digital_inputs}"
                 digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
                 
-                temp_in = self.__trim_inels_status_values(THERMOSTAT_DATA, TEMP_IN, "")
-
                 plusminus = self.__trim_inels_status_values(
                     THERMOSTAT_DATA, PLUS_MINUS_BUTTONS, "")
                 plusminus = f"0x{plusminus}"
                 plusminus = f"{int(plusminus, 16):0>8b}"
                 
+                temp_in = self.__trim_inels_status_values(THERMOSTAT_DATA, TEMP_IN, "")
                     
                 light_in = self.__trim_inels_status_values(THERMOSTAT_DATA, LIGHT_IN, "")
 
@@ -267,6 +266,35 @@ class DeviceValue(object):
                     # backlit
                     backlit=False,
                 )
+            elif self.__inels_type is WSB3_20H:
+                digital_inputs = self.__trim_inels_status_values(
+                    DEVICE_TYPE_124_DATA, WSB3_20H, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+                
+                sw=[] #up/down buttons
+                din=[]
+                for i in range(2):
+                    sw.append(digital_inputs[7 - i] == "1")
+                    din.append(digital_inputs[15 - i] == "1")
+            
+                temp_in = self.__trim_inels_status_values(DEVICE_TYPE_124_DATA, TEMP_IN, "")
+                    
+                ain = self.__trim_inels_status_values(DEVICE_TYPE_124_DATA, AIN, "")
+                
+                humidity = self.__trim_inels_status_values(DEVICE_TYPE_124_DATA, HUMIDITY, "")
+
+                dewpoint = self.__trim_inels_status_values(DEVICE_TYPE_124_DATA, DEW_POINT, "")
+
+                self.__ha_value = new_object(
+                    sw=sw,
+                    din=din,
+                    temp_in=temp_in,
+                    ain=ain,
+                    humidity=humidity,
+                    dewpoint=dewpoint,
+                )
+                
             else:
                 self.__ha_value = self.__inels_status_value
         elif self.__device_type is LIGHT:  # dimmer
