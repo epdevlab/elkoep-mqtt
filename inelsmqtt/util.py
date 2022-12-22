@@ -160,7 +160,7 @@ class DeviceValue(object):
             elif self.__inels_type is SA3_04M:
                 re=[]
                 for relay in self.__trim_inels_status_bytes(DEVICE_TYPE_106_DATA, RELAY):
-                    re.append(int(relay, 16) == 1)
+                    re.append((int(relay, 16) & 1) != 0)
 
                 
                 digital_inputs = int(self.__trim_inels_status_values(
