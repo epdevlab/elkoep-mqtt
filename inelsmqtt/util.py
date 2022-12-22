@@ -461,6 +461,11 @@ class DeviceValue(object):
         if self.__device_type is SWITCH:
             if self.__inels_type is SA3_01B:
                 self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
+            elif self.__inels_type is SA3_04M:
+                value = ""
+                for re in self.__ha_value.re:
+                    value += RELAY_SET[re]
+                self.__inels_set_value = value
             elif self.__inels_type is RFSTI_11B:
                 state = int(
                     self.__trim_inels_status_values(DEVICE_TYPE_07_DATA, STATE, ""), 16
