@@ -163,14 +163,16 @@ class DeviceValue(object):
                     re.append((int(relay, 16) & 1) != 0)
 
                 
-                digital_inputs = int(self.__trim_inels_status_values(
-                    DEVICE_TYPE_106_DATA, SA3_04M, ""))
+                digital_inputs = self.__trim_inels_status_values(
+                    DEVICE_TYPE_106_DATA, SA3_04M, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
                 
                 #TODO test new way of obtaining values
                 #RF guy might have been reversing the values with the string stuff
                 sw=[]
                 for i in range(4):
-                    sw.append(digital_inputs & (1 << i))
+                    sw.append(digital_inputs[7 - i] == "1")
                 
                 self.__ha_value = new_object(
                     re=re,
@@ -375,7 +377,6 @@ class DeviceValue(object):
                 digital_inputs = self.__trim_inels_status_values(
                     BUTTONARRAY_DATA, GSB3_90SX, "")
                 digital_inputs = f"0x{digital_inputs}"
-                dig = int(digital_inputs, 16)
                 digital_inputs = f"{int(digital_inputs, 16):0>16b}"
                 
                 
