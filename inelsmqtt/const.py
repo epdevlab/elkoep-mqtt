@@ -60,7 +60,7 @@ INELS_DEVICE_TYPE_DICT = {
     "103": GSB3_90SX,
     
     "106": SA3_04M,
-    #"108": SA3_012M,
+    "108": SA3_012M,
     #"117": IM3_80B,
     #"121": IM3_140M,
     #"124": WSB3_20H,
@@ -90,7 +90,7 @@ DEVICE_TYPE_DICT = {
     "103": BUTTON,
     
     "106": SWITCH,
-    #"108": SWITCH,
+    "108": SWITCH,
     #"117":,
     #"121":,
     #"124": SENSOR,
