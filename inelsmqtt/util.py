@@ -407,8 +407,8 @@ class DeviceValue(object):
                 inputs = f"0x{inputs}"
                 inputs = f"{int(inputs, 16):0>16b}"
                 for i in range(4):
-                    input.append(int(inputs[7-2*i] + inputs[7-2*i-1], 16))
-                    input2.append(int(inputs[15-2*i] + inputs[15-2*i-1], 16))
+                    input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 16))
+                    input2.append(int(inputs[15-2*i-1] + inputs[15-2*i], 16))
                 input.extend(input2)
                 
                 temp = self.__trim_inels_status_values(IM3_80B_DATA, TEMP_IN, "")
@@ -425,14 +425,14 @@ class DeviceValue(object):
                 inputs = f"{int(inputs, 16):0>64b}"
                 
                 for i in range(4):
-                    input.append(int(inputs[7-2*i] + inputs[7-2*i-1], 16))
-                    input2.append(int(inputs[15-2*i] + inputs[15-2*i-1], 16))
-                    input3.append(int(inputs[23-2*i] + inputs[23-2*i-1], 16))
+                    input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 16))
+                    input2.append(int(inputs[15-2*i-1] + inputs[15-2*i], 16))
+                    input3.append(int(inputs[23-2*i-1] + inputs[23-2*i], 16))
                 input.extend(input2)
                 input.extend(input3)
                 
                 for i in range(2):
-                    input.append(int(inputs[63-2*i] + inputs[63-2*i], 16))
+                    input.append(int(inputs[63-2*i-1] + inputs[63-2*i], 16))
                 
                 self.__ha_value = new_object(
                     input=input
