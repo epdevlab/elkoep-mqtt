@@ -479,7 +479,7 @@ class DeviceValue(object):
                 inputs = f"{int(inputs, 16):0>64b}"
                 
                 for i in range(4):
-                    input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 2))
+                    binary_input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 2))
                     binary_input2.append(int(inputs[15-2*i-1] + inputs[15-2*i], 2))
                     binary_input3.append(int(inputs[23-2*i-1] + inputs[23-2*i], 2))
                 binary_input.extend(binary_input2)
