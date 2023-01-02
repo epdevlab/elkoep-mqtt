@@ -13,6 +13,7 @@ LIGHT = "light"
 COVER = "cover"
 CLIMATE = "climate"
 BUTTON = "button"
+BINARY_SENSOR = "binary_sensor"
 
 # RF
 RFSC_61 = "RFSC-61"
@@ -28,15 +29,46 @@ RFTC_10_G = "RFTC-10/G"
 # BUS
 SA3_01B = "SA3-01B"
 DA3_22M = "DA3-22M"
-GTR3_50 = "GTR3-50"
+GTR3_50 = "GTR3-50" #TODO fix
+#GRT3_50 = "GRT3-50"
 GSB3_90SX = "GSB3-90SX"
+#GSB3_90SX = "GSB3-90Sx"
 SA3_04M = "SA3-04M"
 SA3_012M = "SA3-012M"
 IM3_80B = "IM3-80B"
 IM3_140M = "IM3-140M"
 WSB3_20H = "WSB3-20H"
 GSB3_60S = "GSB3-60S"
+#GSB3_60SX = "GSB3-60Sx"
 IDRT3_1 = "IDRT3-1"
+ADC3_60M = "ADC3-60M"
+DA3_66M = "DA3-66M"
+DAC3_04B = "DAC3-04B"
+DAC3_04M = "DAC3-04M"
+DCDA_33M = "DCDA-33M"
+DMD3_1 = "DMD3-1"
+FA3_612M = "FA3-612M"
+GBP3_60 = "GBP3-60"
+GCH3_31 = "GCH3-31"
+GCR3_11 = "GCR3-11"
+GDB3_10 = "GDB3-10"
+GSB3_20SX = "GSB3_20Sx"
+GSB3_40SX = "GSB3_40Sx"
+GSP3_100 = "GSP3-100"
+IM3_20B = "IM3-20B"
+IM3_40B = "IM3-40B"
+IOU3_108M = "IOU3-108M"
+SA3_02B = "SA3-02B"
+SA3_02M = "SA3-02M"
+SA3_06M = "SA3-06M"
+SA3_22M = "SA3-22M"
+TI3_10B = "TI3-10B"
+TI3_40B = "TI3-40B"
+TI3_60M = "TI3-60M"
+WSB3_20 = "WSB3-20"
+WSB3_20HUM = "WSB3-20HUM"
+WSB3_40 = "WSB3-20"
+WSB3_40HUM = "WSB3-20HUM"
 
 #Virtual bus
 VIRT_CONTR = "Virtual controller"
@@ -65,7 +97,35 @@ INELS_DEVICE_TYPE_DICT = {
     #"121": IM3_140M,
     "124": WSB3_20H,
     "139": GSB3_60S,
-    #"160": IDRT3_1,
+    "160": IDRT3_1,
+    #"": ADC3_60M,
+    #"": DA3_66M,
+    #"": DAC3_04B,
+    #"": DAC3_04M,
+    #"": DCDA_33M,
+    #"": DMD3_1,
+    #"": FA3_612M,
+    #"": GBP3_60,
+    #"": GCH3_31,
+    #"": GCR3_11,
+    #"": GDB3_10,
+    #"": GSB3_20SX,
+    #"": GSB3_40SX,
+    #"": GSP3_100,
+    #"": IM3_20B,
+    #"": IM3_40B,
+    #"": IOU3_108M,
+    #"": SA3_02B,
+    #"": SA3_02M
+    #"": SA3_06M,
+    #"": SA3_22M,
+    #"": TI3_10B,
+    #"": TI3_40B,
+    #"": TI3_60M,
+    #"": WSB3_20,
+    #"": WSB3_20HUM,
+    #"": WSB3_40,
+    #"": WSB3_40HUM,
     #"166": VIRT_CONTR,
     #"167": VIRT_HEAT_REG,
     #"168": VIRT_COOL_REG,
@@ -75,27 +135,56 @@ INELS_DEVICE_TYPE_DICT = {
 # device types
 DEVICE_TYPE_DICT = {
     # RF
-    "02": SWITCH,
-    "03": COVER,
-    "05": LIGHT,
-    "07": SWITCH,
-    "09": CLIMATE,
-    "10": SENSOR,
-    "19": BUTTON,
-    "12": SENSOR,
+    "02": SWITCH, #RFSC_61
+    "03": COVER, #RFJA_12
+    "05": LIGHT, #RFDAC_71B
+    "07": SWITCH, #RFSTI_11B
+    "09": CLIMATE, #RFATV_2
+    "10": SENSOR, #RFTI_10B
+    "19": BUTTON, #RFGB_40
+    "12": SENSOR, #RFTC_10_G
     # BUS
-    "100": SWITCH,
-    "101": LIGHT,
-    "102": SENSOR,
-    "103": BUTTON,
+    "100": SWITCH, #SA3_01B
+    "101": LIGHT, #SA3_012M
+    "102": SENSOR, #GTR3_50
+    "103": BUTTON, #GSB3_90SX
     
-    "106": SWITCH,
-    "108": SWITCH,
-    #"117":,
-    #"121":,
-    "124": SENSOR,
-    "139": BUTTON,
-    #"160": BUTTON,
+    "106": SWITCH, #SA3_04M
+    "108": SWITCH, #SA3_012M
+    "117": SENSOR, #IM3_80B
+    "121": SENSOR, #IM3_140M
+    "124": SENSOR, #WSB3_20HUM / H
+    "139": BUTTON, #GSB3_60S
+    "160": BUTTON, #IDRT3_1
+    
+    #"": SENSOR,#ADC3_60M,
+    #"": LIGHT,#DA3_66M,
+    #"": LIGHT,#(?) DAC3_04B,
+    #"": LIGHT,#(?) DAC3_04M,
+    #"": LIGHT,#(?) DCDA_33M,
+    #"": SENSOR,#(?) DMD3_1,
+    #"": SWITCH,#(?) FA3_612M,
+    #"": SENSOR,#(?) GBP3_60,
+    #"": SENSOR,#(?) GCH3_31,
+    #"": SENSOR,#(?) GCR3_11,
+    #"": SENSOR,#(?) GDB3_10,
+    #"": SENSOR,#(?) GSB3_20SX,
+    #"": SENSOR,#(?) GSB3_40SX,
+    #"": SENSOR,#(?) GSP3_100,
+    #"": SENSOR,#(?) IM3_20B,
+    #"": SENSOR,#(?) IM3_40B,
+    #"": SWITCH,#(?) IOU3_108M,
+    #"": SWITCH,#(?) SA3_02B,
+    #"": SWITCH,#(?) SA3_02M
+    #"": SWITCH,#(?) SA3_06M,
+    #"": SWITCH,#(?) SA3_22M,
+    #"": SENSOR,#(?) TI3_10B,
+    #"": SENSOR,#(?) TI3_40B,
+    #"": SENSOR,#(?) TI3_60M,
+    #"": SENSOR,#(?) WSB3_20,
+    #"": SENSOR,#(?) WSB3_40,
+    #"": SENSOR,#(?) WSB3_40HUM,
+    
     #"166": CLIMATE,
     #"167": SENSOR,
     #"168": SENSOR,
@@ -153,6 +242,14 @@ AIN = "analog_temperature_input"
 HUMIDITY = "humidity"
 DEW_POINT = "dew_point"
 PLUS_MINUS_BUTTONS = "plus_and_minus_buttons"
+OUT = "out"
+ALERT = "alert"
+SW = "sw"
+DIN = "din"
+MIN_BRIGHTNESS = "minimum_brightness"
+CHAN_TYPE = "channel_type"
+CARD_ID = "card_id"
+IN = "in"
 
 # COVER CONSTANTS
 COVER_SET_BYTES = {
@@ -266,13 +363,13 @@ DEVICE_TYPE_108_DATA = {
     SA3_012M: [12, 13], #switch inputs
 }
 
-DEVICE_TYPE_117_DATA = {
-    IM3_80B: [0, 1],
+IM3_80B_DATA = {
+    IN: [0, 1],
     TEMP_IN: [2, 3],
 }
 
-DEVICE_TYPE_121_DATA = {
-    IM3_140M: [0, 1, 2, 3]
+IM3_140M_DATA = {
+    IN: [0, 1, 2, 3]
 }
 
 DEVICE_TYPE_124_DATA = {
@@ -296,6 +393,158 @@ DEVICE_TYPE_160_DATA = {
     TEMP_OUT: [8, 9],
 }
 
+ADC3_60M_DATA = {
+    AIN: [i for i in range(24)],
+    ADC3_60M: [24],
+}
+
+DA3_66M_DATA = {
+    ALERT: [1, 2],
+    SW: [3],
+    OUT: [4, 5, 6, 7, 12, 13],
+    DIN: [8],
+    MIN_BRIGHTNESS: [2*i+14 for i in range(6)],
+    CHAN_TYPE: [2*i+15 for i in range(6)],
+}
+
+DAC3_04_DATA = {
+    TEMP_IN: [0, 1],
+    ALERT: [2],
+    OUT: [4, 5, 6, 7],
+}
+
+DCDA_33M_DATA = {
+    DCDA_33M: [2],
+    OUT: [4, 5, 6, 7],
+}
+
+DMD3_1_DATA = {
+    LIGHT_IN: [0, 1, 2, 3],
+    TEMP_IN: [4, 5],
+    HUMIDITY: [6, 7],
+    DMD3_1: [8],    
+}
+
+FA3_612M_DATA = {
+    FA3_612M: [0, 1, 2],
+    ALERT: [3],
+    OUT: [i for i in range(4, 16)],
+    AIN: [i for i in range(16, 28)]
+}
+
+GBP3_60_DATA = {
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
+}
+
+CARD_DATA = { #Card holder/reader
+    SW: [0, 1], #really confusing distribution
+    CARD_ID: [i for i in range (4, 12)],
+    LIGHT_IN: [12, 13, 14, 15],
+    TEMP_IN: [16, 17],
+}
+
+GDB3_10_DATA = { #generalize with GBP3_60
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
+}
+
+GSB3_DATA = { #same as upper one
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
+}
+
+GSP3_100_DATA = {
+    GSP3_100: [0, 1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
+}
+
+IM3_240B_DATA = {
+    IN: [0],
+    TEMP_IN: [1],
+}
+
+IOU3_108M_DATA = {
+    RELAY: [i for i in range(8)],
+    TEMP_IN: [8, 9, 10, 11],
+    TEMP_OUT: [12, 13, 14, 15], #TODO review this
+    DIN: [24],
+    ALERT: [25, 26],
+}
+
+SA3_02B_DATA = {
+    RELAY: [0, 1],
+    TEMP_IN: [2, 3],
+}
+
+SA3_02M_DATA = {
+    RELAY: [0, 1],
+    SW: [2]
+}
+
+SA3_04M_DATA = {
+    RELAY: [0, 1, 2, 3],
+    SW: [4],
+}
+
+SA3_06M_DATA = {
+    RELAY: [0, 1, 2, 3, 4, 5],
+    SW: [6],
+}
+
+SA3_022M_DATA = {#TODO see about shutters and stuff
+    RELAY: [i for i in range(16)]
+    
+}
+
+TI3_10B_DATA = {
+    TEMP_IN: [0, 1]
+}
+
+TI3_40B_DATA = {
+    TEMP_IN: [i for i in range(8)]
+}
+
+TI3_60M_DATA = {
+    TEMP_IN: [i for i in range(12)]
+}
+
+WSB3_20_DATA = {
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    AIN: [4, 5],
+}
+
+#WSB3_20_H OR HUM IS DONE
+
+WSB3_40_DATA = {
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    AIN: [4, 5],
+}
+
+WSB3_40HUM_DATA = {
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    AIN: [4, 5],
+    HUMIDITY: [6, 7],
+    DEW_POINT: [8, 9],
+}
+
 DEVICE_TYPE_166_DATA = {
     CURRENT_TEMP: [0, 1, 2, 3],
     CRITICAL_MAX_TEMP: [4, 5, 6, 7],
@@ -314,6 +563,7 @@ VIRT_REG_DATA = {
     VIRT_HEAT_REG: [1],
 }
 
+#TODO update table
 INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
     #RF
     RFSC_61 : TEMP_SENSOR_DATA,
@@ -329,10 +579,10 @@ INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
     GTR3_50: THERMOSTAT_DATA,
     GSB3_90SX: BUTTONARRAY_DATA,
     
-    SA3_04M: DEVICE_TYPE_106_DATA,
+    SA3_04M: SA3_04M_DATA,
     SA3_012M: DEVICE_TYPE_108_DATA,
-    IM3_80B: DEVICE_TYPE_117_DATA,
-    IM3_140M: DEVICE_TYPE_121_DATA,
+    IM3_80B: IM3_80B_DATA,
+    IM3_140M: IM3_140M_DATA,
     WSB3_20H: DEVICE_TYPE_124_DATA,
     GSB3_60S: DEVICE_TYPE_139_DATA,
     IDRT3_1: DEVICE_TYPE_160_DATA,
@@ -353,6 +603,12 @@ BUTTON_NUMBER = {
 
 BUTTON_DEVICE_AMOUNT = {RFGB_40: 4}
 
+SA3_AMOUNTS = {SA3_01B: 1, SA3_02B: 2, SA3_02M: 2, SA3_04M: 4, SA3_06M: 6, SA3_012M: 12, SA3_22M: 16}
+DA3_AMOUNTS = {DA3_22M: 2, DA3_66M: 6}
+GSB3_AMOUNTS = {GSB3_20SX: 2, GSB3_40SX: 4, GSB3_60S: 6, GSB3_90SX: 9} #TODO fix the 60S into 60SX
+IM3_AMOUNTS = {IM3_20B: 2, IM3_40B: 4, IM3_80B: 8, IM3_140M: 14}
+TI3_AMOUNTS = {TI3_10B: 1, TI3_40B: 4, TI3_60M: 6}
+WSB3_AMOUNTS = {WSB3_20: 2, WSB3_20H: 2, WSB3_40: 4, WSB3_40HUM: 4} #TODO fix the H into HUM
 # FRAGMENT/MQTT CONSTANTS
 FRAGMENT_DOMAIN = "fragment_domain"
 FRAGMENT_SERIAL_NUMBER = "fragment_serial_number"
