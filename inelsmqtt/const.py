@@ -171,8 +171,8 @@ DEVICE_TYPE_DICT = {
     #"": SENSOR,#(?) GSB3_20SX,
     #"": SENSOR,#(?) GSB3_40SX,
     #"": SENSOR,#(?) GSP3_100,
-    #"": SENSOR,#(?) IM3_20B,
-    #"": SENSOR,#(?) IM3_40B,
+    #"": SENSOR,# IM3_20B,
+    #"": SENSOR,# IM3_40B,
     #"": SWITCH,#(?) IOU3_108M,
     #"": SWITCH,#(?) SA3_02B,
     #"": SWITCH,#(?) SA3_02M
@@ -520,23 +520,14 @@ TI3_60M_DATA = {
     TEMP_IN: [i for i in range(12)]
 }
 
-WSB3_20_DATA = {
+WSB3_240_DATA = {
     SW: [0],
     DIN: [1],
     TEMP_IN: [2, 3],
     AIN: [4, 5],
 }
 
-#WSB3_20_H OR HUM IS DONE
-
-WSB3_40_DATA = {
-    SW: [0],
-    DIN: [1],
-    TEMP_IN: [2, 3],
-    AIN: [4, 5],
-}
-
-WSB3_40HUM_DATA = {
+WSB3_240HUM_DATA = {
     SW: [0],
     DIN: [1],
     TEMP_IN: [2, 3],

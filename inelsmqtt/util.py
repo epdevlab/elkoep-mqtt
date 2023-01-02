@@ -61,7 +61,6 @@ from .const import (
     WSB3_20H,
     GSB3_60S,
     IDRT3_1,
-    IDRT3_1,
     ADC3_60M,
     DA3_66M,
     DAC3_04B,
@@ -90,7 +89,7 @@ from .const import (
     WSB3_20HUM,
     WSB3_40,
     WSB3_40HUM,
-    VIRT_CONTR,
+    #VIRT_CONTR,
     VIRT_HEAT_REG,
     VIRT_COOL_REG,
 
@@ -112,6 +111,9 @@ from .const import (
     SA3_02M_DATA,
     SA3_04M_DATA,
     SA3_06M_DATA,
+    IM3_240B_DATA,
+    WSB3_240_DATA,
+    WSB3_240HUM_DATA,
 
     RELAY,
     RELAY_OVERFLOW,
@@ -134,6 +136,9 @@ from .const import (
 
     BUTTONARRAY_SET_DISABLED,
     BUTTONARRAY_SET_BACKLIT,
+    
+    IM3_AMOUNTS,
+    WSB3_AMOUNTS,
 )
 
 ConfigType = Dict[str, str]
@@ -195,8 +200,7 @@ class DeviceValue(object):
 
                 self.__ha_value = new_object(on=(state == 0), temperature=temp)
                 # simplified the command to just on/off
-                self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]
-                
+                self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]              
             elif self.__inels_type is SA3_01B:
                 state = int(self.__trim_inels_status_values(RELAY_DATA, STATE, ""), 16)
                 temp = self.__trim_inels_status_values(RELAY_DATA, TEMP_IN, "")
@@ -317,8 +321,7 @@ class DeviceValue(object):
                 self.__inels_set_value = SWITCH_SET[self.__ha_value.on]
         elif self.__device_type is SENSOR:  # temperature sensor
             if self.__inels_type is RFTI_10B:
-                self.__ha_value = self.__inels_status_value
-            
+                self.__ha_value = self.__inels_status_value       
             elif self.__inels_type is GTR3_50:
                 digital_inputs = self.__trim_inels_status_values(
                     THERMOSTAT_DATA, GTR3_50, "")
@@ -372,25 +375,63 @@ class DeviceValue(object):
                     # backlit
                     backlit=False,
                 )
-            elif self.__inels_type is WSB3_20H:
-                digital_inputs = self.__trim_inels_status_values(
-                    DEVICE_TYPE_124_DATA, WSB3_20H, "")
-                digital_inputs = f"0x{digital_inputs}"
-                digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+            elif self.__inels_type is WSB3_20 or self.__inels_type is WSB3_40:
+                switches = self.__trim_inels_status_values(
+                    WSB3_240_DATA, SW, "")
+                switches = f"0x{switches}"
+                switches = f"{int(switches, 16):0>8b}"
+                
+                switches = self.__trim_inels_status_values(
+                    WSB3_240_DATA, DIN, "")
+                switches = f"0x{switches}"
+                switches = f"{int(switches, 16):0>8b}"
                 
                 sw=[] #up/down buttons
+                for i in range(WSB3_AMOUNTS[self.__inels_type]):
+                    sw.append(switches[7 - i] == "1")
+                
                 din=[]
                 for i in range(2):
                     sw.append(digital_inputs[7 - i] == "1")
+
+                temp_in=self.__trim_inels_status_values(
+                    WSB3_240_DATA, TEMP_IN, ""
+                )
+                ain=self.__trim_inels_status_values(
+                    WSB3_240_DATA, AIN, ""
+                )
+                
+                self.__ha_value = new_object(
+                    sw=sw,
+                    din=din,
+                    temp_in=temp_in,
+                    ain=ain,
+                )
+            elif self.__inels_type is WSB3_20H or self.__inels_type is WSB3_40HUM:
+                switches = self.__trim_inels_status_values(
+                    WSB3_240HUM_DATA, WSB3_20H, "")
+                switches = f"0x{switches}"
+                switches = f"{int(switches, 16):0>8b}"
+                
+                
+                digital_inputs = self.__trim_inels_status_values(
+                    WSB3_240HUM_DATA, WSB3_20H, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+                sw=[] #up/down buttons
+                din=[]
+                for i in range(WSB3_AMOUNTS[self.__inels_type]):
+                    sw.append(switches[7 - i] == "1")
+                for i in range(2):
                     din.append(digital_inputs[15 - i] == "1")
             
-                temp_in = self.__trim_inels_status_values(DEVICE_TYPE_124_DATA, TEMP_IN, "")
+                temp_in = self.__trim_inels_status_values(WSB3_240HUM_DATA, TEMP_IN, "")
                     
-                ain = self.__trim_inels_status_values(DEVICE_TYPE_124_DATA, AIN, "")
+                ain = self.__trim_inels_status_values(WSB3_240HUM_DATA, AIN, "")
                 
-                humidity = self.__trim_inels_status_values(DEVICE_TYPE_124_DATA, HUMIDITY, "")
+                humidity = self.__trim_inels_status_values(WSB3_240HUM_DATA, HUMIDITY, "")
 
-                dewpoint = self.__trim_inels_status_values(DEVICE_TYPE_124_DATA, DEW_POINT, "")
+                dewpoint = self.__trim_inels_status_values(WSB3_240HUM_DATA, DEW_POINT, "")
 
                 self.__ha_value = new_object(
                     sw=sw,
@@ -400,42 +441,55 @@ class DeviceValue(object):
                     humidity=humidity,
                     dewpoint=dewpoint,
                 )
+            elif self.__inels_type is IM3_20B or self.__inels_type is IM3_40B:
+                binary_input = []
+                inputs = self.__trim_inels_status_values(IM3_240B_DATA, IN, "")
+                inputs = f"0x{inputs}"
+                inputs = f"{int(inputs, 16):0>8b}"
+                for i in range(IM3_AMOUNTS[self.__inels_type]):
+                    binary_input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 2))
+                
+                temp = self.__trim_inels_status_values(IM3_80B_DATA, TEMP_IN, "")
+                self.__ha_value = new_object(
+                    input=binary_input,
+                    temp=temp,
+                )
             elif self.__inels_type is IM3_80B:
-                input = []
-                input2 = []
+                binary_input = []
+                binary_input2 = []
                 inputs = self.__trim_inels_status_values(IM3_80B_DATA, IN, "")
                 inputs = f"0x{inputs}"
                 inputs = f"{int(inputs, 16):0>16b}"
                 for i in range(4):
-                    input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 2))
-                    input2.append(int(inputs[15-2*i-1] + inputs[15-2*i], 2))
-                input.extend(input2)
+                    binary_input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 2))
+                    binary_input2.append(int(inputs[15-2*i-1] + inputs[15-2*i], 2))
+                binary_input.extend(binary_input2)
                 
                 temp = self.__trim_inels_status_values(IM3_80B_DATA, TEMP_IN, "")
                 self.__ha_value = new_object(
-                    input=input,
+                    input=binary_input,
                     temp=temp,
                 )
             elif self.__inels_type is IM3_140M:
-                input = []
-                input2 = []
-                input3 = []
+                binary_input = []
+                binary_input2 = []
+                binary_input3 = []
                 inputs = self.__trim_inels_status_values(IM3_140M_DATA, IN, "")
                 inputs = f"0x{inputs}"
                 inputs = f"{int(inputs, 16):0>64b}"
                 
                 for i in range(4):
                     input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 2))
-                    input2.append(int(inputs[15-2*i-1] + inputs[15-2*i], 2))
-                    input3.append(int(inputs[23-2*i-1] + inputs[23-2*i], 2))
-                input.extend(input2)
-                input.extend(input3)
+                    binary_input2.append(int(inputs[15-2*i-1] + inputs[15-2*i], 2))
+                    binary_input3.append(int(inputs[23-2*i-1] + inputs[23-2*i], 2))
+                binary_input.extend(binary_input2)
+                binary_input.extend(binary_input3)
                 
                 for i in range(2):
-                    input.append(int(inputs[63-2*i-1] + inputs[63-2*i], 2))
+                    binary_input.append(int(inputs[63-2*i-1] + inputs[63-2*i], 2))
                 
                 self.__ha_value = new_object(
-                    input=input
+                    input=binary_input
                 )
             else:
                 self.__ha_value = self.__inels_status_value
@@ -861,7 +915,7 @@ class DeviceValue(object):
                     ain=ain,
                 )
             else:
-                pass
+                self.__ha_value = self.__inels_status_value
             
     def __trim_inels_status_values(
         self, selector: "dict[str, Any]", fragment: str, jointer: str
