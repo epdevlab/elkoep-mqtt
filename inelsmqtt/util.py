@@ -565,12 +565,6 @@ class DeviceValue(object):
                     set_val +=  f"{self.__ha_value.out[i]:02X}\n"
                 self.__inels_set_value = set_val
             elif self.__inels_type is DA3_66M:                
-                state = self.__trim_inels_status_values(
-                    DA3_66M_DATA, DA3_66M, ""
-                )
-                state = state = f"0x{state}"
-                state = f"{int(state, 16):0>16b}"
-                
                 toa = []
                 coa = []
                 for i in range (4):
