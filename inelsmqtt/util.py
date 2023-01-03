@@ -452,7 +452,7 @@ class DeviceValue(object):
                 temp = self.__trim_inels_status_values(IM3_80B_DATA, TEMP_IN, "")
                 self.__ha_value = new_object(
                     input=binary_input,
-                    temp=temp,
+                    temp_in=temp,
                 )
             elif self.__inels_type is IM3_80B:
                 binary_input = []
