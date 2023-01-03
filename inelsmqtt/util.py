@@ -410,13 +410,13 @@ class DeviceValue(object):
                 )
             elif self.__inels_type in [WSB3_20H, WSB3_40HUM]:
                 switches = self.__trim_inels_status_values(
-                    WSB3_240HUM_DATA, WSB3_20H, "")
+                    WSB3_240HUM_DATA, SW, "")
                 switches = f"0x{switches}"
                 switches = f"{int(switches, 16):0>8b}"
                 
                 
                 digital_inputs = self.__trim_inels_status_values(
-                    WSB3_240HUM_DATA, WSB3_20H, "")
+                    WSB3_240HUM_DATA, DIN, "")
                 digital_inputs = f"0x{digital_inputs}"
                 digital_inputs = f"{int(digital_inputs, 16):0>8b}"
                 sw=[] #up/down buttons
