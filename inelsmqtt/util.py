@@ -376,16 +376,16 @@ class DeviceValue(object):
                     # backlit
                     backlit=False,
                 )
-            elif self.__inels_type is WSB3_20 or self.__inels_type is WSB3_40:
+            elif self.__inels_type in [WSB3_20, WSB3_40]:
                 switches = self.__trim_inels_status_values(
                     WSB3_240_DATA, SW, "")
                 switches = f"0x{switches}"
                 switches = f"{int(switches, 16):0>8b}"
                 
-                switches = self.__trim_inels_status_values(
+                digital_inputs = self.__trim_inels_status_values(
                     WSB3_240_DATA, DIN, "")
-                switches = f"0x{switches}"
-                switches = f"{int(switches, 16):0>8b}"
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
                 
                 sw=[] #up/down buttons
                 for i in range(WSB3_AMOUNTS[self.__inels_type]):
@@ -408,7 +408,7 @@ class DeviceValue(object):
                     temp_in=temp_in,
                     ain=ain,
                 )
-            elif self.__inels_type is WSB3_20H or self.__inels_type is WSB3_40HUM:
+            elif self.__inels_type in [WSB3_20H, WSB3_40HUM]:
                 switches = self.__trim_inels_status_values(
                     WSB3_240HUM_DATA, WSB3_20H, "")
                 switches = f"0x{switches}"
@@ -442,7 +442,7 @@ class DeviceValue(object):
                     humidity=humidity,
                     dewpoint=dewpoint,
                 )
-            elif self.__inels_type is IM3_20B or self.__inels_type is IM3_40B:
+            elif self.__inels_type in [IM3_20B, IM3_40B]:
                 binary_input = []
                 inputs = self.__trim_inels_status_values(IM3_240B_DATA, IN, "")
                 inputs = f"0x{inputs}"

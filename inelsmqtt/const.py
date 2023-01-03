@@ -147,9 +147,9 @@ DEVICE_TYPE_DICT = {
     "101": LIGHT, #DA3-22M
 
     "102": SENSOR, #GTR3_50
-    
+
     "103": BUTTON, #GSB3_90SX
-    
+
     "104": SWITCH, #SA3_02B,
     "105": SWITCH, #SA3_02M
     "106": SWITCH, #SA3_04M
@@ -164,7 +164,7 @@ DEVICE_TYPE_DICT = {
     "116": SENSOR, #IM3_40B,
     "117": SENSOR, #IM3_80B
     #"120": SENSOR,#(?) DMD3_1,
-    
+
     "121": SENSOR, #IM3_140M
     "122": SENSOR, #WSB3_20,
     "123": SENSOR, #WSB3_40,
@@ -175,20 +175,20 @@ DEVICE_TYPE_DICT = {
     #"129": SENSOR,#(?) GCH3_31,
 
     #"136": SENSOR,#(?) GSP3_100,
-    #"137": SENSOR,#(?) GDB3_10,    
+    #"137": SENSOR,#(?) GDB3_10,
     #"138": SENSOR,#(?) GSB3_40SX,
     "139": BUTTON, #GSB3_60S
     #"140": SENSOR,#(?) GSB3_20SX,
     #"141": SENSOR,#(?) GBP3_60,
-    
+
     #"147": LIGHT,#(?) DAC3_04B,
     #"148": LIGHT,#(?) DAC3_04M,
     #"150": LIGHT,#(?) DCDA_33M,
 
     "151": LIGHT, #DA3_66M,
-    
+
     #"156": SENSOR, #ADC3_60M,
-    
+
     #"157": SENSOR,# TI3_10B,
     #"158": SENSOR,# TI3_40B,
     #"159": SENSOR,# TI3_60M,
