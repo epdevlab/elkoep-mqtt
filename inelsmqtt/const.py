@@ -482,7 +482,7 @@ GSP3_100_DATA = {
 
 IM3_240B_DATA = {
     IN: [0],
-    TEMP_IN: [1],
+    TEMP_IN: [1, 2],
 }
 
 IOU3_108M_DATA = {
