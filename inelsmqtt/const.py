@@ -432,7 +432,7 @@ DMD3_1_DATA = {
     LIGHT_IN: [0, 1, 2, 3],
     TEMP_IN: [4, 5],
     HUMIDITY: [6, 7],
-    DMD3_1: [8],    
+    DMD3_1: [8],
 }
 
 FA3_612M_DATA = {
@@ -515,7 +515,6 @@ SA3_06M_DATA = {
 
 SA3_022M_DATA = {#TODO see about shutters and stuff
     RELAY: [i for i in range(16)]
-    
 }
 
 TI3_10B_DATA = {

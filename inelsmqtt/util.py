@@ -564,9 +564,7 @@ class DeviceValue(object):
                 for i in range(self.__ha_value.channel_number):
                     set_val +=  f"{self.__ha_value.out[i]:02X}\n"
                 self.__inels_set_value = set_val
-            elif self.__inels_type is DA3_66M:
-                temp = self.__trim_inels_status_values(DA3_66M_DATA, TEMP_IN, "")
-                
+            elif self.__inels_type is DA3_66M:                
                 state = self.__trim_inels_status_values(
                     DA3_66M_DATA, DA3_66M, ""
                 )
@@ -615,7 +613,6 @@ class DeviceValue(object):
                 )
                 
                 self.__ha_value = new_object(
-                    temp_in=temp,
                     toa=toa,
                     coa=coa,
                     sw=sw,
