@@ -393,7 +393,7 @@ class DeviceValue(object):
                 
                 din=[]
                 for i in range(2):
-                    sw.append(digital_inputs[7 - i] == "1")
+                    din.append(digital_inputs[7 - i] == "1")
 
                 temp_in=self.__trim_inels_status_values(
                     WSB3_240_DATA, TEMP_IN, ""
