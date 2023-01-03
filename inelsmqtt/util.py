@@ -604,6 +604,7 @@ class DeviceValue(object):
                     DA3_66M, OUT
                 )
                 for o in outs:
+                    o = int(o, 16)
                     out.append(o if o <= 100 else 100)
                 
                 min_brightness = self.__trim_inels_status_bytes(
