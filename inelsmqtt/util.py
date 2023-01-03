@@ -601,17 +601,17 @@ class DeviceValue(object):
                 
                 out = []
                 outs = self.__trim_inels_status_bytes(
-                    DA3_66M, OUT
+                    DA3_66M_DATA, OUT
                 )
                 for o in outs:
                     o = int(o, 16)
                     out.append(o if o <= 100 else 100)
                 
                 min_brightness = self.__trim_inels_status_bytes(
-                    DA3_66M, MIN_BRIGHTNESS
+                    DA3_66M_DATA, MIN_BRIGHTNESS
                 )
                 channel_type = min_brightness = self.__trim_inels_status_bytes(
-                    DA3_66M, CHAN_TYPE
+                    DA3_66M_DATA, CHAN_TYPE
                 )
                 
                 self.__ha_value = new_object(
