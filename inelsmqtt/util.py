@@ -424,7 +424,7 @@ class DeviceValue(object):
                 for i in range(WSB3_AMOUNTS[self.__inels_type]):
                     sw.append(switches[7 - i] == "1")
                 for i in range(2):
-                    din.append(digital_inputs[15 - i] == "1")
+                    din.append(digital_inputs[7 - i] == "1")
             
                 temp_in = self.__trim_inels_status_values(WSB3_240HUM_DATA, TEMP_IN, "")
                     
