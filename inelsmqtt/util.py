@@ -449,7 +449,7 @@ class DeviceValue(object):
                 for i in range(IM3_AMOUNTS[self.__inels_type]):
                     binary_input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 2))
                 
-                temp = self.__trim_inels_status_values(IM3_80B_DATA, TEMP_IN, "")
+                temp = self.__trim_inels_status_values(IM3_240B_DATA, TEMP_IN, "")
                 self.__ha_value = new_object(
                     input=binary_input,
                     temp_in=temp,
