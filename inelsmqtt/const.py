@@ -90,45 +90,44 @@ INELS_DEVICE_TYPE_DICT = {
     "101": DA3_22M,
     "102": GTR3_50,
     "103": GSB3_90SX,
-    
+    "104": SA3_02B,
+    "105": SA3_02M,
     "106": SA3_04M,
+    "107": SA3_06M,
     "108": SA3_012M,
+    #"109": SA3_22M, #util
+    #"111": FA3_612M, #util
+    #"112": IOU3_108M, #util
+    "115": IM3_20B,
+    "116": IM3_40B,
     "117": IM3_80B,
+    #"120": DMD3_1, #util
     "121": IM3_140M,
+    "122": WSB3_20,
+    "123": WSB3_40,
     "124": WSB3_20H,
+    "125": WSB3_40HUM,
+    #"128": GCR3_11, #util
+    #"129": GCH3_31, #util
+    #"136": GSP3_100, #util
+    #"137": GDB3_10, #util
+    #"138": GSB3_40SX, #util
     "139": GSB3_60S,
+    #"140": GSB3_20SX, #util
+    #"141": GBP3_60, #util
+    #"147": DAC3_04B, #util
+    #"148": DAC3_04M, #util
+    #"150": DCDA_33M, #util
+    "151": DA3_66M,
+    #"156": ADC3_60M, #util
+    #"157": TI3_10B, #util
+    #"158": TI3_40B, #util
+    #"159": TI3_60M, #util
     "160": IDRT3_1,
-    #"": ADC3_60M,
-    #"": DA3_66M,
-    #"": DAC3_04B,
-    #"": DAC3_04M,
-    #"": DCDA_33M,
-    #"": DMD3_1,
-    #"": FA3_612M,
-    #"": GBP3_60,
-    #"": GCH3_31,
-    #"": GCR3_11,
-    #"": GDB3_10,
-    #"": GSB3_20SX,
-    #"": GSB3_40SX,
-    #"": GSP3_100,
-    #"": IM3_20B,
-    #"": IM3_40B,
-    #"": IOU3_108M,
-    #"": SA3_02B,
-    #"": SA3_02M
-    #"": SA3_06M,
-    #"": SA3_22M,
-    #"": TI3_10B,
-    #"": TI3_40B,
-    #"": TI3_60M,
-    #"": WSB3_20,
-    #"": WSB3_20HUM,
-    #"": WSB3_40,
-    #"": WSB3_40HUM,
-    #"166": VIRT_CONTR,
-    #"167": VIRT_HEAT_REG,
-    #"168": VIRT_COOL_REG,
+
+    #"166": VIRT_CONTR, #util
+    #"167": VIRT_HEAT_REG, #util
+    #"168": VIRT_COOL_REG, #util
 }
 
 #TODO retire this system
