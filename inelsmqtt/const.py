@@ -145,45 +145,56 @@ DEVICE_TYPE_DICT = {
     "12": SENSOR, #RFTC_10_G
     # BUS
     "100": SWITCH, #SA3_01B
-    "101": LIGHT, #SA3_012M
+    "101": LIGHT, #DA3-22M
+
     "102": SENSOR, #GTR3_50
+    
     "103": BUTTON, #GSB3_90SX
     
+    "104": SWITCH, #SA3_02B,
+    "105": SWITCH, #SA3_02M
     "106": SWITCH, #SA3_04M
+    "107": SWITCH, #SA3_06M,
     "108": SWITCH, #SA3_012M
+    #"109": SWITCH,#SA3_22M,
+
+    #"111": SWITCH,#(?) FA3_612M,
+    #"112": SWITCH,#(?) IOU3_108M,
+
+    "115": SENSOR, #IM3_20B,
+    "116": SENSOR, #IM3_40B,
     "117": SENSOR, #IM3_80B
-    "121": SENSOR, #IM3_140M
-    "124": SENSOR, #WSB3_20HUM / H
-    "139": BUTTON, #GSB3_60S
-    "160": BUTTON, #IDRT3_1
+    #"120": SENSOR,#(?) DMD3_1,
     
-    #"": SENSOR,#ADC3_60M,
-    #"": LIGHT,#DA3_66M,
-    #"": LIGHT,#(?) DAC3_04B,
-    #"": LIGHT,#(?) DAC3_04M,
-    #"": LIGHT,#(?) DCDA_33M,
-    #"": SENSOR,#(?) DMD3_1,
-    #"": SWITCH,#(?) FA3_612M,
-    #"": SENSOR,#(?) GBP3_60,
-    #"": SENSOR,#(?) GCH3_31,
-    #"": SENSOR,#(?) GCR3_11,
-    #"": SENSOR,#(?) GDB3_10,
-    #"": SENSOR,#(?) GSB3_20SX,
-    #"": SENSOR,#(?) GSB3_40SX,
-    #"": SENSOR,#(?) GSP3_100,
-    #"": SENSOR,# IM3_20B,
-    #"": SENSOR,# IM3_40B,
-    #"": SWITCH,#(?) IOU3_108M,
-    #"": SWITCH,#(?) SA3_02B,
-    #"": SWITCH,#(?) SA3_02M
-    #"": SWITCH,#(?) SA3_06M,
-    #"": SWITCH,#(?) SA3_22M,
-    #"": SENSOR,#(?) TI3_10B,
-    #"": SENSOR,#(?) TI3_40B,
-    #"": SENSOR,#(?) TI3_60M,
-    #"": SENSOR,#(?) WSB3_20,
-    #"": SENSOR,#(?) WSB3_40,
-    #"": SENSOR,#(?) WSB3_40HUM,
+    "121": SENSOR, #IM3_140M
+    "122": SENSOR, #WSB3_20,
+    "123": SENSOR, #WSB3_40,
+    "124": SENSOR, #WSB3_20HUM / H
+    "125": SENSOR, #WSB3_40HUM,
+
+    #"128": SENSOR,#(?) GCR3_11,
+    #"129": SENSOR,#(?) GCH3_31,
+
+    #"136": SENSOR,#(?) GSP3_100,
+    #"137": SENSOR,#(?) GDB3_10,    
+    #"138": SENSOR,#(?) GSB3_40SX,
+    "139": BUTTON, #GSB3_60S
+    #"140": SENSOR,#(?) GSB3_20SX,
+    #"141": SENSOR,#(?) GBP3_60,
+    
+    #"147": LIGHT,#(?) DAC3_04B,
+    #"148": LIGHT,#(?) DAC3_04M,
+    #"150": LIGHT,#(?) DCDA_33M,
+
+    "151": LIGHT, #DA3_66M,
+    
+    #"156": SENSOR, #ADC3_60M,
+    
+    #"157": SENSOR,# TI3_10B,
+    #"158": SENSOR,# TI3_40B,
+    #"159": SENSOR,# TI3_60M,
+    
+    "160": BUTTON, #IDRT3_1
     
     #"166": CLIMATE,
     #"167": SENSOR,
