@@ -131,6 +131,7 @@ from .const import (
     MIN_BRIGHTNESS,
     CHAN_TYPE,
     IN,
+    ALERT,
 
     RELAY_SET,
 
@@ -565,6 +566,12 @@ class DeviceValue(object):
                     set_val +=  f"{self.__ha_value.out[i]:02X}\n"
                 self.__inels_set_value = set_val
             elif self.__inels_type is DA3_66M:                
+                state = self.__trim_inels_status_values(
+                    DA3_66M_DATA, ALERT, ""
+                )
+                state = state = f"0x{state}"
+                state = f"{int(state, 16):0>16b}"
+                
                 toa = []
                 coa = []
                 for i in range (4):
