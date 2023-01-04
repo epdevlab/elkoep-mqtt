@@ -101,7 +101,7 @@ INELS_DEVICE_TYPE_DICT = {
     "115": IM3_20B,
     "116": IM3_40B,
     "117": IM3_80B,
-    "120": DMD3_1, #util
+    "120": DMD3_1,
     "121": IM3_140M,
     "122": WSB3_20,
     "123": WSB3_40,
@@ -120,9 +120,9 @@ INELS_DEVICE_TYPE_DICT = {
     #"150": DCDA_33M, #util
     "151": DA3_66M,
     #"156": ADC3_60M, #util
-    #"157": TI3_10B, #util
-    #"158": TI3_40B, #util
-    #"159": TI3_60M, #util
+    "157": TI3_10B,
+    "158": TI3_40B,
+    "159": TI3_60M,
     "160": IDRT3_1,
 
     #"166": VIRT_CONTR, #util
@@ -189,9 +189,9 @@ DEVICE_TYPE_DICT = {
 
     #"156": SENSOR, #ADC3_60M,
 
-    #"157": SENSOR,# TI3_10B,
-    #"158": SENSOR,# TI3_40B,
-    #"159": SENSOR,# TI3_60M,
+    "157": SENSOR,# TI3_10B,
+    "158": SENSOR,# TI3_40B,
+    "159": SENSOR,# TI3_60M,
     
     "160": BUTTON, #IDRT3_1
     
