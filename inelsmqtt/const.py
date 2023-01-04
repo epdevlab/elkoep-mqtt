@@ -101,7 +101,7 @@ INELS_DEVICE_TYPE_DICT = {
     "115": IM3_20B,
     "116": IM3_40B,
     "117": IM3_80B,
-    #"120": DMD3_1, #util
+    "120": DMD3_1, #util
     "121": IM3_140M,
     "122": WSB3_20,
     "123": WSB3_40,
@@ -163,7 +163,7 @@ DEVICE_TYPE_DICT = {
     "115": SENSOR, #IM3_20B,
     "116": SENSOR, #IM3_40B,
     "117": SENSOR, #IM3_80B
-    #"120": SENSOR,#(?) DMD3_1,
+    "120": SENSOR, #DMD3_1,
 
     "121": SENSOR, #IM3_140M
     "122": SENSOR, #WSB3_20,

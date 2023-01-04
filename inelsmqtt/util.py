@@ -114,6 +114,7 @@ from .const import (
     IM3_240B_DATA,
     WSB3_240_DATA,
     WSB3_240HUM_DATA,
+    DMD3_1_DATA,
 
     RELAY,
     RELAY_OVERFLOW,
@@ -491,6 +492,26 @@ class DeviceValue(object):
                 
                 self.__ha_value = new_object(
                     input=binary_input
+                )
+            elif self.__inels_type is DMD3_1:
+                light_in = self.__trim_inels_status_values(DMD3_1_DATA, LIGHT_IN, "")
+
+                temp_in = self.__trim_inels_status_values(DMD3_1_DATA, TEMP_IN, "")    
+                
+                humidity = self.__trim_inels_status_values(DMD3_1_DATA, HUMIDITY, "")
+
+                proximity = self.__trim_inels_status_values(
+                    DMD3_1_DATA, DMD3_1, "")
+                proximity = f"0x{proximity}"
+                proximity = f"{int(proximity, 16):0>8b}"
+
+                prox=proximity[7] == "1"
+
+                self.__ha_value = new_object(
+                    light_in=light_in,
+                    temp_in=temp_in,
+                    humidity=humidity,
+                    prox=prox,
                 )
             else:
                 self.__ha_value = self.__inels_status_value
