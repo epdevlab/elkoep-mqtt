@@ -936,17 +936,8 @@ class DeviceValue(object):
                     GSB3_DATA, AIN, "")
 
                 self.__ha_value = new_object(
-                    sw=[
-                        digital_inputs[7] == "1",#0
-                        digital_inputs[6] == "1",
-                        digital_inputs[5] == "1",
-                        digital_inputs[4] == "1",
-                        digital_inputs[3] == "1",
-                    ],
-                    din=[
-                        digital_inputs[15] == "1",#9
-                        digital_inputs[14] == "1",#10
-                    ],
+                    sw=sw,
+                    din=din,
                     # temperature
                     temp_in=temp,
 
