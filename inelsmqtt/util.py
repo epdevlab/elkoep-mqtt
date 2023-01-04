@@ -523,7 +523,7 @@ class DeviceValue(object):
                 )
                 
                 for i in range(int(len(temp_bytes)/2)):
-                    temps += (temp_bytes[2*i] + temp_bytes[2*i+1])    
+                    temps += (temp_bytes[2*i+1] + temp_bytes[2*i])    
                 
                 self.__ha_value = new_object(
                     temps=temps
