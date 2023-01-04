@@ -52,14 +52,14 @@ from .const import (
 
     SA3_01B,
     DA3_22M,
-    GTR3_50,
+    GRT3_50,
     GSB3_90SX,
     SA3_04M,
     SA3_012M,
     IM3_80B,
     IM3_140M,
     WSB3_20H,
-    GSB3_60S,
+    GSB3_60SX,
     IDRT3_1,
     ADC3_60M,
     DA3_66M,
@@ -86,9 +86,9 @@ from .const import (
     TI3_40B,
     TI3_60M,
     WSB3_20,
-    WSB3_20HUM,
+    WSB3_20H,
     WSB3_40,
-    WSB3_40HUM,
+    WSB3_40H,
     #VIRT_CONTR,
     VIRT_HEAT_REG,
     VIRT_COOL_REG,
@@ -102,7 +102,6 @@ from .const import (
     IM3_80B_DATA,
     IM3_140M_DATA,
     DEVICE_TYPE_124_DATA,
-    DEVICE_TYPE_139_DATA,
     IDRT3_1_DATA,
     DEVICE_TYPE_166_DATA,
     VIRT_REG_DATA,
@@ -115,6 +114,7 @@ from .const import (
     WSB3_240_DATA,
     WSB3_240HUM_DATA,
     DMD3_1_DATA,
+    GSB3_DATA,
 
     RELAY,
     RELAY_OVERFLOW,
@@ -141,6 +141,7 @@ from .const import (
     
     IM3_AMOUNTS,
     WSB3_AMOUNTS,
+    GSB3_AMOUNTS,
     
     INELS_DEVICE_TYPE_DATA_STRUCT_DATA
 )
@@ -326,9 +327,9 @@ class DeviceValue(object):
         elif self.__device_type is SENSOR:  # temperature sensor
             if self.__inels_type is RFTI_10B:
                 self.__ha_value = self.__inels_status_value       
-            elif self.__inels_type is GTR3_50:
+            elif self.__inels_type is GRT3_50:
                 digital_inputs = self.__trim_inels_status_values(
-                    THERMOSTAT_DATA, GTR3_50, "")
+                    THERMOSTAT_DATA, GRT3_50, "")
                 digital_inputs_hex_str = f"0x{digital_inputs}"
                 digital_inputs_bin_str = f"{int(digital_inputs_hex_str, 16):0>8b}"
                 
@@ -411,7 +412,7 @@ class DeviceValue(object):
                     temp_in=temp_in,
                     ain=ain,
                 )
-            elif self.__inels_type in [WSB3_20H, WSB3_40HUM]:
+            elif self.__inels_type in [WSB3_20H, WSB3_40H]:
                 switches = self.__trim_inels_status_values(
                     WSB3_240HUM_DATA, SW, "")
                 switches = f"0x{switches}"
@@ -906,20 +907,33 @@ class DeviceValue(object):
                     # backlit
                     backlit=False,
                 )
-            elif self.__inels_type is GSB3_60S:
+            elif self.__inels_type in [GSB3_20SX, GSB3_40SX, GSB3_60SX]:
+                switches = self.__trim_inels_status_values(
+                    GSB3_DATA, SW, "")
+                switches = f"0x{switches}"
+                switches = f"{int(switches, 16):0>8b}"
+                
                 digital_inputs = self.__trim_inels_status_values(
-                    DEVICE_TYPE_139_DATA, GSB3_60S, "")
+                    GSB3_DATA, SW, "")
                 digital_inputs = f"0x{digital_inputs}"
-                digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+                
+                sw = []
+                for i in range(GSB3_AMOUNTS[self.__inels_type]):
+                    sw.append(switches[7-i] == "1")
+                
+                din = []
+                for i in range(2):
+                    din.append(digital_inputs[7-i] == "1")
                 
                 temp = self.__trim_inels_status_values(
-                    DEVICE_TYPE_139_DATA, TEMP_IN, "")
+                    GSB3_DATA, TEMP_IN, "")
 
                 light_in = self.__trim_inels_status_values(
-                    DEVICE_TYPE_139_DATA, LIGHT_IN, "")
+                    GSB3_DATA, LIGHT_IN, "")
 
                 ain = self.__trim_inels_status_values(
-                    DEVICE_TYPE_139_DATA, AIN, "")
+                    GSB3_DATA, AIN, "")
 
                 self.__ha_value = new_object(
                     sw=[
@@ -945,6 +959,7 @@ class DeviceValue(object):
                     # backlit
                     # backlit=False,
                 )
+            
             else:
                 self.__ha_value = self.__inels_status_value
             
@@ -1068,7 +1083,11 @@ class DeviceValue(object):
                 backlit = BUTTONARRAY_SET_BACKLIT[self.__ha_value.backlit]
 
                 self.__inels_set_value = "".join(["00\n" * 36, disabled, backlit])
-            elif self.__inels_type is GSB3_60S:
+            elif self.__inels_type is GSB3_20SX: #TODO revisit for color values
+                self.__inels_set_value = "".join("00\n" * 4)
+            elif self.__inels_type is GSB3_40SX:
+                self.__inels_set_value = "".join("00\n" * 7)
+            elif self.__inels_type is GSB3_60SX:
                 self.__inels_set_value = "".join("00\n" * 10)
             elif self.__inels_type is IDRT3_1:
                 self.__inels_set_value = "".join("00\n" * 9)
