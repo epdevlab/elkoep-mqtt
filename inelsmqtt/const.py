@@ -369,7 +369,7 @@ DEVICE_TYPE_106_DATA = {
 }
 
 DEVICE_TYPE_108_DATA = {
-    RELAY: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], #relays
+    RELAY: list(range(12)), #relays
     SA3_012M: [12, 13], #switch inputs
 }
 
@@ -397,14 +397,14 @@ DEVICE_TYPE_139_DATA = {
     AIN: [8, 9],
 }
 
-DEVICE_TYPE_160_DATA = {
-    IDRT3_1: [1],
+IDRT3_1_DATA = {
+    SW: [1],
     TEMP_IN: [2, 3],
     TEMP_OUT: [8, 9],
 }
 
 ADC3_60M_DATA = {
-    AIN: [i for i in range(24)],
+    AIN: list(range(24)),
     ADC3_60M: [24],
 }
 
@@ -413,8 +413,8 @@ DA3_66M_DATA = {
     SW: [3],
     OUT: [4, 5, 6, 7, 12, 13],
     DIN: [8],
-    MIN_BRIGHTNESS: [2*i+14 for i in range(6)],
-    CHAN_TYPE: [2*i+15 for i in range(6)],
+    MIN_BRIGHTNESS: list(range(14, 20, 2)), #[2*i+14 for i in range(6)],
+    CHAN_TYPE: list(range(15, 21, 2)), #[2*i+15 for i in range(6)],
 }
 
 DAC3_04_DATA = {
@@ -438,8 +438,8 @@ DMD3_1_DATA = {
 FA3_612M_DATA = {
     FA3_612M: [0, 1, 2],
     ALERT: [3],
-    OUT: [i for i in range(4, 16)],
-    AIN: [i for i in range(16, 28)]
+    OUT: list(range(4, 16)),
+    AIN: list(range(16, 28))
 }
 
 GBP3_60_DATA = {
@@ -452,7 +452,7 @@ GBP3_60_DATA = {
 
 CARD_DATA = { #Card holder/reader
     SW: [0, 1], #really confusing distribution
-    CARD_ID: [i for i in range (4, 12)],
+    CARD_ID: list(range (4, 12)),
     LIGHT_IN: [12, 13, 14, 15],
     TEMP_IN: [16, 17],
 }
@@ -486,7 +486,7 @@ IM3_240B_DATA = {
 }
 
 IOU3_108M_DATA = {
-    RELAY: [i for i in range(8)],
+    RELAY: list(range(8)),
     TEMP_IN: [8, 9, 10, 11],
     TEMP_OUT: [12, 13, 14, 15], #TODO review this
     DIN: [24],
@@ -514,7 +514,7 @@ SA3_06M_DATA = {
 }
 
 SA3_022M_DATA = {#TODO see about shutters and stuff
-    RELAY: [i for i in range(16)]
+    RELAY: list(range(16))
 }
 
 TI3_10B_DATA = {
@@ -585,7 +585,7 @@ INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
     IM3_140M: IM3_140M_DATA,
     WSB3_20H: DEVICE_TYPE_124_DATA,
     GSB3_60S: DEVICE_TYPE_139_DATA,
-    IDRT3_1: DEVICE_TYPE_160_DATA,
+    IDRT3_1: IDRT3_1_DATA,
     VIRT_CONTR: DEVICE_TYPE_166_DATA,
     VIRT_HEAT_REG: VIRT_REG_DATA,
     VIRT_COOL_REG: VIRT_REG_DATA,

@@ -103,7 +103,7 @@ from .const import (
     IM3_140M_DATA,
     DEVICE_TYPE_124_DATA,
     DEVICE_TYPE_139_DATA,
-    DEVICE_TYPE_160_DATA,
+    IDRT3_1_DATA,
     DEVICE_TYPE_166_DATA,
     VIRT_REG_DATA,
     DA3_66M_DATA,
@@ -527,6 +527,26 @@ class DeviceValue(object):
                 
                 self.__ha_value = new_object(
                     temps=temps
+                )
+            elif self.__inels_type in IDRT3_1:
+                inputs = self.__trim_inels_status_values(IDRT3_1_DATA, SW, "")
+                inputs = f"0x{inputs}"
+                inputs = f"{int(inputs, 16):0>8b}"
+                
+                sw = []
+                din = []
+                for i in range(2):
+                    din.append(inputs[7-i]=="1")
+                    sw.append(inputs[5-i]=="1")
+                
+                temp_in = self.__trim_inels_status_values(IDRT3_1_DATA, TEMP_IN, "")
+                temp_out = self.__trim_inels_status_values(IDRT3_1_DATA, TEMP_OUT, "")
+                
+                self.__ha_value = new_object(
+                    sw=sw,
+                    din=din,
+                    temp_in=temp_in,
+                    temp_out=temp_out,
                 )
             else:
                 self.__ha_value = self.__inels_status_value
