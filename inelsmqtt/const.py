@@ -522,11 +522,11 @@ TI3_10B_DATA = {
 }
 
 TI3_40B_DATA = {
-    TEMP_IN: [i for i in range(8)]
+    TEMP_IN: list(range(8))
 }
 
 TI3_60M_DATA = {
-    TEMP_IN: [i for i in range(12)]
+    TEMP_IN: list(range(12))
 }
 
 WSB3_240_DATA = {
@@ -589,6 +589,10 @@ INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
     VIRT_CONTR: DEVICE_TYPE_166_DATA,
     VIRT_HEAT_REG: VIRT_REG_DATA,
     VIRT_COOL_REG: VIRT_REG_DATA,
+    
+    TI3_10B: TI3_10B_DATA,
+    TI3_40B: TI3_40B_DATA,
+    TI3_60M: TI3_60M_DATA,
 }
 
 # BUTTON CONSTANTS

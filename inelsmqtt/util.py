@@ -141,6 +141,8 @@ from .const import (
     
     IM3_AMOUNTS,
     WSB3_AMOUNTS,
+    
+    INELS_DEVICE_TYPE_DATA_STRUCT_DATA
 )
 
 ConfigType = Dict[str, str]
@@ -512,6 +514,19 @@ class DeviceValue(object):
                     temp_in=temp_in,
                     humidity=humidity,
                     prox=prox,
+                )
+            elif self.__inels_type in [TI3_10B, TI3_40B, TI3_60M]:
+                temps = []
+                temp_bytes = self.__trim_inels_status_bytes(
+                    INELS_DEVICE_TYPE_DATA_STRUCT_DATA[self.__inels_type],
+                    TEMP_IN,
+                )
+                
+                for i in range(temp_bytes/2):
+                    temps += temp_bytes[2*i] + temp_bytes[2*i+1]    
+                
+                self.__ha_value = new_object(
+                    temps=temps
                 )
             else:
                 self.__ha_value = self.__inels_status_value
