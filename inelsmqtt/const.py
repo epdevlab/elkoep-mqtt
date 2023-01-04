@@ -193,7 +193,7 @@ DEVICE_TYPE_DICT = {
     "158": SENSOR,# TI3_40B,
     "159": SENSOR,# TI3_60M,
     
-    "160": BUTTON, #IDRT3_1
+    "160": SENSOR, #IDRT3_1
     
     #"166": CLIMATE,
     #"167": SENSOR,

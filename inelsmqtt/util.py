@@ -945,30 +945,6 @@ class DeviceValue(object):
                     # backlit
                     # backlit=False,
                 )
-            elif self.__inels_type is IDRT3_1:
-                digital_inputs = self.__trim_inels_status_values(
-                    DEVICE_TYPE_160_DATA, IDRT3_1, "")
-                digital_inputs = f"0x{digital_inputs}"
-                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
-                
-                temp = self.__trim_inels_status_values(
-                    DEVICE_TYPE_160_DATA, TEMP_IN, "")
-                
-                ain = self.__trim_inels_status_values(
-                    DEVICE_TYPE_160_DATA, AIN, "")
-                
-                self.__ha_value = new_object(
-                    din=[
-                        digital_inputs[7] == "1",
-                        digital_inputs[6] == "1",
-                    ],
-                    sw=[
-                        digital_inputs[5] == "1",
-                        digital_inputs[4] == "1",
-                    ],
-                    temp=temp,
-                    ain=ain,
-                )
             else:
                 self.__ha_value = self.__inels_status_value
             
