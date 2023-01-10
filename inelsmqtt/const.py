@@ -95,7 +95,7 @@ INELS_DEVICE_TYPE_DICT = {
     #"109": SA3_022M, #util
     #"111": FA3_612M, #util
     #"112": IOU3_108M, #util
-    #"113" : RC3_610DALI,
+    "114" : RC3_610DALI,
     "115": IM3_20B,
     "116": IM3_40B,
     "117": IM3_80B,
@@ -157,7 +157,7 @@ DEVICE_TYPE_DICT = {
 
     #"111": SWITCH,#(?) FA3_612M,
     #"112": SWITCH,#(?) IOU3_108M,
-    #"113" : LIGHT, #RC3_610DALI,
+    "114" : LIGHT, #RC3_610DALI,
 
     "115": SENSOR, #IM3_20B,
     "116": SENSOR, #IM3_40B,
