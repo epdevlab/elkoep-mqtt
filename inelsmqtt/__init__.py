@@ -371,7 +371,7 @@ class InelsMqtt:
         _LOGGER.info("Found device from topic %s\n", msg.topic)
         # set discovery_start_time to now every message was returned
         # will be doing till messages will rising
-        if self.__discovered.get(msg.topic) is not None:
+        if self.__discovered.get(msg.topic) is None:
             _LOGGER.info("Message: %s", str(self.__discovered[msg.topic]))
             _LOGGER.info("First time getting topic %s", msg.topic)
             #self.__discover_start_time = datetime.now()
@@ -381,7 +381,7 @@ class InelsMqtt:
         device_type = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         status = fragments[TOPIC_FRAGMENTS[FRAGMENT_STATE]]
 
-        if device_type in DEVICE_TYPE_DICT and status == "status":
+        if device_type in DEVICE_TYPE_DICT and status == "connected":#"status":
             self.__discovered[msg.topic] = msg.payload
             self.__last_values[msg.topic] = msg.payload
             self.__is_subscribed_list[msg.topic] = True
