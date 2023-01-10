@@ -399,7 +399,7 @@ class DeviceValue(object):
                 alert_dali_communication = alerts[0] == "1"
                 
                 dali_raw = self.__trim_inels_status_bytes(
-                    RC3_610DALI_DATA, ALERT, "")
+                    RC3_610DALI_DATA, ALERT)
                 dali = []
                 for d in dali_raw:
                     d = int(d, 16)
