@@ -157,7 +157,7 @@ DEVICE_TYPE_DICT = {
 
     #"111": SWITCH,#(?) FA3_612M,
     #"112": SWITCH,#(?) IOU3_108M,
-    "114" : LIGHT, #RC3_610DALI,
+    "114" : SWITCH, #RC3_610DALI,
 
     "115": SENSOR, #IM3_20B,
     "116": SENSOR, #IM3_40B,

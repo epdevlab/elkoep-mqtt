@@ -1136,7 +1136,7 @@ class DeviceValue(object):
 
                 # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
                 self.__inels_set_value = "".join(["00\n" * 4, out1_str, out2_str])
-            elif self.__inels_type is DA3_66M:                   
+            elif self.__inels_type is DA3_66M:
                 set_val = "00\n"*4
                 for i in range(4):
                     out = self.__ha_value.out[i]
