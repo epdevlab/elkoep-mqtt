@@ -26,6 +26,7 @@ from .const import (
     TOPIC_FRAGMENTS,
     DISCOVERY_TIMEOUT_IN_SEC,
     MQTT_DISCOVER_TOPIC,
+    MQTT_STATUS_TOPIC,
 )
 
 __version__ = VERSION
@@ -349,9 +350,14 @@ class InelsMqtt:
 
             time.sleep(0.1)
 
-        self.__messages = self.__discovered.copy()
+        self.client.unsubscribe(MQTT_DISCOVER_TOPIC)
 
-        _LOGGER.info("Found %s devices", self.__discovered.__len__)
+        self.client.on_message = self.__on_message
+        self.client.subscribe(MQTT_STATUS_TOPIC, 0, None, None)
+
+        #self.__messages = self.__discovered.copy()
+
+        #_LOGGER.info("Found %s devices", self.__discovered.__len__)
         return self.__discovered
 
     def __on_discover(
@@ -383,7 +389,7 @@ class InelsMqtt:
 
         if device_type in DEVICE_TYPE_DICT and status == "connected":#"status":
             self.__discovered[msg.topic] = msg.payload
-            #self.__last_values[msg.topic] = msg.payload
+            self.__last_values[msg.topic] = msg.payload
             self.__is_subscribed_list[msg.topic] = True
             _LOGGER.info("Device of type %s found.\n", device_type)
             

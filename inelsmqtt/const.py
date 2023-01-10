@@ -671,6 +671,7 @@ FRAGMENT_UNIQUE_ID = "fragment_unique_id"
 
 MQTT_BROKER_CLIENT_NAME = "inels-mqtt"
 MQTT_DISCOVER_TOPIC = "inels/connected/#" #"inels/status/#"
+MQTT_STATUS_TOPIC = "inels/status/#"
 
 TOPIC_FRAGMENTS = {
     FRAGMENT_DOMAIN: 0,
