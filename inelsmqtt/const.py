@@ -65,6 +65,7 @@ TI3_60M = "TI3-60M"
 WSB3_20 = "WSB3-20"
 WSB3_40 = "WSB3-40"
 WSB3_40H = "WSB3-40H"
+RC3_610DALI = "RC3-610DALI"
 
 #Virtual bus
 VIRT_CONTR = "Virtual controller"
@@ -94,6 +95,7 @@ INELS_DEVICE_TYPE_DICT = {
     #"109": SA3_022M, #util
     #"111": FA3_612M, #util
     #"112": IOU3_108M, #util
+    #"113" : RC3_610DALI,
     "115": IM3_20B,
     "116": IM3_40B,
     "117": IM3_80B,
@@ -155,6 +157,7 @@ DEVICE_TYPE_DICT = {
 
     #"111": SWITCH,#(?) FA3_612M,
     #"112": SWITCH,#(?) IOU3_108M,
+    #"113" : LIGHT, #RC3_610DALI,
 
     "115": SENSOR, #IM3_20B,
     "116": SENSOR, #IM3_40B,
@@ -258,6 +261,8 @@ CARD_ID = "card_id"
 IN = "in"
 SHUTTER = "shutter"
 VALVE = "valve"
+DALI = "dali"
+AOUT = "aout"
 
 # COVER CONSTANTS
 COVER_SET_BYTES = {
@@ -547,6 +552,16 @@ WSB3_240HUM_DATA = {
     AIN: [4, 5],
     HUMIDITY: [6, 7],
     DEW_POINT: [8, 9],
+}
+
+RC3_610DALI_DATA = {
+    TEMP_IN: [2, 3, 18, 19],
+    AOUT: [4, 5],
+    RELAY: list(range(8, 16)),
+    DALI: [20, 21, 22, 23, 28, 29, 30, 31, 36, 37, 38, 39, 44, 45, 46, 47],
+    DIN: [24],
+    RELAY_OVERFLOW: [25],
+    ALERT: [26],
 }
 
 DEVICE_TYPE_166_DATA = {

@@ -89,6 +89,7 @@ from .const import (
     WSB3_20H,
     WSB3_40,
     WSB3_40H,
+    RC3_610DALI,
     #VIRT_CONTR,
     VIRT_HEAT_REG,
     VIRT_COOL_REG,
@@ -116,6 +117,7 @@ from .const import (
     WSB3_240HUM_DATA,
     DMD3_1_DATA,
     GSB3_DATA,
+    RC3_610DALI_DATA,
 
     RELAY,
     RELAY_OVERFLOW,
@@ -136,6 +138,7 @@ from .const import (
     ALERT,
     SHUTTER,
     VALVE,
+    AOUT,
 
     RELAY_SET,
 
@@ -343,7 +346,76 @@ class DeviceValue(object):
                 valves=[]
                 for i in range(int(len(valve)/2)):
                     valves.append([valve[2*i], valve[2*i+1]])
+            elif self.__inels_type is RC3_610DALI:
+                #aout
+                aout=[]
+                for a in self.__trim_inels_status_bytes(RC3_610DALI_DATA, AOUT):
+                    aout.append(int(a, 16))
+                
+                #relays
+                re=[]
+                for relay in self.__trim_inels_status_bytes(RC3_610DALI_DATA, RELAY):
+                    re.append((int(relay, 16) & 1) != 0)
+                
+                #temperatures
+                temps = []
+                temp_bytes = self.__trim_inels_status_bytes(
+                    INELS_DEVICE_TYPE_DATA_STRUCT_DATA[self.__inels_type],
+                    TEMP_IN,
+                )
+                for i in range(int(len(temp_bytes)/2)):
+                    temps.append(temp_bytes[2*i] + temp_bytes[2*i+1])
+                
+                #digital inputs
+                din=[]
+                digital_inputs = self.__trim_inels_status_values(
+                    INELS_DEVICE_TYPE_DATA_STRUCT_DATA[self.__inels_type], DIN, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+                
+                for i in range(6):
+                    din.append(digital_inputs[7-i] == "1")
+                
+                relay_overflow=[]
+                overflows = self.__trim_inels_status_values(
+                    RC3_610DALI_DATA, RELAY_OVERFLOW, "")
+                overflows = f"0x{overflows}"
+                overflows = f"{int(overflows, 16):0>8b}"
+                for i in range(len(re)):
+                    relay_overflow.append(overflows[7-i] == "1")
                     
+                sync_error = []
+                coa = []
+                alerts = self.__trim_inels_status_values(
+                    RC3_610DALI_DATA, ALERT, "")
+                alerts = f"0x{alerts}"
+                alerts = f"{int(alerts, 16):0>8b}"
+                
+                for i in range(4):
+                    sync_error.append(alerts[7-i == "1"])
+                for i in range(5, 6):
+                    coa.append(alerts[7-i] == "1")
+                alert_dali_power = alerts[1] == "1"
+                alert_dali_communication = alerts[0] == "1"
+                
+                dali_raw = self.__trim_inels_status_bytes(
+                    RC3_610DALI_DATA, ALERT, "")
+                dali = []
+                for d in dali_raw:
+                    d = int(d, 16)
+                    dali.append(d if d <= 100 else 100)
+                    
+                self.__ha_value = new_object(
+                    re=re,
+                    temps=temps,
+                    din=din,
+                    relay_overflow=relay_overflow,
+                    coa=coa,
+                    sync_error=sync_error,
+                    alert_dali_power=alert_dali_power,
+                    alert_dali_communication=alert_dali_communication,
+                    dali=dali,
+                )
             else:
                 self.__ha_value = new_object(on = (SWITCH_STATE[self.__inels_status_value]))
                 self.__inels_set_value = SWITCH_SET[self.__ha_value.on]
@@ -678,22 +750,28 @@ class DeviceValue(object):
                 for i in range(6):
                     sw.append(switches[7-i] == "1")
                     din.append(digital_inputs[7-i] == "1")
-                
+
+                min_brightness = []
+                min_brightness_raw = self.__trim_inels_status_bytes(
+                    DA3_66M_DATA, MIN_BRIGHTNESS
+                )
+                for m in min_brightness_raw:
+                    m = int(m, 16)
+                    min_brightness.append(m if m <= 100 else 100)
+
                 out = []
                 outs = self.__trim_inels_status_bytes(
                     DA3_66M_DATA, OUT
                 )
-                for o in outs:
-                    o = int(o, 16)
-                    out.append(o if o <= 100 else 100)
+                for k, v in enumerate(outs):
+                    v = int(v, 16)
+                    v = v if v == 0 or v > min_brightness[k] else min_brightness[k]
+                    out.append(v if v <= 100 else 100)
                 
-                min_brightness = self.__trim_inels_status_bytes(
-                    DA3_66M_DATA, MIN_BRIGHTNESS
-                )
                 channel_type = min_brightness = self.__trim_inels_status_bytes(
                     DA3_66M_DATA, CHAN_TYPE
                 )
-                
+
                 self.__ha_value = new_object(
                     toa=toa,
                     coa=coa,
@@ -1000,7 +1078,7 @@ class DeviceValue(object):
         if self.__device_type is SWITCH:
             if self.__inels_type is SA3_01B:
                 self.__inels_set_value = RELAY_SET.get(self.__ha_value.on)
-            elif self.__inels_type in [SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M, SA3_22M]:
+            elif self.__inels_type in [SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M, SA3_022M]:
                 value = ""
                 for re in self.__ha_value.re:
                     value += RELAY_SET[re]
