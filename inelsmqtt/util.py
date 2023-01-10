@@ -360,7 +360,7 @@ class DeviceValue(object):
                 #temperatures
                 temps = []
                 temp_bytes = self.__trim_inels_status_bytes(
-                    INELS_DEVICE_TYPE_DATA_STRUCT_DATA[self.__inels_type],
+                    RC3_610DALI_DATA,
                     TEMP_IN,
                 )
                 for i in range(int(len(temp_bytes)/2)):
@@ -369,7 +369,7 @@ class DeviceValue(object):
                 #digital inputs
                 din=[]
                 digital_inputs = self.__trim_inels_status_values(
-                    INELS_DEVICE_TYPE_DATA_STRUCT_DATA[self.__inels_type], DIN, "")
+                    RC3_610DALI_DATA, DIN, "")
                 digital_inputs = f"0x{digital_inputs}"
                 digital_inputs = f"{int(digital_inputs, 16):0>8b}"
                 
