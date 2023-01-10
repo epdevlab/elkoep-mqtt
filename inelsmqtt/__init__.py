@@ -383,7 +383,7 @@ class InelsMqtt:
 
         if device_type in DEVICE_TYPE_DICT and status == "connected":#"status":
             self.__discovered[msg.topic] = msg.payload
-            self.__last_values[msg.topic] = msg.payload
+            #self.__last_values[msg.topic] = msg.payload
             self.__is_subscribed_list[msg.topic] = True
             _LOGGER.info("Device of type %s found.\n", device_type)
             
