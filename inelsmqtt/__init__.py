@@ -381,7 +381,7 @@ class InelsMqtt:
         device_type = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         status = fragments[TOPIC_FRAGMENTS[FRAGMENT_STATE]]
 
-        if device_type in DEVICE_TYPE_DICT and status == "connected":#"status":
+        if device_type in DEVICE_TYPE_DICT and status == "status":
             self.__discovered[msg.topic] = msg.payload
             self.__last_values[msg.topic] = msg.payload
             self.__is_subscribed_list[msg.topic] = True
