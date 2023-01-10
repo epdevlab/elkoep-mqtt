@@ -26,7 +26,6 @@ from .const import (
     TOPIC_FRAGMENTS,
     DISCOVERY_TIMEOUT_IN_SEC,
     MQTT_DISCOVER_TOPIC,
-    MQTT_STATUS_TOPIC,
 )
 
 __version__ = VERSION
@@ -350,12 +349,7 @@ class InelsMqtt:
 
             time.sleep(0.1)
 
-        self.client.unsubscribe(MQTT_DISCOVER_TOPIC)
-
-        self.client.on_message = self.__on_message
-        self.client.subscribe(MQTT_STATUS_TOPIC, 0, None, None)
-
-        #self.__messages = self.__discovered.copy()
+        self.__messages = self.__discovered.copy()
 
         #_LOGGER.info("Found %s devices", self.__discovered.__len__)
         return self.__discovered
