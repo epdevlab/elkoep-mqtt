@@ -58,7 +58,7 @@ IOU3_108M = "IOU3-108M"
 SA3_02B = "SA3-02B"
 SA3_02M = "SA3-02M"
 SA3_06M = "SA3-06M"
-SA3_22M = "SA3-22M"
+SA3_022M = "SA3-022M"
 TI3_10B = "TI3-10B"
 TI3_40B = "TI3-40B"
 TI3_60M = "TI3-60M"
@@ -91,7 +91,7 @@ INELS_DEVICE_TYPE_DICT = {
     "106": SA3_04M,
     "107": SA3_06M,
     "108": SA3_012M,
-    #"109": SA3_22M, #util
+    #"109": SA3_022M, #util
     #"111": FA3_612M, #util
     #"112": IOU3_108M, #util
     "115": IM3_20B,
@@ -109,8 +109,8 @@ INELS_DEVICE_TYPE_DICT = {
     #"137": GDB3_10, #util
     "138": GSB3_40SX, #util
     "139": GSB3_60SX,
-    "140": GSB3_20SX, #util
-    #"141": GBP3_60, #util
+    "140": GSB3_20SX,
+    "141": GBP3_60, #util
     #"147": DAC3_04B, #util
     #"148": DAC3_04M, #util
     #"150": DCDA_33M, #util
@@ -121,9 +121,9 @@ INELS_DEVICE_TYPE_DICT = {
     "159": TI3_60M,
     "160": IDRT3_1,
 
-    #"166": VIRT_CONTR, #util
-    #"167": VIRT_HEAT_REG, #util
-    #"168": VIRT_COOL_REG, #util
+    "166": VIRT_CONTR,
+    "167": VIRT_HEAT_REG,
+    "168": VIRT_COOL_REG,
 }
 
 #TODO retire this system
@@ -151,7 +151,7 @@ DEVICE_TYPE_DICT = {
     "106": SWITCH, #SA3_04M
     "107": SWITCH, #SA3_06M,
     "108": SWITCH, #SA3_012M
-    #"109": SWITCH, #SA3_22M,
+    #"109": SWITCH, #SA3_022M,
 
     #"111": SWITCH,#(?) FA3_612M,
     #"112": SWITCH,#(?) IOU3_108M,
@@ -175,7 +175,7 @@ DEVICE_TYPE_DICT = {
     "138": BUTTON, # GSB3_40SX,
     "139": BUTTON, # GSB3_60SX
     "140": BUTTON, # GSB3_20SX,
-    #"141": SENSOR,#(?) GBP3_60,
+    "141": BUTTON, # GBP3_60,
 
     #"147": LIGHT,#(?) DAC3_04B,
     #"148": LIGHT,#(?) DAC3_04M,
@@ -191,9 +191,9 @@ DEVICE_TYPE_DICT = {
     
     "160": SENSOR, #IDRT3_1
     
-    #"166": CLIMATE,
-    #"167": SENSOR,
-    #"168": SENSOR,
+    "166": CLIMATE, #VIRT_CONTR
+    "167": CLIMATE, #VIRT_HEAT_REG
+    "168": CLIMATE, #VIRT_COOL_REG
 }
 
 
@@ -256,6 +256,8 @@ MIN_BRIGHTNESS = "minimum_brightness"
 CHAN_TYPE = "channel_type"
 CARD_ID = "card_id"
 IN = "in"
+SHUTTER = "shutter"
+VALVE = "valve"
 
 # COVER CONSTANTS
 COVER_SET_BYTES = {
@@ -509,8 +511,14 @@ SA3_06M_DATA = {
     SW: [6],
 }
 
-SA3_022M_DATA = {#TODO see about shutters and stuff
-    RELAY: list(range(16))
+SA3_022M_DATA = {
+    RELAY: list(range(16)),
+    SHUTTER : [16, 17],
+    VALVE: [18, 19, 20, 21],
+    SW: [22, 23],
+    ALERT: [24, 25],
+    RELAY_OVERFLOW: [26, 27],
+    SA3_022M: [28]
 }
 
 TI3_10B_DATA = {
@@ -590,7 +598,8 @@ INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
     TI3_60M: TI3_60M_DATA,
     GSB3_20SX: GSB3_DATA,
     GSB3_40SX: GSB3_DATA,
-    GSB3_60SX: GSB3_DATA
+    GSB3_60SX: GSB3_DATA,
+    GBP3_60: GSB3_DATA,
 }
 
 # BUTTON CONSTANTS
@@ -605,12 +614,39 @@ BUTTON_NUMBER = {
 
 BUTTON_DEVICE_AMOUNT = {RFGB_40: 4}
 
-SA3_AMOUNTS = {SA3_01B: 1, SA3_02B: 2, SA3_02M: 2, SA3_04M: 4, SA3_06M: 6, SA3_012M: 12, SA3_22M: 16}
+SA3_AMOUNTS = {
+    SA3_01B: 1,
+    SA3_02B: 2,
+    SA3_02M: 2,
+    SA3_04M: 4,
+    SA3_06M: 6,
+    SA3_012M: 12,
+    SA3_022M: 16,
+}
+
 DA3_AMOUNTS = {DA3_22M: 2, DA3_66M: 6}
-GSB3_AMOUNTS = {GSB3_20SX: 2, GSB3_40SX: 4, GSB3_60SX: 6, GSB3_90SX: 9}
+GSB3_AMOUNTS = {GSB3_20SX: 2, GSB3_40SX: 4, GSB3_60SX: 6, GSB3_90SX: 9, GBP3_60: 6}
 IM3_AMOUNTS = {IM3_20B: 2, IM3_40B: 4, IM3_80B: 8, IM3_140M: 14}
 TI3_AMOUNTS = {TI3_10B: 1, TI3_40B: 4, TI3_60M: 6}
-WSB3_AMOUNTS = {WSB3_20: 2, WSB3_20H: 2, WSB3_40: 4, WSB3_40H: 4} #TODO fix the H into HUM
+WSB3_AMOUNTS = {WSB3_20: 2, WSB3_20H: 2, WSB3_40: 4, WSB3_40H: 4}
+
+VIRT_CONT_STATUS_TABLE = {
+    0 : "User control",
+    1 : "Two temperature autonomous",
+    2 : "Single temperature autonomous",
+}
+
+VIRT_REG_STATUS_TABLE = {
+    1 : "Enabled",
+    2 : "Error actual temperature",
+    4 : "Error required temperature",
+    8 : "Disabled",
+    16 : "Error critical temperature",
+    32 : "Error anti-freeze temperature",
+}
+
+
+
 # FRAGMENT/MQTT CONSTANTS
 FRAGMENT_DOMAIN = "fragment_domain"
 FRAGMENT_SERIAL_NUMBER = "fragment_serial_number"

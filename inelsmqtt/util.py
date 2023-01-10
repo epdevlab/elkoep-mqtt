@@ -81,7 +81,7 @@ from .const import (
     SA3_02B,
     SA3_02M,
     SA3_06M,
-    SA3_22M,
+    SA3_022M,
     TI3_10B,
     TI3_40B,
     TI3_60M,
@@ -110,6 +110,7 @@ from .const import (
     SA3_02M_DATA,
     SA3_04M_DATA,
     SA3_06M_DATA,
+    SA3_022M_DATA,
     IM3_240B_DATA,
     WSB3_240_DATA,
     WSB3_240HUM_DATA,
@@ -133,6 +134,8 @@ from .const import (
     CHAN_TYPE,
     IN,
     ALERT,
+    SHUTTER,
+    VALVE,
 
     RELAY_SET,
 
@@ -321,6 +324,26 @@ class DeviceValue(object):
                 for r in re:
                     set_val += "07\n" if r else "06\n"
                 self.__inels_set_value=set_val
+            elif self.__inels_type is SA3_022M:
+                re=[]
+                for relay in self.__trim_inels_status_bytes(SA3_022M_DATA, RELAY):
+                    re.append((int(relay, 16) & 1) != 0)
+                    
+                #organize them into [[up, down], ...], [[open, close], ...]
+                shutter=[]
+                for s in self.__trim_inels_status_bytes(SA3_022M_DATA, SHUTTER):
+                    shutter.append((int(s, 16) & 1) != 0)
+                shutters=[]
+                for i in range(int(len(shutter)/2)):
+                    shutters.append([shutter[2*i], shutter[2*i+1]])
+                
+                valve=[]
+                for v in self.__trim_inels_status_bytes(SA3_022M_DATA, VALVE):
+                    valve.append((int(v, 16) & 1) != 0)
+                valves=[]
+                for i in range(int(len(valve)/2)):
+                    valves.append([valve[2*i], valve[2*i+1]])
+                    
             else:
                 self.__ha_value = new_object(on = (SWITCH_STATE[self.__inels_status_value]))
                 self.__inels_set_value = SWITCH_SET[self.__ha_value.on]
@@ -907,7 +930,7 @@ class DeviceValue(object):
                     # backlit
                     backlit=False,
                 )
-            elif self.__inels_type in [GSB3_20SX, GSB3_40SX, GSB3_60SX]:
+            elif self.__inels_type in [GSB3_20SX, GSB3_40SX, GSB3_60SX, GBP3_60]:
                 switches = self.__trim_inels_status_values(
                     GSB3_DATA, SW, "")
                 switches = f"0x{switches}"
