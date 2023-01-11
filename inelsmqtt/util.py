@@ -386,7 +386,7 @@ class DeviceValue(object):
                     relay_overflow.append(overflows[7-i] == "1")
                     
                 sync_error = []
-                coa = []
+                aout_coa = []
                 alerts = self.__trim_inels_status_values(
                     RC3_610DALI_DATA, ALERT, "")
                 alerts = f"0x{alerts}"
@@ -395,7 +395,7 @@ class DeviceValue(object):
                 for i in range(4):
                     sync_error.append(alerts[7-i == "1"])
                 for i in range(4, 6):
-                    coa.append(alerts[7-i] == "1")
+                    aout_coa.append(alerts[7-i] == "1")
                 alert_dali_power = alerts[1] == "1"
                 alert_dali_communication = alerts[0] == "1"
                 
@@ -411,7 +411,7 @@ class DeviceValue(object):
                     temps=temps,
                     din=din,
                     relay_overflow=relay_overflow,
-                    coa=coa,
+                    aout_coa=aout_coa,
                     sync_error=sync_error,
                     alert_dali_power=alert_dali_power,
                     alert_dali_communication=alert_dali_communication,
