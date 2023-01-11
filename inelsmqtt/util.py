@@ -139,6 +139,7 @@ from .const import (
     SHUTTER,
     VALVE,
     AOUT,
+    DALI,
 
     RELAY_SET,
 
@@ -393,13 +394,13 @@ class DeviceValue(object):
                 
                 for i in range(4):
                     sync_error.append(alerts[7-i == "1"])
-                for i in range(5, 6):
+                for i in range(4, 6):
                     coa.append(alerts[7-i] == "1")
                 alert_dali_power = alerts[1] == "1"
                 alert_dali_communication = alerts[0] == "1"
                 
                 dali_raw = self.__trim_inels_status_bytes(
-                    RC3_610DALI_DATA, ALERT)
+                    RC3_610DALI_DATA, DALI)
                 dali = []
                 for d in dali_raw:
                     d = int(d, 16)
