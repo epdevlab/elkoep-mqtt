@@ -1108,7 +1108,7 @@ class DeviceValue(object):
                     set_val += f"{a:02X}\n"
                 set_val += "00\n" * 2
                 for r in self.__ha_value.re:
-                    set_val += f"{RELAY_SET[r]:02X}\n"
+                    set_val += RELAY_SET[r]
                 set_val += "00\n" * 4
                 for i in range(4):
                     set_val += f"{self.__ha_value.dali[i]:02X}\n"
