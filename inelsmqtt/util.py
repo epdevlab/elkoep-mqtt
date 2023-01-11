@@ -411,6 +411,7 @@ class DeviceValue(object):
                     temps=temps,
                     din=din,
                     relay_overflow=relay_overflow,
+                    aout=aout,
                     aout_coa=aout_coa,
                     sync_error=sync_error,
                     alert_dali_power=alert_dali_power,
