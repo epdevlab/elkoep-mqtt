@@ -1102,6 +1102,27 @@ class DeviceValue(object):
 
                 self.__ha_value = new_object(on=(state == 1), temperature=temp)
                 self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]
+            elif self.__inels_type is RC3_610DALI:
+                set_val = "00\n" * 4
+                for a in self.__ha_value.aout:
+                    set_val += f"{a:02X}\n"
+                set_val += "00\n" * 2
+                for r in self.__ha_value.re:
+                    set_val += f"{RELAY_SET[r]:02X}\n"
+                set_val += "00\n" * 4
+                for i in range(4):
+                    set_val += f"{self.__ha_value.dali[i]:02X}\n"
+                set_val += "00\n" * 4
+                for i in range(4, 8):
+                    set_val += f"{self.__ha_value.dali[i]:02X}\n"
+                set_val += "00\n" * 4
+                for i in range(8, 12):
+                    set_val += f"{self.__ha_value.dali[i]:02X}\n"
+                set_val += "00\n" * 4
+                for i in range(12, 16):
+                    set_val += f"{self.__ha_value.dali[i]:02X}\n"
+                    
+                self.__inels_set_value = set_val
             else:
                 # just a shortcut for setting it
                 # basically set the status from the ha value
@@ -1133,8 +1154,8 @@ class DeviceValue(object):
                 out2 = round(self.__ha_value.out[1], -1)
                 out2 = out2 if out2 < 100 else 100
 
-                out1_str = f"{out1:02X}" + "\n"
-                out2_str = f"{out2:02X}" + "\n"
+                out1_str = f"{out1:02X}\n"
+                out2_str = f"{out2:02X}\n"
 
                 # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
                 self.__inels_set_value = "".join(["00\n" * 4, out1_str, out2_str])
