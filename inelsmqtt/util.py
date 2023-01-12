@@ -422,7 +422,6 @@ class DeviceValue(object):
                     alert_dali_power=alert_dali_power,
                     alert_dali_communication=alert_dali_communication,
                     dali=dali,
-                    last_status_val=last_status_val,
                 )
             elif self.__inels_type is FA3_612M:
                 inputs = self.__trim_inels_status_values(FA3_612M_DATA, FA3_612M, "")
@@ -492,6 +491,7 @@ class DeviceValue(object):
                     fan_speed=fan_speed,
                     heating_out=heating_out,
                     ains=ains,
+                    last_status_val=last_status_val,
                 )
             else:
                 self.__ha_value = new_object(on = (SWITCH_STATE[self.__inels_status_value]))
