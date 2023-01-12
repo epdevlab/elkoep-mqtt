@@ -194,7 +194,9 @@ class DeviceValue(object):
         # ha values are for home assistant to observe the state
         # inels set values are for enforcing commands
         # inels status values are what comes from the broker
-
+        
+        #is_rf = "RF" in self.__inels_type
+            
         if self.__device_type is SWITCH:  # outlet switch
             if self.__inels_type is RFSTI_11B:
                 state = int(  # defines state of relay
@@ -1173,13 +1175,13 @@ class DeviceValue(object):
                 self.__ha_value = new_object(on=(state == 1), temperature=temp)
                 self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.on]
             elif self.__inels_type is RC3_610DALI:
-                set_val = "00\n" * 4
+                set_val = "00\n" * 4 #4 bytes
                 for a in self.__ha_value.aout:
                     set_val += f"{a:02X}\n"
-                set_val += "00\n" * 2
+                set_val += "00\n" * 2 #8 bytes
                 for r in self.__ha_value.re:
-                    set_val += RELAY_SET[r]
-                set_val += "00\n" * 4
+                    set_val += RELAY_SET[r] #16 bytes
+                set_val += "00\n" * 4 #20 bytes
                 for i in range(4):
                     set_val += f"{self.__ha_value.dali[i]:02X}\n"
                 set_val += "00\n" * 4
@@ -1194,7 +1196,7 @@ class DeviceValue(object):
                     
                 self.__inels_set_value = set_val
             elif self.__inels_type is FA3_612M:
-                original_status = self.__inels_status_value.split("\n")
+                original_status = self.__last_value.inels_status_value.split("\n")
                 
                 set_val = "00\n" * 4
                 for a in self.ha_value.aout:
