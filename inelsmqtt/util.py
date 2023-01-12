@@ -118,6 +118,7 @@ from .const import (
     DMD3_1_DATA,
     GSB3_DATA,
     RC3_610DALI_DATA,
+    FA3_612M_DATA,
 
     RELAY,
     RELAY_OVERFLOW,
@@ -417,6 +418,75 @@ class DeviceValue(object):
                     alert_dali_power=alert_dali_power,
                     alert_dali_communication=alert_dali_communication,
                     dali=dali,
+                )
+            elif self.__inels_type is FA3_612M:
+                inputs = self.__trim_inels_status_values(FA3_612M_DATA, FA3_612M, "")
+                inputs = f"0x{inputs}"
+                inputs = f"{int(inputs, 16):0>24b}"
+
+                din = []
+                for i in range(3):
+                    din.append(inputs[7-i] == "1")
+
+                aout_coa = []
+                for i in range(4, 8):
+                    aout_coa.append(inputs[7 - i] == "1")
+
+                sw = []
+                for i in range(8):
+                    sw.append(inputs[15-i] == "1")
+
+                roa = []
+                for i in range(3):
+                    roa.append(inputs[23 - i] == "1")
+
+                sw.append(inputs[23 - 3] == "1")
+                
+                overflows = self.__trim_inels_status_values(FA3_612M_DATA, RELAY_OVERFLOW, "")
+                overflows = f"0x{overflows}"
+                overflows = f"{int(overflows, 16):0>8b}"
+                
+                #relay_overflow = []
+                #for i in range(8):
+                #    relay_overflow.append(overflows[7-i] == "1")
+                
+                aout=[]
+                for a in self.__trim_inels_status_bytes(FA3_612M_DATA, AOUT):
+                    aout.append(int(a, 16))
+                
+                re=[]
+                for relay in self.__trim_inels_status_bytes(FA3_612M_DATA, RELAY):
+                    re.append((int(relay, 16) & 1) != 0)
+                
+                valves = [[re[0], re[1]], [re[2], re[3]]]
+                fan_speed = 0
+                if re[6]: #speed 3
+                    fan_speed = 3
+                elif re[5]: #speed 2
+                    fan_speed = 2
+                elif re[3]: #speed 1
+                    fan_speed = 1
+                
+                heating_out = re[7]
+                
+                ains=[]
+                ain_bytes = self.__trim_inels_status_bytes(
+                    FA3_612M_DATA,
+                    AIN,
+                )
+                for i in range(int(len(ain_bytes)/4)):
+                    ains.append(ain_bytes[4*i] + ain_bytes[4*i+1] + ain_bytes[4*i+2] + ain_bytes[4*i+3])
+
+                self.__ha_value = new_object(
+                    din=din,
+                    aout_coa=aout_coa,
+                    sw=sw,
+                    #relay_overflow=relay_overflow,
+                    aout=aout,
+                    valves=valves,
+                    fan_speed=fan_speed,
+                    heating_out=heating_out,
+                    ains=ains,
                 )
             else:
                 self.__ha_value = new_object(on = (SWITCH_STATE[self.__inels_status_value]))
@@ -719,7 +789,7 @@ class DeviceValue(object):
                 for i in range(self.__ha_value.channel_number):
                     set_val +=  f"{self.__ha_value.out[i]:02X}\n"
                 self.__inels_set_value = set_val
-            elif self.__inels_type is DA3_66M:                
+            elif self.__inels_type is DA3_66M:
                 state = self.__trim_inels_status_values(
                     DA3_66M_DATA, ALERT, ""
                 )
@@ -1122,6 +1192,21 @@ class DeviceValue(object):
                 for i in range(12, 16):
                     set_val += f"{self.__ha_value.dali[i]:02X}\n"
                     
+                self.__inels_set_value = set_val
+            elif self.__inels_type is FA3_612M:
+                original_status = self.__inels_status_value.split("\n")
+                
+                set_val = "00\n" * 4
+                for a in self.ha_value.aout:
+                    set_val += f"{a:02X}\n"
+                for i in range(4):
+                    set_val += f"{original_status[8 + i]}\n"
+                fan_val = ""
+                for i in range(3):
+                    fan_val += RELAY_SET[self.ha_value.fan_speed == (i + 1)]
+                set_val += fan_val
+                set_val += f"{original_status[15]}\n"
+                
                 self.__inels_set_value = set_val
             else:
                 # just a shortcut for setting it

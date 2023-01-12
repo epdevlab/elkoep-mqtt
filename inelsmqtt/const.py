@@ -93,7 +93,7 @@ INELS_DEVICE_TYPE_DICT = {
     "107": SA3_06M,
     "108": SA3_012M,
     #"109": SA3_022M, #util
-    #"111": FA3_612M, #util
+    "111": FA3_612M, #util
     #"112": IOU3_108M, #util
     "114": RC3_610DALI,
     "115": IM3_20B,
@@ -155,7 +155,7 @@ DEVICE_TYPE_DICT = {
     "108": SWITCH, #SA3_012M
     #"109": SWITCH, #SA3_022M,
 
-    #"111": SWITCH,#(?) FA3_612M,
+    "111": SWITCH,#(?) FA3_612M,
     #"112": SWITCH,#(?) IOU3_108M,
     "114" : SWITCH, #RC3_610DALI,
 
@@ -440,9 +440,10 @@ DMD3_1_DATA = {
 
 FA3_612M_DATA = {
     FA3_612M: [0, 1, 2],
-    ALERT: [3],
-    OUT: list(range(4, 16)),
-    AIN: list(range(16, 28))
+    RELAY_OVERFLOW: [3],
+    AOUT: list(4, 8),
+    RELAY: list(range(8, 16)),
+    AIN: list(range(16, 28)),
 }
 
 GBP3_60_DATA = {
@@ -491,7 +492,7 @@ IM3_240B_DATA = {
 IOU3_108M_DATA = {
     RELAY: list(range(8)),
     TEMP_IN: [8, 9, 10, 11],
-    TEMP_OUT: [12, 13, 14, 15], #TODO review this
+    TEMP_OUT: [12, 13, 14, 15],
     DIN: [24],
     ALERT: [25, 26],
 }
