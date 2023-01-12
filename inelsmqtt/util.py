@@ -467,7 +467,7 @@ class DeviceValue(object):
                     fan_speed = 3
                 elif re[5]: #speed 2
                     fan_speed = 2
-                elif re[3]: #speed 1
+                elif re[4]: #speed 1
                     fan_speed = 1
                 
                 heating_out = re[7]
