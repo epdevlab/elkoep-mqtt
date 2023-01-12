@@ -409,7 +409,6 @@ class DeviceValue(object):
                     d = int(d, 16)
                     dali.append(d if d <= 100 else 100)
                 
-                last_status_val=self.__inels_status_value
                 
                 self.__ha_value = new_object(
                     re=re,
@@ -480,6 +479,8 @@ class DeviceValue(object):
                 )
                 for i in range(int(len(ain_bytes)/4)):
                     ains.append(ain_bytes[4*i] + ain_bytes[4*i+1] + ain_bytes[4*i+2] + ain_bytes[4*i+3])
+
+                last_status_val=self.__inels_status_value
 
                 self.__ha_value = new_object(
                     din=din,
