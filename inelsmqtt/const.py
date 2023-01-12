@@ -123,9 +123,9 @@ INELS_DEVICE_TYPE_DICT = {
     "159": TI3_60M,
     "160": IDRT3_1,
 
-    "166": VIRT_CONTR,
-    "167": VIRT_HEAT_REG,
-    "168": VIRT_COOL_REG,
+    #"166": VIRT_CONTR,
+    #"167": VIRT_HEAT_REG,
+    #"168": VIRT_COOL_REG,
 }
 
 #TODO retire this system
@@ -194,9 +194,9 @@ DEVICE_TYPE_DICT = {
     
     "160": SENSOR, #IDRT3_1
     
-    "166": CLIMATE, #VIRT_CONTR
-    "167": CLIMATE, #VIRT_HEAT_REG
-    "168": CLIMATE, #VIRT_COOL_REG
+    #"166": CLIMATE, #VIRT_CONTR
+    #"167": CLIMATE, #VIRT_HEAT_REG
+    #"168": CLIMATE, #VIRT_COOL_REG
 }
 
 
@@ -441,7 +441,7 @@ DMD3_1_DATA = {
 FA3_612M_DATA = {
     FA3_612M: [0, 1, 2],
     RELAY_OVERFLOW: [3],
-    AOUT: list(4, 8),
+    AOUT: list(range(4, 8)),
     RELAY: list(range(8, 16)),
     AIN: list(range(16, 28)),
 }
