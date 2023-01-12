@@ -408,7 +408,9 @@ class DeviceValue(object):
                 for d in dali_raw:
                     d = int(d, 16)
                     dali.append(d if d <= 100 else 100)
-                    
+                
+                last_status_val=self.__inels_status_value
+                
                 self.__ha_value = new_object(
                     re=re,
                     temps=temps,
@@ -420,6 +422,7 @@ class DeviceValue(object):
                     alert_dali_power=alert_dali_power,
                     alert_dali_communication=alert_dali_communication,
                     dali=dali,
+                    last_status_val=last_status_val,
                 )
             elif self.__inels_type is FA3_612M:
                 inputs = self.__trim_inels_status_values(FA3_612M_DATA, FA3_612M, "")
@@ -1196,7 +1199,7 @@ class DeviceValue(object):
                     
                 self.__inels_set_value = set_val
             elif self.__inels_type is FA3_612M:
-                original_status = self.__last_value.inels_status_value.split("\n")
+                original_status = self.ha_value.last_status_val.split("\n")
                 
                 set_val = "00\n" * 4
                 for a in self.ha_value.aout:
