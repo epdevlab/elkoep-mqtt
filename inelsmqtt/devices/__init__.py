@@ -1,8 +1,9 @@
 """Class handle base info about device."""
+from collections import defaultdict
 import logging
 import json
 
-from typing import Any
+from typing import Any, Callable
 
 from inelsmqtt.util import DeviceValue
 from inelsmqtt import InelsMqtt
@@ -68,7 +69,8 @@ class Device(object):
         self.__domain = fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]
         self.__state: Any = None
         self.__values: DeviceValue = None
-
+    
+        self.__entity_callbacks: dict[tuple[str, int], Callable[[Any], Any]] = None
         # subscribe availability
         self.__mqtt.subscribe(self.__connected_topic, 0, None, None)
 
@@ -137,7 +139,7 @@ class Device(object):
         if isinstance(val, (bytes, bytearray)):
             val = val.decode()
 
-        return DEVICE_CONNECTED.get(val)
+        return DEVICE_CONNECTED.get(val) and self.__values is not None and self.__values._DeviceValue__ha_value is not None
 
     @property
     def set_topic(self) -> str:
@@ -187,7 +189,14 @@ class Device(object):
         Returns:
             DeviceValue: latest values in many formats
         """
-        return self.__get_value(self.__mqtt.last_value(self.__state_topic))
+        val = self.__mqtt.last_value(self.__state_topic)
+        
+        dev_value = DeviceValue(
+            self.__device_type,
+            self.__inels_type,
+            inels_value=(val.decode() if val is not None else None),
+        )
+        return dev_value
 
     @property
     def mqtt(self) -> InelsMqtt:
@@ -196,16 +205,18 @@ class Device(object):
 
     def update_value(self, new_value: Any) -> DeviceValue:
         """Update value after broker change it."""
+        #_LOGGER.info("UPDATE_VALUE")
         return self.__get_value(new_value)
 
     def __get_value(self, val: Any) -> DeviceValue:
         """Get value and transform into the DeviceValue."""
+        #_LOGGER.info("__GET_VALUE")
+
         dev_value = DeviceValue(
             self.__device_type,
             self.__inels_type,
             inels_value=(val.decode() if val is not None else None),
         )
-
         self.__state = dev_value.ha_value
         self.__values = dev_value
 
@@ -217,6 +228,8 @@ class Device(object):
         Returns:
             Any: DeviceValue
         """
+        #_LOGGER.info("GET_VALUE")
+
         val = self.__mqtt.messages().get(self.state_topic)
         return self.__get_value(val)
 
@@ -267,6 +280,39 @@ class Device(object):
 
         return json_serialized
 
+    def add_ha_callback(self, key: str, index: int, fnc: Callable[[Any], Any]) -> None:
+        t: tuple[str, int] = (key, index)
+        if self.__entity_callbacks is None:
+            self.__entity_callbacks = dict()
+        self.__entity_callbacks[t] = fnc
+        _LOGGER.info("Registering callback for %s.%d", key, index)
+
+    def ha_diff(self, last_val, curr_val, new_val):
+        for k in (key for key in dir(curr_val) if not key.startswith('_')):
+            if type(curr_val.__dict__[k]) is list:
+                for i in range(len(curr_val.__dict__[k])):
+                    #if True:
+                    if curr_val.__dict__[k][i] != last_val.__dict__[k][i]:
+                        t: tuple[str, int] = (k, i)
+                        self.__entity_callbacks[t](new_val)
+                        #_LOGGER.info("Calling %s.%d callback", k, i)
+            else:
+                #if True:
+                if curr_val.__dict__[k] != last_val.__dict__[k]:
+                    t: tuple[str, int] = (k, -1)
+                    self.__entity_callbacks[t](new_val)
+                    #_LOGGER.info("Calling %s callback", k)
+
+    def callback(self, new_value: Any) -> None:
+        """Update value in device and call the callbacks of the respective entities."""
+        #_LOGGER.info("Calling update_value")
+        self.update_value(new_value) #calculate status value
+
+        self.ha_diff(
+            last_val=self.last_values.ha_value,
+            curr_val=self.__values.ha_value,
+            new_val=new_value,
+        )   
 
 class DeviceInfo(object):
     """Device info class."""

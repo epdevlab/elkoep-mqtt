@@ -1,4 +1,5 @@
 """Library specified for inels-mqtt."""
+from collections import defaultdict
 import logging
 import time
 import uuid
@@ -88,7 +89,7 @@ class InelsMqtt:
         _t = config.get(MQTT_TIMEOUT)
         self.__timeout = _t if _t is not None else __DISCOVERY_TIMEOUT__
 
-        self.__listeners = dict[str, dict[str, Callable[[Any], Any]]]()
+        self.__listeners : dict[str, dict[str, Callable[[Any], Any]]] = defaultdict(lambda: dict())
         self.__is_subscribed_list = dict[str, bool]()
         self.__last_values = dict[str, str]()
         self.__try_connect = False
@@ -162,8 +163,8 @@ class InelsMqtt:
 
     def subscribe_listener(self, topic: str, unique_id: str, fnc: Callable[[Any], Any]) -> None:
         """Append new item into the datachange listener."""
-        if topic not in self.__listeners:
-            self.__listeners[topic] = dict[str, Callable[[Any], Any]]()
+        #if topic not in self.__listeners:
+        #    self.__listeners[topic] = dict[str, Callable[[Any], Any]]()
         self.__listeners[topic][unique_id] = fnc
 
     def unsubscribe_listeners(self) -> bool:
@@ -313,7 +314,7 @@ class InelsMqtt:
 
         return self.__messages.get(topic)
 
-    def discovery_all(self) -> dict[str, str]:
+    def discovery_all(self) -> "dict[str, str]":
         """Subscribe to selected topic. This method is primary used for
         subscribing with wild-card (#,+).
         When wild-card is used, then all topic matching this will
@@ -420,7 +421,6 @@ class InelsMqtt:
                 for unique_id in list(self.__listeners[msg.topic]): #prevents the dictionary increased in size during iteration exception
                     self.__listeners[msg.topic][unique_id](msg.payload)
             
-            #self.__listeners[msg.topic](msg.payload)
 
     def __on_subscribe(
         self,
