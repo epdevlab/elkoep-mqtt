@@ -43,14 +43,14 @@ class InelsDiscovery(object):
             list[Device]: List of Device object
         """
         devs = self.__mqtt.discovery_all()
-        self.__devices = [Device(self.__mqtt, item) for item in devs]
+        self.__devices = [Device(self.__mqtt, "inels/status" + item) for item in devs]
 
-        for item in self.__devices:
-            if item.parent_id not in self.__coordinators:
-                self.__coordinators.append(item.parent_id)
-                self.__coordinators_with_devices[item.parent_id] = []
+        # for item in self.__devices:
+        #     if item.parent_id not in self.__coordinators:
+        #         self.__coordinators.append(item.parent_id)
+        #         self.__coordinators_with_devices[item.parent_id] = []
 
-            self.__coordinators_with_devices[item.parent_id].append(item)
+        #     self.__coordinators_with_devices[item.parent_id].append(item)
 
         _LOGGER.info("Discovered %s devices", len(self.__devices))
 
