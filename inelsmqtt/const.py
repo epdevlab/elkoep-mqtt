@@ -16,14 +16,31 @@ BUTTON = "button"
 BINARY_SENSOR = "binary_sensor"
 
 # RF
+RF_SINGLE_SWITCH = "Single switching unit"  # 01
 RF_SWITCHING_UNIT = "Switching unit" #02
-RF_TEMPERATURE_INPUT = "Temperature input" #10
-RF_DIMMER = "Dimmer" #05
 RF_SHUTTERS = "Shutters" #3
+# RF_SINGLE_DIMMER = "Single dimmer"  # 04
+RF_DIMMER = "Dimmer" #05
+RF_DIMMER_RGB = "RGB dimmer"  # 06
+RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR = (
+    "Switching unit with external temperature sensor" #07
+)
+# RF_SWITCHING_UNIT_WITH_TEMPERATURE_SENSORS = (
+#     "Switching unit with temperature sensors"  # 08
+# )
 RF_WIRELESS_THERMOVALVE = "Wireless Thermostat" #9
-RF_CONTROLLER = "Controller" #19
-RF_SWITCHING_UNIT_WITH_TEMPERATURE_SENSOR = "Switching unit with temperature sensor" #7
+RF_TEMPERATURE_INPUT = "Temperature input" #10
 RF_THERMOSTAT = "Thermostat" #12
+RF_FLOOD_DETECTOR = "Flood detector"  # 15
+RF_DETECTOR = "Detector"  # 16
+RF_MOTION_DETECTOR = "Motion detector"  # 17
+RF_2_BUTTON_CONTROLLER = "Two button controller"  # 18
+RF_CONTROLLER = "Controller" #19
+RF_PULSE_CONVERTER = "Pulse converter"  # 20
+# RF_SHUTTER_UNIT = "Shutter unit" #21
+RF_TEMPERATURE_HUMIDITY_SENSOR = "Temperature and humidity sensor"  # 29
+SYSTEM_BITS = "Virtual system bits"
+SYSTEM_INTEGERS = "Virtual system integers"
 
 # BUS
 SA3_01B = "SA3-01B"
@@ -73,10 +90,11 @@ VIRT_COOL_REG = "Cool virtual regulator"
 
 
 INELS_DEVICE_TYPE_DICT = {
+    # "01": RF_SINGLE_SWITCH,
     "02": RF_SWITCHING_UNIT,
     "03": RF_SHUTTERS,
     "05": RF_DIMMER,
-    "07": RF_SWITCHING_UNIT_WITH_TEMPERATURE_SENSOR,
+    "07": RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR,
     "09": RF_WIRELESS_THERMOVALVE,
     "10": RF_TEMPERATURE_INPUT,
     "19": RF_CONTROLLER,
@@ -599,7 +617,7 @@ INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
     RF_SWITCHING_UNIT : DEVICE_TYPE_02_DATA,
     RF_SHUTTERS : DEVICE_TYPE_03_DATA,
     RF_DIMMER : DEVICE_TYPE_05_DATA,
-    RF_SWITCHING_UNIT_WITH_TEMPERATURE_SENSOR : DEVICE_TYPE_07_DATA,
+    RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR : DEVICE_TYPE_07_DATA,
     RF_WIRELESS_THERMOVALVE : DEVICE_TYPE_09_DATA,
     RF_TEMPERATURE_INPUT : DEVICE_TYPE_10_DATA,
     RF_CONTROLLER : DEVICE_TYPE_19_DATA,
@@ -682,8 +700,13 @@ FRAGMENT_DEVICE_TYPE = "fragment_device_type"
 FRAGMENT_UNIQUE_ID = "fragment_unique_id"
 
 MQTT_BROKER_CLIENT_NAME = "inels-mqtt"
-MQTT_DISCOVER_TOPIC = "inels/status/#" #"inels/connected/#"
-MQTT_STATUS_TOPIC = "inels/status/#"
+MQTT_DISCOVER_TOPIC = "inels/status/#"
+
+MQTT_TOTAL_CONNECTED_TOPIC = "inels/connected/#"
+MQTT_TOTAL_STATUS_TOPIC = "inels/status/#"
+
+MQTT_STATUS_TOPIC_PREFIX = "inels/status/"
+MQTT_SET_TOPIC_PREFIX = "inels/set/"
 
 TOPIC_FRAGMENTS = {
     FRAGMENT_DOMAIN: 0,
@@ -723,9 +746,17 @@ SWITCH_WITH_TEMP_SET = {
     False: SWITCH_OFF_WITH_TEMP_SET,
 }
 
+DEVICE_TYPE_02_COMM_TEST = "08\n00\n00\n"
 DEVICE_TYPE_07_COMM_TEST = "08\n00\n"
 DEVICE_TYPE_05_COMM_TEST = "07\n00\n00\n"
 DEVICE_TYPE_03_COMM_TEST = "09\n00\n00\n"
+
+INELS_COMM_TEST_DICT = {
+    "02": DEVICE_TYPE_02_COMM_TEST,
+    "03": DEVICE_TYPE_03_COMM_TEST,
+    "05": DEVICE_TYPE_05_COMM_TEST,
+    "07": DEVICE_TYPE_07_COMM_TEST,
+}
 
 # RELAY (100)
 # state
