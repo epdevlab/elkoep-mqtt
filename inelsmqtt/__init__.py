@@ -11,12 +11,14 @@ from typing import Any, Callable
 import paho.mqtt.client as mqtt
 
 from .const import (
-    FRAGMENT_UNIQUE_ID,
     MQTT_CLIENT_ID,
     MQTT_HOST,
     MQTT_PASSWORD,
     MQTT_PORT,
+    MQTT_STATUS_TOPIC_PREFIX,
     MQTT_TIMEOUT,
+    MQTT_TOTAL_CONNECTED_TOPIC,
+    MQTT_TOTAL_STATUS_TOPIC,
     MQTT_TRANSPORT,
     MQTT_USERNAME,
     MQTT_PROTOCOL,
@@ -27,7 +29,6 @@ from .const import (
     FRAGMENT_STATE,
     TOPIC_FRAGMENTS,
     DISCOVERY_TIMEOUT_IN_SEC,
-    MQTT_DISCOVER_TOPIC,
 )
 
 __version__ = VERSION
@@ -339,13 +340,20 @@ class InelsMqtt:
         self.client.on_message = self.__on_discover
 
         self.__connect()
-        #self.client.subscribe(MQTT_DISCOVER_TOPIC, 0, None, None)
+
         self.client.subscribe(
-            #MQTT_DISCOVER_TOPIC,
-            'inels/#',
-            0, None, None
+            MQTT_TOTAL_CONNECTED_TOPIC,
+            0,
+            None,
+            None,
         )
 
+        self.client.subscribe(
+            MQTT_TOTAL_STATUS_TOPIC,
+            0,
+            None,
+            None,
+        )
 
         self.__discover_start_time = datetime.now()
 
@@ -357,9 +365,11 @@ class InelsMqtt:
 
             time.sleep(0.1)
 
-        self.__messages = self.__discovered.copy()
+        for t in self.__discovered:
+            self.__messages[MQTT_STATUS_TOPIC_PREFIX + t] = self.__discovered[t]
 
-        #_LOGGER.info("Found %s devices", self.__discovered.__len__)
+        self.client.unsubscribe(MQTT_TOTAL_CONNECTED_TOPIC)
+
         return self.__discovered
 
     def __on_discover(
@@ -388,7 +398,6 @@ class InelsMqtt:
         fragments = msg.topic.split("/")
         device_type = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         action = fragments[TOPIC_FRAGMENTS[FRAGMENT_STATE]]
-        unique_id = fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]
 
         if device_type in DEVICE_TYPE_DICT:
             topic = msg.topic.split("/")[2:]
@@ -399,11 +408,12 @@ class InelsMqtt:
                 self.__last_values[msg.topic] = msg.payload
                 self.__is_subscribed_list[msg.topic] = True
                 _LOGGER.info("Device of type %s found [status].\n", device_type)
-            elif action == "connect":
-                self.__discovered[topic] = msg.payload
-                self.__last_values[msg.topic] = msg.payload
-                self.__is_subscribed_list[msg.topic] = msg.payload
-                _LOGGER.info("Device of type %s found [connect].\n", device_type)
+            elif action == "connected":
+                if topic not in self.__discovered:
+                    self.__discovered[topic] = None#msg.payload
+                    self.__last_values[msg.topic] = msg.payload
+                    self.__is_subscribed_list[msg.topic] = msg.payload
+                _LOGGER.info("Device of type %s found [connected].\n", device_type)
         
         # if device_type in DEVICE_TYPE_DICT and action == "status":
         #     self.__discovered[msg.topic] = msg.payload
