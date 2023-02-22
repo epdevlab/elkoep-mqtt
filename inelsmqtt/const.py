@@ -109,7 +109,7 @@ INELS_DEVICE_TYPE_DICT = {
     "106": SA3_04M,
     "107": SA3_06M,
     "108": SA3_012M,
-    #"109": SA3_022M, #util
+    "109": SA3_022M, #util
     "111": FA3_612M, #util
     #"112": IOU3_108M, #util
     "114": RC3_610DALI,
