@@ -1258,7 +1258,7 @@ class DeviceValue(object):
                 for s in self.__ha_value.shutter_motors:
                     value += RELAY_SET[s]
                 for v in self.__ha_value.valve:
-                    value += RELAY[v]
+                    value += RELAY_SET[v]
                 self.__inels_set_value = value
             elif self.__inels_type is RC3_610DALI:
                 set_val = "00\n" * 4 #4 bytes
