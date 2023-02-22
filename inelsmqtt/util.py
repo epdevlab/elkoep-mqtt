@@ -373,6 +373,16 @@ class DeviceValue(object):
                     shutter_motors=shutter,
                     valve=valve,
                 )
+
+                set_val = ""
+                for r in self.ha_value.re:
+                    set_val += RELAY_SET[r]
+                for s in self.ha_value.shutter_motors:
+                    set_val += RELAY_SET[r]
+                for v in self.ha_value.valve:
+                    set_val += RELAY_SET[r]
+
+                self.__inels_set_value = set_val
             elif self.__inels_type is RC3_610DALI:
                 #aout
                 aout=[]
