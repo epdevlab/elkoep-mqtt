@@ -282,27 +282,21 @@ class Device(object):
         if self.__entity_callbacks is None:
             self.__entity_callbacks = dict()
         self.__entity_callbacks[t] = fnc
-        _LOGGER.info("Registering callback for %s.%d", key, index)
 
     def ha_diff(self, last_val, curr_val, new_val):
         for k in (key for key in dir(curr_val) if not key.startswith('_')):
             if type(curr_val.__dict__[k]) is list:
                 for i in range(len(curr_val.__dict__[k])):
-                    #if True:
                     if curr_val.__dict__[k][i] != last_val.__dict__[k][i]:
                         t: tuple[str, int] = (k, i)
                         self.__entity_callbacks[t](new_val)
-                        #_LOGGER.info("Calling %s.%d callback", k, i)
             else:
-                #if True:
                 if curr_val.__dict__[k] != last_val.__dict__[k]:
                     t: tuple[str, int] = (k, -1)
                     self.__entity_callbacks[t](new_val)
-                    #_LOGGER.info("Calling %s callback", k)
 
     def callback(self, new_value: Any) -> None:
         """Update value in device and call the callbacks of the respective entities."""
-        #_LOGGER.info("Calling update_value")
         self.update_value(new_value) #calculate status value
 
         self.ha_diff(
