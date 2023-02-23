@@ -28,7 +28,7 @@ RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR = (
 # RF_SWITCHING_UNIT_WITH_TEMPERATURE_SENSORS = (
 #     "Switching unit with temperature sensors"  # 08
 # )
-RF_WIRELESS_THERMOVALVE = "Wireless Thermostat" #9
+RF_WIRELESS_THERMOVALVE = "Wireless Thermovalve" #9
 RF_TEMPERATURE_INPUT = "Temperature input" #10
 RF_THERMOSTAT = "Thermostat" #12
 RF_FLOOD_DETECTOR = "Flood detector"  # 15
