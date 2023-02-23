@@ -852,8 +852,8 @@ class DeviceValue(object):
                 )
                 
                 set_val = "00\n00\n00\n00\n"
-                for i in range(self.__ha_value.out):
-                    set_val +=  f"{i:02X}\n"
+                for i in range(len(self.__ha_value.out)):
+                    set_val +=  f"{self.__ha_value.out[i]:02X}\n"
                 self.__inels_set_value = set_val
             elif self.__inels_type is DA3_66M:
                 state = self.__trim_inels_status_values(
