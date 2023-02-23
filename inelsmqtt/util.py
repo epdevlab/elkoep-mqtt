@@ -778,7 +778,7 @@ class DeviceValue(object):
                 if self.inels_status_value is None:
                     _LOGGER.info("inels_status_value was None for RFDAC")
                     self.__inels_set_value = DEVICE_TYPE_05_COMM_TEST
-                    self.ha_value = None
+                    self.__ha_value = None
                 else:
                     brightness = int(self.__trim_inels_status_values(DEVICE_TYPE_05_DATA, RF_DIMMER, ""), 16)
                     brightness = int((((0xFFFF - brightness) - 10000)/1000)*5)
