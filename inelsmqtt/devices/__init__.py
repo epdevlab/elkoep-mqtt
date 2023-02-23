@@ -205,12 +205,10 @@ class Device(object):
 
     def update_value(self, new_value: Any) -> DeviceValue:
         """Update value after broker change it."""
-        #_LOGGER.info("UPDATE_VALUE")
         return self.__get_value(new_value)
 
     def __get_value(self, val: Any) -> DeviceValue:
         """Get value and transform into the DeviceValue."""
-        #_LOGGER.info("__GET_VALUE")
 
         dev_value = DeviceValue(
             self.__device_type,
@@ -228,7 +226,6 @@ class Device(object):
         Returns:
             Any: DeviceValue
         """
-        #_LOGGER.info("GET_VALUE")
 
         val = self.__mqtt.messages().get(self.state_topic)
         return self.__get_value(val)

@@ -48,10 +48,14 @@ class InelsDiscovery(object):
         retry = False
         for d in devs:
             if devs[d] is None: #if comes from 'connected'
-                dev_type = d.split("/")[1]
+                d_frags = d.split("/")
+                
+                dev_type = d_frags[1]
+                unique_id = d_frags[2]
+
                 if dev_type in INELS_COMM_TEST_DICT:
                     self.__mqtt.publish("inels/set/" + d, INELS_COMM_TEST_DICT[dev_type])
-                    _LOGGER.info("Sending comm test to device of type %s", dev_type)
+                    _LOGGER.info("Sending comm test to device of type %s, unique_id %s", dev_type, unique_id)
                     retry = True
 
         if retry:
