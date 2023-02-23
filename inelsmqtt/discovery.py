@@ -58,6 +58,9 @@ class InelsDiscovery(object):
             _LOGGER.info("Retrying discovery...")
             devs = self.__mqtt.discovery_all()
 
+        #disregard any devices that don't respond
+        devs = dict((k, v) for k, v in devs.items() if v is not None)
+
         self.__devices = [Device(self.__mqtt, "inels/status/" + item) for item in devs]
         # for item in self.__devices:
         #     if item.parent_id not in self.__coordinators:
