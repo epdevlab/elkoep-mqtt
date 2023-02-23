@@ -243,12 +243,12 @@ class DeviceValue(object):
                 temp = self.__trim_inels_status_values(SA3_01B_DATA, TEMP_IN, "")
                 
                 relay_overflow = []
-                relay_overflow.append(int(self.__trim_inels_status_values(SA3_01B_DATA, RELAY_OVERFLOW, ""),16))
+                relay_overflow.append(int(self.__trim_inels_status_values(SA3_01B_DATA, RELAY_OVERFLOW, ""),16) == 1)
                 
                 self.__ha_value = new_object(
                     re=re,
                     temp_in=temp,
-                    relay_overflow=(relay_overflow == 1)
+                    relay_overflow=relay_overflow
                 )
                 self.__inels_set_value = RELAY_SET[self.__ha_value.re[0]]
             elif self.__inels_type is SA3_02B:
