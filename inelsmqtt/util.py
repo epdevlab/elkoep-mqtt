@@ -590,7 +590,6 @@ class DeviceValue(object):
                     card_read_state=card_read_state,
                     card_id=card_id,
                 )
-
         elif self.__device_type is SENSOR:  # temperature sensor
             if self.__inels_type is RF_TEMPERATURE_INPUT:
                 battery = int(self.__trim_inels_status_values(DEVICE_TYPE_10_DATA, BATTERY, ""), 16)
@@ -1183,9 +1182,6 @@ class DeviceValue(object):
                     cool_reg=cool_reg,
                     cool_source=cool_source,
                 )
-                
-            else:
-                self.__ha_value = self.__inels_status_value
         elif self.__device_type is BUTTON:
             if self.__inels_type is RF_CONTROLLER:
                 if self.__inels_status_value is None:
@@ -1228,7 +1224,7 @@ class DeviceValue(object):
                         low_battery=low_battery,
                         btn=btn
                     )
-            if self.__inels_type is RF_2_BUTTON_CONTROLLER:
+            elif self.__inels_type is RF_2_BUTTON_CONTROLLER:
                 if self.__inels_status_value is None:
                     self.__ha_value = new_object(
                         low_battery=True,
@@ -1257,7 +1253,6 @@ class DeviceValue(object):
                         low_battery=low_battery,
                         btn=btn,
                     )
-
             elif self.__inels_type is GSB3_90SX:
                 digital_inputs = self.__trim_inels_status_values(
                     GSB3_90SX_DATA, GSB3_90SX, "")
@@ -1362,10 +1357,7 @@ class DeviceValue(object):
                     
                     # backlit
                     # backlit=False,
-                )
-            
-            else:
-                self.__ha_value = self.__inels_status_value
+                )         
             
     def __trim_inels_status_values(
         self, selector: "dict[str, Any]", fragment: str, jointer: str
@@ -1522,29 +1514,10 @@ class DeviceValue(object):
                 else:
                     shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0]]
                     self.__inels_set_value = shutter_set + "00\n00\n"
-
-
-                # self.__inels_status_value = self.__find_keys_by_value(
-                #     SHUTTER_STATES,  # str -> str
-                #     self.__ha_value,
-                #     self.__last_value
-                # )
-                # self.__inels_set_value = SHUTTER_SET.get(self.__ha_value)
-                # # special behavior. We need to find right HA state for the cover
-                # prev_val = SHUTTER_STATES.get(self.__inels_status_value)
-                # ha_val = (
-                #     self.__ha_value
-                #     if self.__ha_value in SHUTTER_STATE_LIST
-                #     else prev_val
-                # )
-                # self.__ha_value = ha_val
         elif self.__device_type is CLIMATE:
             if self.__inels_type is RF_WIRELESS_THERMOVALVE:
                 required_temp = int(round(self.__ha_value.climate.required * 2, 0))
                 self.__inels_set_value = f"00\n{required_temp:02X}\n00\n"
-
-                # required_temp = int(round(self.__ha_value.required * 2, 0))
-                # self.__inels_set_value = f"00 {required_temp:x} 00".upper()
         elif self.__device_type is BUTTON:
             if self.__inels_type is GSB3_90SX:
                 disabled = BUTTONARRAY_SET_DISABLED[self.__ha_value.disabled]
