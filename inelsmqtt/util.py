@@ -963,7 +963,7 @@ class DeviceValue(object):
                 self.__inels_set_value = set_val
             elif self.__inels_type in [DAC3_04B, DAC3_04M]:
                 temp_in = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_IN, "")
-                aout_str = self.__trim_inels_status_bytes(DAC3_04_DATA, OUT, "")
+                aout_str = self.__trim_inels_status_bytes(DAC3_04_DATA, OUT)
                 aout = []
                 for d in aout_str:
                     d = int(d, 16)
