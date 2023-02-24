@@ -303,6 +303,8 @@ class InelsMqtt:
         self.__connect()
         self.client.subscribe(topic, qos, options, properties)
 
+        self.__is_subscribed_list[topic] = True
+
         start_time = datetime.now()
 
         while self.__message_readed is False:
@@ -406,7 +408,7 @@ class InelsMqtt:
                 if topic not in self.__discovered:
                     self.__discovered[topic] = None#msg.payload
                     self.__last_values[msg.topic] = msg.payload
-                    self.__is_subscribed_list[msg.topic] = msg.payload
+                    self.__is_subscribed_list[msg.topic] = True
                 _LOGGER.info("Device of type %s found [connected].\n", device_type)
             
     def __on_message(
@@ -434,7 +436,7 @@ class InelsMqtt:
             )
             self.__messages[msg.topic] = msg.payload
             # update info that the topic is subscribed
-            self.__is_subscribed_list[msg.topic] = True
+            #self.__is_subscribed_list[msg.topic] = True
 
         if len(self.__listeners) > 0 and msg.topic in self.__listeners:
             # This pass data change directely into the device.
