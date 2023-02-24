@@ -66,7 +66,7 @@ class InelsDiscovery(object):
         sanitized_devs = []
         for k, v in devs.items():
             k_frags = k.split("/")
-            dev_type = d_frags[1]
+            dev_type = k_frags[1]
             if v is not None or INELS_DEVICE_TYPE_DICT[dev_type] in INELS_ASSUMED_STATE_DEVICES:
                 sanitized_devs.append(k)
         devs = sanitized_devs
