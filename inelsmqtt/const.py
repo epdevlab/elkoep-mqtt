@@ -766,6 +766,12 @@ DEVICE_TYPE_05_COMM_TEST = "07\n00\n00\n"
 DEVICE_TYPE_07_COMM_TEST = "08\n00\n"
 DEVICE_TYPE_13_COMM_TEST = "07\n00\n00\n00\n00\n00\n"
 
+#devices that support having no state topic at setup time
+INELS_ASSUMED_STATE_DEVICES = [ 
+    RF_2_BUTTON_CONTROLLER,
+    RF_CONTROLLER,
+]
+
 INELS_COMM_TEST_DICT = {
     "01": DEVICE_TYPE_07_COMM_TEST, # same as 07
     "02": DEVICE_TYPE_02_COMM_TEST,

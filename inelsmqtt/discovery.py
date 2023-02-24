@@ -1,6 +1,6 @@
 """Discovery class handle find all device in broker and create devices."""
 import logging
-from inelsmqtt.const import INELS_COMM_TEST_DICT
+from inelsmqtt.const import INELS_ASSUMED_STATE_DEVICES, INELS_COMM_TEST_DICT, INELS_DEVICE_TYPE_DICT
 
 from inelsmqtt import InelsMqtt
 from inelsmqtt.devices import Device
@@ -63,7 +63,13 @@ class InelsDiscovery(object):
             devs = self.__mqtt.discovery_all()
 
         #disregard any devices that don't respond
-        devs = dict((k, v) for k, v in devs.items() if v is not None)
+        sanitized_devs = []
+        for k, v in devs.items():
+            k_frags = k.split("/")
+            dev_type = d_frags[1]
+            if v is not None or INELS_DEVICE_TYPE_DICT[dev_type] in INELS_ASSUMED_STATE_DEVICES:
+                sanitized_devs.append(k)
+        devs = sanitized_devs
 
         self.__devices = [Device(self.__mqtt, "inels/status/" + item) for item in devs]
         # for item in self.__devices:
