@@ -7,8 +7,12 @@ from typing import Any, Dict
 from inelsmqtt.mqtt_client import GetMessageType
 
 from .const import (
+    ADC3_60M_DATA,
     ANALOG_REGULATOR_SET_BYTES,
     BATTERY,
+    CARD_DATA,
+    CARD_ID,
+    DAC3_04_DATA,
     DEVICE_TYPE_01_COMM_TEST,
     DEVICE_TYPE_02_COMM_TEST,
     DEVICE_TYPE_09_DATA,
@@ -174,6 +178,7 @@ from .const import (
     INELS_DEVICE_TYPE_DATA_STRUCT_DATA,
 
     DEVICE_TYPE_07_COMM_TEST,
+    Card_read_state,
     Shutter_state,
 )
 
@@ -554,9 +559,39 @@ class DeviceValue(object):
                     ains=ains,
                     last_status_val=last_status_val,
                 )
-            else:
-                self.__ha_value = new_object(on = (SWITCH_STATE[self.__inels_status_value]))
-                self.__inels_set_value = SWITCH_SET[self.__ha_value.on]
+            elif self.__inels_type in [GCR3_11, GCH3_31]:
+                state = self.__trim_inels_status_values(CARD_DATA, STATE, "")
+                
+                re = []
+                re.append(state[13] == "1")
+                
+                card_ok = (state[12] == "1")
+                card_ko = (state[11] == "1")
+
+                card_read_state = Card_read_state.No_card
+                if card_ko:
+                    card_read_state = Card_read_state.Failure
+                elif card_ok:
+                    card_read_state = Card_read_state.Success
+
+                card_id = self.__trim_inels_status_values(CARD_DATA, CARD_ID, "")
+
+                sw = []
+                sw.append(state[8] == "1")
+                sw.append(state[5] == "1")
+                sw.append(state[3] == "1")
+
+                light_in = self.__trim_inels_status_values(CARD_DATA, LIGHT_IN, "")
+
+                temp_in = self.__trim_inels_status_values(CARD_DATA, TEMP_IN, "")
+                self.__ha_value = new_object(
+                    re=re,
+                    sw=sw,
+                    temp_in=temp_in,
+                    card_read_state=card_read_state,
+                    card_id=card_id,
+                )
+
         elif self.__device_type is SENSOR:  # temperature sensor
             if self.__inels_type is RF_TEMPERATURE_INPUT:
                 battery = int(self.__trim_inels_status_values(DEVICE_TYPE_10_DATA, BATTERY, ""), 16)
@@ -799,6 +834,17 @@ class DeviceValue(object):
                     humidity=humidity,
                     motion=motion,
                 )
+            elif self.__inels_type is ADC3_60M:
+                ains=[]
+                ain_bytes = self.__trim_inels_status_bytes(
+                    ADC3_60M_DATA, AIN,
+                )
+                for i in range(int(len(ain_bytes)/4)):
+                    ains.append(ain_bytes[4*i] + ain_bytes[4*i+1] + ain_bytes[4*i+2] + ain_bytes[4*i+3])
+
+                self.__ha_value = new_object(
+                    ains=ains,
+                )
             elif self.__inels_type in [TI3_10B, TI3_40B, TI3_60M]:
                 temps = []
                 temp_bytes = self.__trim_inels_status_bytes(
@@ -916,6 +962,23 @@ class DeviceValue(object):
                 for i in range(len(self.__ha_value.out)):
                     set_val +=  f"{self.__ha_value.out[i]:02X}\n"
                 self.__inels_set_value = set_val
+            elif self.__inels_type in [DAC3_04B, DAC3_04M]:
+                temp_in = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_IN, "")
+                aout_str = self.__trim_inels_status_bytes(DAC3_04_DATA, OUT, "")
+                aout = []
+                for d in aout_str:
+                    d = int(d, 16)
+                    d = d if d <= 100 else 100
+                    aout.append(d)
+                
+                self.__ha_value = new_object(
+                    temp_in=temp_in,
+                    aout=aout,
+                )
+
+                set_val = "00\n" * 4
+                for d in aout:
+                    set_val += f"{d:02X}\n"
             elif self.__inels_type is DA3_66M:
                 state = self.__trim_inels_status_values(
                     DA3_66M_DATA, ALERT, ""
@@ -974,8 +1037,6 @@ class DeviceValue(object):
                     set_val += f"{self.__ha_value.out[i]:02X}\n"
                 set_val += "00\n"*12
                 self.__inels_set_value = set_val
-            else:
-                self.__ha_value = self.__inels_status_value
         elif self.__device_type is COVER:  # Shutters
             if self.inels_status_value is None:
                 _LOGGER.info("inels_status_value was 'None' for %s", RF_SHUTTERS)
@@ -1438,6 +1499,10 @@ class DeviceValue(object):
 
                 # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
                 self.__inels_set_value = "".join(["00\n" * 4, out1_str, out2_str])
+            elif self.__inels_type in [DAC3_04B, DAC3_04M]:
+                set_val = "00\n" * 4
+                for d in self.ha_value.aout:
+                    set_val += f"{d:02X}\n"
             elif self.__inels_type is DA3_66M:
                 set_val = "00\n"*4
                 for i in range(4):
@@ -1495,8 +1560,6 @@ class DeviceValue(object):
                 self.__inels_set_value = "".join("00\n" * 10)
             elif self.__inels_type is IDRT3_1:
                 self.__inels_set_value = "".join("00\n" * 9)
-            #else:
-            #    self.__ha_value = ha_val
 
     def __find_keys_by_value(self, array: dict, value, last_value) -> Any:
         """Return key from dict by value

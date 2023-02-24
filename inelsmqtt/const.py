@@ -136,11 +136,11 @@ INELS_DEVICE_TYPE_DICT = {
     "139": GSB3_60SX,
     "140": GSB3_20SX,
     "141": GBP3_60,
-    #"147": DAC3_04B, #util
-    #"148": DAC3_04M, #util
+    "147": DAC3_04B, #util
+    "148": DAC3_04M, #util
     #"150": DCDA_33M, #util
     "151": DA3_66M,
-    #"156": ADC3_60M, #util
+    "156": ADC3_60M, #util
     "157": TI3_10B,
     "158": TI3_40B,
     "159": TI3_60M,
@@ -198,8 +198,8 @@ DEVICE_TYPE_DICT = {
     "124": SENSOR, #WSB3_20HUM / H
     "125": SENSOR, #WSB3_40HUM,
 
-    #"128": SENSOR,#(?) GCR3_11,
-    #"129": SENSOR,#(?) GCH3_31,
+    #"128": SWITCH, # GCR3_11,
+    #"129": SWITCH, # GCH3_31,
 
     #"136": SENSOR,#(?) GSP3_100,
     #"137": SENSOR,#(?) GDB3_10,
@@ -208,13 +208,13 @@ DEVICE_TYPE_DICT = {
     "140": BUTTON, # GSB3_20SX,
     "141": BUTTON, # GBP3_60,
 
-    #"147": LIGHT,#(?) DAC3_04B,
-    #"148": LIGHT,#(?) DAC3_04M,
-    #"150": LIGHT,#(?) DCDA_33M,
+    "147": LIGHT, # DAC3_04B,
+    "148": LIGHT, # DAC3_04M,
+    #"150": LIGHT, # DCDA_33M,
 
     "151": LIGHT, #DA3_66M,
 
-    #"156": SENSOR, #ADC3_60M,
+    "156": SENSOR, #ADC3_60M,
 
     "157": SENSOR,# TI3_10B,
     "158": SENSOR,# TI3_40B,
@@ -320,6 +320,11 @@ RF_SHUTTER_STATE_SET = {
     Shutter_state.Stop_up: "04\n",
     Shutter_state.Stop_down: "06\n",
 }
+
+class Card_read_state(IntEnum):
+    No_card = 0
+    Success = 1
+    Failure = 2
 
 SHUTTER_STATE_LIST = [STATE_OPEN, STATE_CLOSED]
 
@@ -497,7 +502,7 @@ GBP3_60_DATA = {
 }
 
 CARD_DATA = { #Card holder/reader
-    SW: [0, 1], #really confusing distribution
+    STATE: [0, 1],
     CARD_ID: list(range (4, 12)),
     LIGHT_IN: [12, 13, 14, 15],
     TEMP_IN: [16, 17],

@@ -289,11 +289,13 @@ class Device(object):
                 for i in range(len(curr_val.__dict__[k])):
                     if curr_val.__dict__[k][i] != last_val.__dict__[k][i]:
                         t: tuple[str, int] = (k, i)
-                        self.__entity_callbacks[t](new_val)
+                        if t in self.__entity_callbacks:
+                            self.__entity_callbacks[t](new_val)
             else:
                 if curr_val.__dict__[k] != last_val.__dict__[k]:
                     t: tuple[str, int] = (k, -1)
-                    self.__entity_callbacks[t](new_val)
+                    if t in self.__entity_callbacks:
+                        self.__entity_callbacks[t](new_val)
 
     def callback(self, new_value: Any) -> None:
         """Update value in device and call the callbacks of the respective entities."""
