@@ -13,7 +13,6 @@ from .const import (
     CARD_DATA,
     CARD_ID,
     DAC3_04_DATA,
-    DEVICE_TYPE_01_COMM_TEST,
     DEVICE_TYPE_02_COMM_TEST,
     DEVICE_TYPE_09_DATA,
     COVER,
