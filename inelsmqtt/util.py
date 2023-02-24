@@ -9,6 +9,8 @@ from inelsmqtt.mqtt_client import GetMessageType
 from .const import (
     ANALOG_REGULATOR_SET_BYTES,
     BATTERY,
+    DEVICE_TYPE_01_COMM_TEST,
+    DEVICE_TYPE_02_COMM_TEST,
     DEVICE_TYPE_09_DATA,
     COVER,
     CURRENT_TEMP,
@@ -18,17 +20,28 @@ from .const import (
     DEVICE_TYPE_05_COMM_TEST,
     DEVICE_TYPE_05_DATA,
     DEVICE_TYPE_05_HEX_VALUES,
+    DEVICE_TYPE_13_COMM_TEST,
+    DEVICE_TYPE_13_DATA,
+    DEVICE_TYPE_16_DATA,
     DEVICE_TYPE_19_DATA,
     BUTTON_DEVICE_AMOUNT,
     BUTTON_NUMBER,
     DEVICE_TYPE_07_DATA,
     DEVICE_TYPE_10_DATA,
     DEVICE_TYPE_12_DATA,
+    DEVICE_TYPE_29_DATA,
     REQUIRED_TEMP,
+    RF_2_BUTTON_CONTROLLER,
+    RF_DETECTOR,
+    RF_LIGHT_BULB,
+    RF_MOTION_DETECTOR,
     RF_SHUTTER_STATE_SET,
     RF_DIMMER,
     LIGHT,
+    RF_SINGLE_DIMMER,
+    RF_SINGLE_SWITCH,
     RF_SWITCHING_UNIT,
+    RF_TEMPERATURE_HUMIDITY_SENSOR,
     RF_THERMOSTAT,
     SENSOR,
     RF_SHUTTERS,
@@ -206,10 +219,24 @@ class DeviceValue(object):
         # inels status values are what comes from the broker
                     
         if self.__device_type is SWITCH:  # outlet switch
-            if self.__inels_type is RF_SWITCHING_UNIT:
+            if self.__inels_type is RF_SINGLE_SWITCH:
                 if self.inels_status_value is None:
                     _LOGGER.info("inels_status_value was 'None' for %s", RF_SWITCHING_UNIT)
                     self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
+                    self.__ha_value = None
+                else:
+                    re = []
+                    re.append(int(self.__trim_inels_status_values(DEVICE_TYPE_02_DATA, RELAY, ""), 16) != 0)
+
+                    self.__ha_value = new_object(
+                        re=re,
+                    )
+
+                    self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n"
+            elif self.__inels_type is RF_SWITCHING_UNIT:
+                if self.inels_status_value is None:
+                    _LOGGER.info("inels_status_value was 'None' for %s", RF_SWITCHING_UNIT)
+                    self.__inels_set_value = DEVICE_TYPE_02_COMM_TEST
                     self.__ha_value = None
                 else:
                     re = []
@@ -550,6 +577,42 @@ class DeviceValue(object):
                     low_battery=(battery == 0x81),
                     temp_in=temp_in,
                 )
+            elif self.__inels_type is RF_DETECTOR:
+                state = self.__trim_inels_status_values(
+                    DEVICE_TYPE_16_DATA, STATE, "")
+                state = f"0x{state}"
+                state = f"{int(state, 16):0>8b}"
+
+                low_battery=state["3"] == "1"
+                detected=state["4"] == "1"
+
+                self.__ha_value = new_object(
+                    low_battery=low_battery,
+                    detected=detected,
+                )
+            elif self.__inels_type is RF_MOTION_DETECTOR:
+                state = self.__trim_inels_status_values(
+                    DEVICE_TYPE_16_DATA, STATE, "")
+                state = f"0x{state}"
+                state = f"{int(state, 16):0>8b}"
+
+                low_battery=state["3"] == "1"
+                motion=state["4"] == "1"
+
+                self.__ha_value = new_object(
+                    low_battery=low_battery,
+                    motion=motion,
+                )
+            elif self.__inels_type is RF_TEMPERATURE_HUMIDITY_SENSOR:
+                battery = int(self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, BATTERY, ""), 16)
+                temp_in = self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, TEMP_IN, "")
+                humidity = self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, HUMIDITY, "")
+
+                self.__ha_value = new_object(
+                    low_battery=(battery!=0),
+                    temp_in=temp_in,
+                    humidity=humidity,
+                )
             elif self.__inels_type is GRT3_50:
                 digital_inputs = self.__trim_inels_status_values(
                     GRT3_50_DATA, GRT3_50, "")
@@ -721,23 +784,20 @@ class DeviceValue(object):
                 )
             elif self.__inels_type is DMD3_1:
                 light_in = self.__trim_inels_status_values(DMD3_1_DATA, LIGHT_IN, "")
-
                 temp_in = self.__trim_inels_status_values(DMD3_1_DATA, TEMP_IN, "")    
-                
                 humidity = self.__trim_inels_status_values(DMD3_1_DATA, HUMIDITY, "")
-
-                proximity = self.__trim_inels_status_values(
+                motion = self.__trim_inels_status_values(
                     DMD3_1_DATA, DMD3_1, "")
-                proximity = f"0x{proximity}"
-                proximity = f"{int(proximity, 16):0>8b}"
+                motion = f"0x{motion}"
+                motion = f"{int(motion, 16):0>8b}"
 
-                prox=proximity[7] == "1"
+                motion=motion[7] == "1"
 
                 self.__ha_value = new_object(
                     light_in=light_in,
                     temp_in=temp_in,
                     humidity=humidity,
-                    prox=prox,
+                    motion=motion,
                 )
             elif self.__inels_type in [TI3_10B, TI3_40B, TI3_60M]:
                 temps = []
@@ -775,7 +835,7 @@ class DeviceValue(object):
             else:
                 self.__ha_value = self.__inels_status_value
         elif self.__device_type is LIGHT:  # dimmer
-            if self.__inels_type is RF_DIMMER:
+            if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
                 if self.inels_status_value is None:
                     _LOGGER.info("inels_status_value was None for RFDAC")
                     self.__inels_set_value = DEVICE_TYPE_05_COMM_TEST
@@ -788,18 +848,18 @@ class DeviceValue(object):
                     out = []
                     out.append(brightness)
                     self.__ha_value = new_object(out=out)
-                # # value in percentage to present in HA
-                # self.__ha_value = DEVICE_TYPE_05_HEX_VALUES[self.__inels_status_value]
+            elif self.__inels_type is RF_LIGHT_BULB:
+                if self.inels_status_value is None:
+                    _LOGGER.info("inels_status_value was None for RF_LIGHT_BULB")
+                    self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
+                    self.__ha_value = None
+                else:
+                    out = []
+                    out.append(int(
+                        int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, OUT, ""), 16) * 100.0/255.0
+                    ))
 
-                # # gets the hex values directly
-                # trimmed_data = self.__trim_inels_status_values(
-                #     DEVICE_TYPE_05_DATA, RFDAC_71B, " "
-                # )
-
-                # # simplified view of dimmer (sets brightness level)
-                # self.__inels_set_value = (  # "01 ?? ??"" sets this value to internal state
-                #     f"{ANALOG_REGULATOR_SET_BYTES[RFDAC_71B]} {trimmed_data}"
-                # )
+                    self.__ha_value=new_object(out=out)
             elif self.__inels_type is DA3_22M:
                 temp = self.__trim_inels_status_values(DA3_22M_DATA, TEMP_IN, "")
 
@@ -1087,7 +1147,7 @@ class DeviceValue(object):
 
 
                     #NEW
-                    low_battery = state_bin_str[4] == "1" # 1 -> low #is this right?
+                    low_battery = state_bin_str[4] == "1" # 1 -> low
                     pressed = state_bin_str[3] == "1"
                     if self.__last_value is None:
                         btn = [
@@ -1101,22 +1161,43 @@ class DeviceValue(object):
 
                     if identity in BUTTON_NUMBER:
                         number = BUTTON_NUMBER[identity]
-                        btn[number-1] = pressed
+                        if number <= 4:
+                            btn[number-1] = pressed
 
                     self.__ha_value = new_object(
                         low_battery=low_battery,
                         btn=btn
                     )
+            if self.__inels_type is RF_2_BUTTON_CONTROLLER:
+                if self.__inels_status_value is None:
+                    self.__ha_value = new_object(
+                        low_battery=True,
+                        btn=[False, False]
+                    )
+                else:
+                    state = self.__trim_inels_status_values(DEVICE_TYPE_19_DATA, STATE, "")
+                    state = f"0x{state}"  # 0xSTATE
+                    state = f"{int(state, 16):0>8b}"
 
-                #OLD
-                # self.__ha_value = new_object(
-                #     number=BUTTON_NUMBER.get(identity),
-                #     battery=100 if state_bin_str[4] == "0" else 0,  # checking low battery state
-                #     pressing=state_bin_str[3] == "1",
-                #     changed=state_bin_str[2] == "1",
-                #     # reports the number of buttons
-                #     amount=BUTTON_DEVICE_AMOUNT.get(self.__inels_type),
-                # )
+                    identity = self.__trim_inels_status_bytes(DEVICE_TYPE_19_DATA, IDENTITY, "")
+
+                    low_battery = state[4] == "1"
+                    pressed = state[3] == "1"
+                    if self.__last_value is None:
+                        btn = [False, False]
+                    else:
+                        btn = self.__last_value.btn
+                    
+                    if identity in BUTTON_NUMBER:
+                        number = BUTTON_NUMBER[identity]
+                        if number <= 2:
+                            btn[number-1] = pressed
+
+                    self.__ha_value = new_object(
+                        low_battery=low_battery,
+                        btn=btn,
+                    )
+
             elif self.__inels_type is GSB3_90SX:
                 digital_inputs = self.__trim_inels_status_values(
                     GSB3_90SX_DATA, GSB3_90SX, "")
@@ -1247,7 +1328,17 @@ class DeviceValue(object):
     def __find_inels_value(self) -> None:
         """Find inels mqtt value for specific device."""
         if self.__device_type is SWITCH:
-            if self.__inels_type is RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
+            if self.__inels_type is RF_SINGLE_SWITCH:
+                if self.__ha_value is None:
+                    self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
+                else:
+                    self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n"
+            elif self.__inels_type is RF_SWITCHING_UNIT:
+                if self.__ha_value is None:
+                    self.__inels_set_value = DEVICE_TYPE_02_COMM_TEST
+                else:
+                    self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
+            elif self.__inels_type is RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
                 if self.__ha_value is None:
                     self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                 else:
@@ -1318,7 +1409,7 @@ class DeviceValue(object):
                 )
                 self.__inels_set_value = SWITCH_SET.get(self.__ha_value.on)
         elif self.__device_type is LIGHT:
-            if self.__inels_type is RF_DIMMER:
+            if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
                 if self.__ha_value is None:
                     self.__inels_set_value = DEVICE_TYPE_05_COMM_TEST
                 else:
@@ -1329,19 +1420,11 @@ class DeviceValue(object):
                     b = 0xFFFF - ((int(out/5)*1000) + 10000)
                     b_str = f"{b:04X}"
                     self.__inels_set_value = f"01\n{b_str[0]}{b_str[1]}\n{b_str[2]}{b_str[3]}\n"
-                
-                # self.__inels_status_value = self.__find_keys_by_value(
-                #     DEVICE_TYPE_05_HEX_VALUES,  # str -> int
-                #     round(self.__ha_value, -1),
-                #     self.__last_value,
-                # )
-                # trimmed_data = self.__trim_inels_status_values(
-                #     DEVICE_TYPE_05_DATA, RFDAC_71B, " "
-                # )
-                # self.__inels_set_value = (  # 01 00 00
-                #     f"{ANALOG_REGULATOR_SET_BYTES[RFDAC_71B]} {trimmed_data}"
-                # )
-                # self.__ha_value = DEVICE_TYPE_05_HEX_VALUES[self.__inels_status_value]
+            elif self.__inels_type is RF_LIGHT_BULB:
+                if self.__ha_value is None:
+                    self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
+                else:
+                    self.__inels_set_value = f"15\n00\n00\n00{self.ha_value.out[0]*2.55:02X}\n00\n"
             elif self.__inels_type is DA3_22M:
                 # correct the values
                 out1 = round(self.__ha_value.out[0], -1)

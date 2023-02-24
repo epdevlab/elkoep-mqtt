@@ -462,7 +462,7 @@ class InelsMqtt:
             properties (_type_, optional): Props from broker set.
                 Defaults to None.
         """
-        _LOGGER.info(mid)
+        #_LOGGER.info(mid)
 
     def __disconnect(self) -> None:
         """Disconnecting from broker and stopping broker's loop"""
