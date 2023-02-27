@@ -1263,7 +1263,7 @@ class DeviceValue(object):
                     state = f"0x{state}"  # 0xSTATE
                     state = f"{int(state, 16):0>8b}"
 
-                    identity = self.__trim_inels_status_bytes(DEVICE_TYPE_19_DATA, IDENTITY, "")
+                    identity = self.__trim_inels_status_values(DEVICE_TYPE_19_DATA, IDENTITY, "")
 
                     low_battery = state[4] == "1"
                     pressed = state[3] == "1"
