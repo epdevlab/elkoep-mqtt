@@ -32,7 +32,9 @@ from .const import (
     DEVICE_TYPE_07_DATA,
     DEVICE_TYPE_10_DATA,
     DEVICE_TYPE_12_DATA,
+    DEVICE_TYPE_21_DATA,
     DEVICE_TYPE_29_DATA,
+    POSITION,
     REQUIRED_TEMP,
     RF_2_BUTTON_CONTROLLER,
     RF_DETECTOR,
@@ -41,6 +43,7 @@ from .const import (
     RF_SHUTTER_STATE_SET,
     RF_DIMMER,
     LIGHT,
+    RF_SHUTTER_UNIT,
     RF_SINGLE_DIMMER,
     RF_SINGLE_SWITCH,
     RF_SWITCHING_UNIT,
@@ -616,8 +619,8 @@ class DeviceValue(object):
                 state = f"0x{state}"
                 state = f"{int(state, 16):0>8b}"
 
-                low_battery=state["3"] == "1"
-                detected=state["4"] == "1"
+                low_battery=state[3] == "1"
+                detected=state[4] == "1"
 
                 self.__ha_value = new_object(
                     low_battery=low_battery,
@@ -1036,26 +1039,51 @@ class DeviceValue(object):
                 set_val += "00\n"*12
                 self.__inels_set_value = set_val
         elif self.__device_type is COVER:  # Shutters
-            if self.inels_status_value is None:
-                _LOGGER.info("inels_status_value was 'None' for %s", RF_SHUTTERS)
-                self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
-                self.__ha_value = None
-            else:
-                # shutters True -> closed, False -> open
-                shutters = []
-                shutter_val = int(self.__trim_inels_status_values(DEVICE_TYPE_03_DATA, SHUTTER, ""), 16)
+            if self.__inels_type is RF_SHUTTERS:
+                if self.inels_status_value is None:
+                    _LOGGER.info("inels_status_value was 'None' for %s", RF_SHUTTERS)
+                    self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
+                    self.__ha_value = None
+                else:
+                    # shutters True -> closed, False -> open
+                    shutters = []
+                    shutter_val = int(self.__trim_inels_status_values(DEVICE_TYPE_03_DATA, SHUTTER, ""), 16)
 
-                # So as to continue driving it down if it aisn't closed
-                # and continue opening it if it isn't open
-                if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]: 
-                    shutter_val = self.__last_value.shutters[0]
-                shutters.append(shutter_val)
+                    # So as to continue driving it down if it aisn't closed
+                    # and continue opening it if it isn't open
+                    if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]: 
+                        shutter_val = self.__last_value.shutters[0]
+                    shutters.append(shutter_val)
 
-                self.__ha_value = new_object(
-                    shutters=shutters,
-                )
+                    self.__ha_value = new_object(
+                        shutters=shutters,
+                    )
 
-                self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters[0]]}00\n00\n"
+                    self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters[0]]}00\n00\n"
+            elif self.__inels_type is RF_SHUTTER_UNIT:
+                if self.inels_status_value is None:
+                    _LOGGER.info("inels_status_value was 'None' for %s", RF_SHUTTER_UNIT)
+                    self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
+                    self.__ha_value = None
+                else:
+                    shutters = []
+                    shutter_val = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, SHUTTER, ""))
+                    if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]:
+                        shutter_val = self.__last_value.shutters[0]
+                    
+
+                    position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""))
+
+                    shutters.append(
+                        new_object(
+                            state=shutter_val,
+                            position=position,
+                        )
+                    )
+
+                    self.__ha_value = new_object(
+                        shutters=shutters,
+                    )
         elif self.__device_type is CLIMATE:  # thermovalve
             if self.__inels_type is RF_WIRELESS_THERMOVALVE:
                 # fetches all the status values and compacts them into a new object

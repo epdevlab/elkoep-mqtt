@@ -38,7 +38,7 @@ RF_MOTION_DETECTOR = "Motion detector"  # 17
 RF_2_BUTTON_CONTROLLER = "Two button controller"  # 18
 RF_CONTROLLER = "Controller" #19
 RF_PULSE_CONVERTER = "Pulse converter"  # 20
-# RF_SHUTTER_UNIT = "Shutter unit" #21
+RF_SHUTTER_UNIT = "Shutter unit" #21
 RF_TEMPERATURE_HUMIDITY_SENSOR = "Temperature and humidity sensor"  # 29
 SYSTEM_BITS = "Virtual system bits"
 SYSTEM_INTEGERS = "Virtual system integers"
@@ -104,6 +104,7 @@ INELS_DEVICE_TYPE_DICT = {
     "16": RF_DETECTOR,
     "17": RF_MOTION_DETECTOR,
     "19": RF_CONTROLLER,
+    "21": RF_SHUTTER_UNIT,
     "29": RF_TEMPERATURE_HUMIDITY_SENSOR,
 
     "100": SA3_01B,
@@ -167,6 +168,7 @@ DEVICE_TYPE_DICT = {
     "16": SENSOR, #RF_DETECTOR
     "17": SENSOR, #RF_MOTION_DETECTOR
     "19": BUTTON, #RFGB_40
+    "21": COVER, #RF_SHUTTER_UNIT
     "29": SENSOR, #RF_TEMPERATURE_HUMIDITY_SENSOR
     # BUS
     "100": SWITCH, #SA3_01B
@@ -263,6 +265,7 @@ STATE = "state"
 IDENTITY = "identity"
 ON = "on"
 RELAY = "relay"
+POSITION = "position"
 
 STATE_OPEN = "open"
 STATE_CLOSED = "closed"
@@ -381,6 +384,7 @@ DEVICE_TYPE_12_DATA = {TEMP_IN: [0], BATTERY: [2]}
 DEVICE_TYPE_13_DATA = {OUT: [4]}
 DEVICE_TYPE_16_DATA = {STATE: [0]}
 DEVICE_TYPE_19_DATA = {STATE: [0], IDENTITY: [1]}
+DEVICE_TYPE_21_DATA = {SHUTTER: [1], POSITION: [2]}
 DEVICE_TYPE_29_DATA = {BATTERY: [0], TEMP_IN: [2, 1], HUMIDITY: [3]}
 #   BUS
 SA3_01B_DATA = {
@@ -785,6 +789,7 @@ INELS_COMM_TEST_DICT = {
     "05": DEVICE_TYPE_05_COMM_TEST,
     "07": DEVICE_TYPE_07_COMM_TEST,
     "13": DEVICE_TYPE_13_COMM_TEST,
+    "21": DEVICE_TYPE_03_COMM_TEST, # same as 03
 }
 
 # RELAY (100)
