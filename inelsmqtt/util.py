@@ -642,7 +642,7 @@ class DeviceValue(object):
             elif self.__inels_type is RF_TEMPERATURE_HUMIDITY_SENSOR:
                 battery = int(self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, BATTERY, ""), 16)
                 temp_in = self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, TEMP_IN, "")
-                humidity = int(self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, HUMIDITY, ""))
+                humidity = int(self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, HUMIDITY, ""), 16)
 
                 self.__ha_value = new_object(
                     low_battery=(battery!=0),
