@@ -28,14 +28,18 @@ $ pip install tox
 
 Supported RF devices
 
-- Switches
-- Shutters
-- Light dimmers
-- Switches with external temperature sensors
-- Wireless thermovalves
-- Temperature sensors
-- Controllers/buttons
-- Thermostats
+- Switches (01, 02)
+- Shutters (03, 21)
+- Light dimmers (04, 05)
+- Switches with external temperature sensors (07)
+- Wireless thermovalves (09)
+- Temperature sensors (10)
+- Thermostats (12)
+- Flood detectors (15)
+- Generic detector (16)
+- Motion detector (17)
+- Controllers/buttons (18, 19)
+- Temperature and humidity sensors (29)
 
 Supported bus devices
 
@@ -64,6 +68,8 @@ Supported bus devices
 - GSB3-60SX (139)
 - GSB3-20SX (140)
 - GBP3-60 (141)
+- DAC3_04B (147)
+- DAC3_04M (148)
 - DA3-66M (151)
 - TI3-10B (157)
 - TI3-40B (158)

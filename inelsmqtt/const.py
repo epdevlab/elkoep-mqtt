@@ -118,8 +118,8 @@ INELS_DEVICE_TYPE_DICT = {
     "106": SA3_04M,
     "107": SA3_06M,
     "108": SA3_012M,
-    "109": SA3_022M, #util
-    "111": FA3_612M, #util
+    "109": SA3_022M,
+    "111": FA3_612M,
     #"112": IOU3_108M, #util
     "114": RC3_610DALI,
     "115": IM3_20B,
@@ -266,6 +266,10 @@ IDENTITY = "identity"
 ON = "on"
 RELAY = "relay"
 POSITION = "position"
+RED = "red"
+GREEN = "green"
+BLUE = "blue"
+
 
 STATE_OPEN = "open"
 STATE_CLOSED = "closed"
@@ -372,6 +376,7 @@ DEVICE_TYPE_05_HEX_VALUES = {
 DEVICE_TYPE_02_DATA = {RELAY: [1]}
 DEVICE_TYPE_07_DATA = {RELAY: [1], TEMP_OUT: [3, 2]}
 DEVICE_TYPE_05_DATA = {RF_DIMMER: [0, 1]}
+DEVICE_TYPE_06_DATA = {RED: [1], GREEN: [2], BLUE: [3], OUT: [4]}
 DEVICE_TYPE_10_DATA = {BATTERY: [0], TEMP_IN: [2, 1], TEMP_OUT: [4, 3]}
 DEVICE_TYPE_03_DATA = {SHUTTER: [1]}
 DEVICE_TYPE_09_DATA = {
@@ -788,6 +793,7 @@ INELS_COMM_TEST_DICT = {
     "03": DEVICE_TYPE_03_COMM_TEST,
     "04": DEVICE_TYPE_05_COMM_TEST, # same as 05
     "05": DEVICE_TYPE_05_COMM_TEST,
+    "06": DEVICE_TYPE_13_COMM_TEST, #same as 13
     "07": DEVICE_TYPE_07_COMM_TEST,
     "13": DEVICE_TYPE_13_COMM_TEST,
     "21": DEVICE_TYPE_03_COMM_TEST, # same as 03

@@ -10,10 +10,12 @@ from .const import (
     ADC3_60M_DATA,
     ANALOG_REGULATOR_SET_BYTES,
     BATTERY,
+    BLUE,
     CARD_DATA,
     CARD_ID,
     DAC3_04_DATA,
     DEVICE_TYPE_02_COMM_TEST,
+    DEVICE_TYPE_06_DATA,
     DEVICE_TYPE_09_DATA,
     COVER,
     CURRENT_TEMP,
@@ -35,10 +37,13 @@ from .const import (
     DEVICE_TYPE_12_DATA,
     DEVICE_TYPE_21_DATA,
     DEVICE_TYPE_29_DATA,
+    GREEN,
     POSITION,
+    RED,
     REQUIRED_TEMP,
     RF_2_BUTTON_CONTROLLER,
     RF_DETECTOR,
+    RF_DIMMER_RGB,
     RF_FLOOD_DETECTOR,
     RF_LIGHT_BULB,
     RF_MOTION_DETECTOR,
@@ -913,9 +918,33 @@ class DeviceValue(object):
                     out = []
                     out.append(brightness)
                     self.__ha_value = new_object(out=out)
+            elif self.__inels_type is RF_DIMMER_RGB:
+                if self.inels_status_value is None:
+                    _LOGGER.info("inels_status_value was None for %s", RF_DIMMER_RGB)
+                    self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
+                    self.__ha_value = None
+                else:
+                    red = int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, RED, ""), 16)
+                    green = int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, GREEN, ""), 16)
+                    blue = int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, BLUE, ""), 16)
+                    brightness = int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, OUT, ""), 16)
+
+                    rgb=[]
+                    rgb.append(
+                        new_object(
+                            r=red,
+                            g=green,
+                            b=blue,
+                            brightness=brightness,
+                        )
+                    )
+
+                    self.__ha_value=new_object(
+                        rgb=rgb
+                    )
             elif self.__inels_type is RF_LIGHT_BULB:
                 if self.inels_status_value is None:
-                    _LOGGER.info("inels_status_value was None for RF_LIGHT_BULB")
+                    _LOGGER.info("inels_status_value was None for %s", RF_LIGHT_BULB)
                     self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                     self.__ha_value = None
                 else:
@@ -1518,6 +1547,12 @@ class DeviceValue(object):
                     b = 0xFFFF - ((int(out/5)*1000) + 10000)
                     b_str = f"{b:04X}"
                     self.__inels_set_value = f"01\n{b_str[0]}{b_str[1]}\n{b_str[2]}{b_str[3]}\n"
+            elif self.__inels_type is RF_DIMMER_RGB:
+                if self.__ha_value is None:
+                    self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
+                else:
+                    rgb = self.__ha_value.rgb[0]
+                    self.__inels_set_value = f"01\n{rgb.r}\n{rgb.g}\n{rgb.b}\n{rgb.brightness}\n00\n"
             elif self.__inels_type is RF_LIGHT_BULB:
                 if self.__ha_value is None:
                     self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
