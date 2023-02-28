@@ -25,6 +25,7 @@ from .const import (
     DEVICE_TYPE_05_HEX_VALUES,
     DEVICE_TYPE_13_COMM_TEST,
     DEVICE_TYPE_13_DATA,
+    DEVICE_TYPE_15_DATA,
     DEVICE_TYPE_16_DATA,
     DEVICE_TYPE_19_DATA,
     BUTTON_DEVICE_AMOUNT,
@@ -38,6 +39,7 @@ from .const import (
     REQUIRED_TEMP,
     RF_2_BUTTON_CONTROLLER,
     RF_DETECTOR,
+    RF_LEVEL_DETECTOR,
     RF_LIGHT_BULB,
     RF_MOTION_DETECTOR,
     RF_SHUTTER_STATE_SET,
@@ -612,6 +614,22 @@ class DeviceValue(object):
                 self.__ha_value = new_object(
                     low_battery=(battery == 0x81),
                     temp_in=temp_in,
+                )
+            elif self.__inels_type is RF_LEVEL_DETECTOR:
+                state = self.__trim_inels_status_values(DEVICE_TYPE_15_DATA, STATE, "")
+                state = f"0x{state}"
+                state = f"{int(state, 16):0>8b}"
+
+                ain = int(self.__trim_inels_status_values(DEVICE_TYPE_15_DATA, AIN, ""), 16) /100
+
+                low_battery=state[0] == "1"
+                flooded_sensor=state[7]=="1"
+                ains=[]
+                ains.append(ain)
+                #TODO revisit
+                self.__ha_value = new_object(
+                    low_battery=low_battery,
+                    ains=ains,
                 )
             elif self.__inels_type is RF_DETECTOR:
                 state = self.__trim_inels_status_values(
