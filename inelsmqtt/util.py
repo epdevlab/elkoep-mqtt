@@ -570,7 +570,9 @@ class DeviceValue(object):
                 )
             elif self.__inels_type in [GCR3_11, GCH3_31]:
                 state = self.__trim_inels_status_values(CARD_DATA, STATE, "")
-                
+                state = f"0x{state}"
+                state = f"{int(state, 16):0>16b}"
+
                 re = []
                 re.append(state[13] == "1")
                 
