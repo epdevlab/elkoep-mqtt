@@ -201,8 +201,8 @@ DEVICE_TYPE_DICT = {
     "123": SENSOR, #WSB3_40,
     "124": SENSOR, #WSB3_20HUM / H
     "125": SENSOR, #WSB3_40HUM,
-    #"128": SWITCH, # GCR3_11,
-    #"129": SWITCH, # GCH3_31,
+    "128": SWITCH, # GCR3_11,
+    "129": SWITCH, # GCH3_31,
     #"136": SENSOR, # GSP3_100,
     #"137": SENSOR, # GDB3_10,
     "138": BUTTON, # GSB3_40SX,
