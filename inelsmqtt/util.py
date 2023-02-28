@@ -623,12 +623,12 @@ class DeviceValue(object):
                 ain = int(self.__trim_inels_status_values(DEVICE_TYPE_15_DATA, AIN, ""), 16) /100
 
                 low_battery=state[0] == "1"
-                flooded_sensor=state[7]=="1"
+                flooded=state[7]=="1"
                 ains=[]
                 ains.append(ain)
-                #TODO revisit
                 self.__ha_value = new_object(
                     low_battery=low_battery,
+                    flooded=flooded,
                     ains=ains,
                 )
             elif self.__inels_type is RF_DETECTOR:
