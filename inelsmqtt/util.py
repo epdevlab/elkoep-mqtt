@@ -1527,16 +1527,10 @@ class DeviceValue(object):
                 set_val += f"{original_status[15]}\n"
                 
                 self.__inels_set_value = set_val
-            else:
-                #TODO remove
-                # just a shortcut for setting it
-                # basically set the status from the ha value
-                self.__inels_status_value = self.__find_keys_by_value(
-                    SWITCH_STATE,  # str -> bool
-                    self.__ha_value.on,
-                    self.__last_value
-                )
-                self.__inels_set_value = SWITCH_SET.get(self.__ha_value.on)
+            elif self.__inels_type in [GCR3_11, GCH3_31]:
+                set_val = "04\n" if self.ha_value.re[0] else "00\n"
+                set_val += "00\n" * 9
+                self.__inels_set_value = set_val 
         elif self.__device_type is LIGHT:
             if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
                 if self.__ha_value is None:
