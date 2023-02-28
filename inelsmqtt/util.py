@@ -39,7 +39,7 @@ from .const import (
     REQUIRED_TEMP,
     RF_2_BUTTON_CONTROLLER,
     RF_DETECTOR,
-    RF_LEVEL_DETECTOR,
+    RF_FLOOD_DETECTOR,
     RF_LIGHT_BULB,
     RF_MOTION_DETECTOR,
     RF_SHUTTER_STATE_SET,
@@ -615,7 +615,7 @@ class DeviceValue(object):
                     low_battery=(battery == 0x81),
                     temp_in=temp_in,
                 )
-            elif self.__inels_type is RF_LEVEL_DETECTOR:
+            elif self.__inels_type is RF_FLOOD_DETECTOR:
                 state = self.__trim_inels_status_values(DEVICE_TYPE_15_DATA, STATE, "")
                 state = f"0x{state}"
                 state = f"{int(state, 16):0>8b}"

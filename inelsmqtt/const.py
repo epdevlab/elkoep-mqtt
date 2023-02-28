@@ -32,7 +32,7 @@ RF_WIRELESS_THERMOVALVE = "Wireless Thermovalve" #9
 RF_TEMPERATURE_INPUT = "Temperature input" #10
 RF_THERMOSTAT = "Thermostat" #12
 RF_LIGHT_BULB = "Light bulb" #13
-RF_LEVEL_DETECTOR = "Level detector"  # 15
+RF_FLOOD_DETECTOR = "Flood detector"  # 15
 RF_DETECTOR = "Detector"  # 16
 RF_MOTION_DETECTOR = "Motion detector"  # 17
 RF_2_BUTTON_CONTROLLER = "Two button controller"  # 18
@@ -101,7 +101,7 @@ INELS_DEVICE_TYPE_DICT = {
     "10": RF_TEMPERATURE_INPUT,
     "12": RF_THERMOSTAT,
     "13": RF_LIGHT_BULB,
-    "15": RF_LEVEL_DETECTOR,
+    "15": RF_FLOOD_DETECTOR,
     "16": RF_DETECTOR,
     "17": RF_MOTION_DETECTOR,
     "18": RF_2_BUTTON_CONTROLLER,
