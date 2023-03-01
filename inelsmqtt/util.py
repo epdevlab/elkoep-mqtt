@@ -1119,12 +1119,12 @@ class DeviceValue(object):
                 else:
                     shutters = []
                     shutter_val = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, SHUTTER, ""))
+                    shutter_val = ((shutter_val >> 1) & 1) | (shutter_val & 1) << 1 #swap bit 0 with bit 1
+
                     if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]:
                         shutter_val = self.__last_value.shutters[0].state
 
                     position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""))
-
-                    set_pos = False
 
                     shutters.append(
                         new_object(
