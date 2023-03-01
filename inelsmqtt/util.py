@@ -1110,7 +1110,7 @@ class DeviceValue(object):
                         shutters=shutters,
                     )
 
-                    self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters[0]]}00\n00\n"
+                    self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters[0].state]}\n00\n00\n"
             elif self.__inels_type is RF_SHUTTER_UNIT:
                 if self.inels_status_value is None:
                     _LOGGER.info("inels_status_value was 'None' for %s", RF_SHUTTER_UNIT)
@@ -1134,6 +1134,7 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         shutters=shutters,
                     )
+                    self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters[0].state]}\n00\n00\n"
         elif self.__device_type is CLIMATE:  # thermovalve
             if self.__inels_type is RF_WIRELESS_THERMOVALVE:
                 # fetches all the status values and compacts them into a new object
@@ -1590,7 +1591,13 @@ class DeviceValue(object):
                 if self.__ha_value is None:
                     self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
                 else:
-                    shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0]]
+                    shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0].state]
+                    self.__inels_set_value = shutter_set + "00\n00\n"
+            elif self.__device_type is RF_SHUTTER_UNIT:
+                if self.__ha_value is None:
+                    self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
+                else:
+                    shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0].state]
                     self.__inels_set_value = shutter_set + "00\n00\n"
         elif self.__device_type is CLIMATE:
             if self.__inels_type is RF_WIRELESS_THERMOVALVE:
