@@ -1101,8 +1101,10 @@ class DeviceValue(object):
                     # So as to continue driving it down if it aisn't closed
                     # and continue opening it if it isn't open
                     if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]: 
-                        shutter_val = self.__last_value.shutters[0]
-                    shutters.append(shutter_val)
+                        shutter_val = self.__last_value.shutters[0].state
+                    shutters.append(
+                        new_object(state=shutter_val)
+                    )
 
                     self.__ha_value = new_object(
                         shutters=shutters,
@@ -1118,8 +1120,7 @@ class DeviceValue(object):
                     shutters = []
                     shutter_val = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, SHUTTER, ""))
                     if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]:
-                        shutter_val = self.__last_value.shutters[0]
-                    
+                        shutter_val = self.__last_value.shutters[0].state
 
                     position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""))
 
