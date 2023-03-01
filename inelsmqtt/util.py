@@ -1558,7 +1558,7 @@ class DeviceValue(object):
                     self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                 else:
                     rgb = self.__ha_value.rgb[0]
-                    self.__inels_set_value = f"01\n{rgb.r:02X}\n{rgb.g:02X}\n{rgb.b:02X}\n{rgb.brightness:02X}\n00\n"
+                    self.__inels_set_value = f"01\n{rgb.r:02X}\n{rgb.g:02X}\n{rgb.b:02X}\n{int(rgb.brightness*2.55):02X}\n00\n"
             elif self.__inels_type is RF_LIGHT_BULB:
                 if self.__ha_value is None:
                     self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
