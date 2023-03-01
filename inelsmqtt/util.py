@@ -1124,10 +1124,13 @@ class DeviceValue(object):
 
                     position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""))
 
+                    set_pos = False
+
                     shutters.append(
                         new_object(
                             state=shutter_val,
                             position=position,
+                            set_pos=False,
                         )
                     )
 
@@ -1597,8 +1600,11 @@ class DeviceValue(object):
                 if self.__ha_value is None:
                     self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
                 else:
-                    shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0].state]
-                    self.__inels_set_value = shutter_set + "00\n00\n"
+                    if self.__ha_value.shutters[0].set_pos:
+                        shutter_set = f"0A\n00\n{self.__ha_value.shutters[0].position:02X}\n"
+                    else:
+                        shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0].state] + "00\n00\n"
+                    self.__inels_set_value = shutter_set
         elif self.__device_type is CLIMATE:
             if self.__inels_type is RF_WIRELESS_THERMOVALVE:
                 required_temp = int(round(self.__ha_value.climate.required * 2, 0))
