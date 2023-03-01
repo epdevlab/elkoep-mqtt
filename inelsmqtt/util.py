@@ -933,7 +933,7 @@ class DeviceValue(object):
                     red = int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, RED, ""), 16)
                     green = int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, GREEN, ""), 16)
                     blue = int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, BLUE, ""), 16)
-                    brightness = int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, OUT, ""), 16)
+                    brightness = int(int(self.__trim_inels_status_values(DEVICE_TYPE_06_DATA, OUT, ""), 16)* 100.0/255.0)
 
                     rgb=[]
                     rgb.append(
