@@ -1135,7 +1135,7 @@ class DeviceValue(object):
                     )
 
                     self.__ha_value = new_object(
-                        shutters_with_pos=shutters,
+                        shutters_with_pos=shutters_with_pos,
                     )
                     self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters_with_pos[0].state]}\n00\n00\n"
         elif self.__device_type is CLIMATE:  # thermovalve
