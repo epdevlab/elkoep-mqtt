@@ -609,10 +609,10 @@ class DeviceValue(object):
                 state = f"{int(state, 16):0>16b}"
 
                 re = []
-                re.append(state[11] == "1")
+                re.append(state[5] == "1")
                 
-                card_ok = (state[12] == "1")
-                card_ko = (state[13] == "1")
+                card_ok = (state[4] == "1")
+                card_ko = (state[3] == "1")
 
                 card_read_state = Card_read_state.No_card
                 if card_ko:
@@ -623,9 +623,9 @@ class DeviceValue(object):
                 card_id = self.__trim_inels_status_values(CARD_DATA, CARD_ID, "")
 
                 sw = []
-                sw.append(state[15] == "1")
-                sw.append(state[3] == "1")
-                sw.append(state[5] == "1")
+                sw.append(state[0] == "1")
+                sw.append(state[12] == "1")
+                sw.append(state[10] == "1")
 
                 light_in = self.__trim_inels_status_values(CARD_DATA, LIGHT_IN, "")
 
