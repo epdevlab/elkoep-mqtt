@@ -91,6 +91,7 @@ VIRT_COOL_REG = "Cool virtual regulator"
 
 
 INELS_DEVICE_TYPE_DICT = {
+    #RF
     "01": RF_SINGLE_SWITCH,
     "02": RF_SWITCHING_UNIT,
     "03": RF_SHUTTERS,
@@ -100,16 +101,21 @@ INELS_DEVICE_TYPE_DICT = {
     "07": RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR,
     "09": RF_WIRELESS_THERMOVALVE,
     "10": RF_TEMPERATURE_INPUT,
+    
     "12": RF_THERMOSTAT,
+    
     "13": RF_LIGHT_BULB,
+    
     "15": RF_FLOOD_DETECTOR,
     "16": RF_DETECTOR,
     "17": RF_MOTION_DETECTOR,
     "18": RF_2_BUTTON_CONTROLLER,
     "19": RF_CONTROLLER,
+    
     "21": RF_SHUTTER_UNIT,
+    
     "29": RF_TEMPERATURE_HUMIDITY_SENSOR,
-
+    #BUS
     "100": SA3_01B,
     "101": DA3_22M,
     "102": GRT3_50,
@@ -120,12 +126,15 @@ INELS_DEVICE_TYPE_DICT = {
     "107": SA3_06M,
     "108": SA3_012M,
     "109": SA3_022M,
+
     "111": FA3_612M,
-    #"112": IOU3_108M, #util
+    "112": IOU3_108M,
+    
     "114": RC3_610DALI,
     "115": IM3_20B,
     "116": IM3_40B,
     "117": IM3_80B,
+    
     "120": DMD3_1,
     "121": IM3_140M,
     "122": WSB3_20,
@@ -134,16 +143,19 @@ INELS_DEVICE_TYPE_DICT = {
     "125": WSB3_40H,
     "128": GCR3_11, #util
     "129": GCH3_31, #util
-    #"136": GSP3_100, #util
-    #"137": GDB3_10, #util
+    
+    "136": GSP3_100, #util
+    "137": GDB3_10, #util
     "138": GSB3_40SX,
     "139": GSB3_60SX,
     "140": GSB3_20SX,
     "141": GBP3_60,
     "147": DAC3_04B,
     "148": DAC3_04M,
-    #"150": DCDA_33M, #util
+    
+    "150": DCDA_33M, #util
     "151": DA3_66M,
+    
     "156": ADC3_60M, #util
     "157": TI3_10B,
     "158": TI3_40B,
@@ -190,14 +202,14 @@ DEVICE_TYPE_DICT = {
     "109": SWITCH, #SA3_022M,
 
     "111": SWITCH, # FA3_612M,
-    #"112": SWITCH, # IOU3_108M,
+    "112": SWITCH, # IOU3_108M,
+    
     "114" : SWITCH, #RC3_610DALI,
-
     "115": SENSOR, #IM3_20B,
     "116": SENSOR, #IM3_40B,
     "117": SENSOR, #IM3_80B
+    
     "120": SENSOR, #DMD3_1,
-
     "121": SENSOR, #IM3_140M
     "122": SENSOR, #WSB3_20,
     "123": SENSOR, #WSB3_40,
@@ -205,8 +217,9 @@ DEVICE_TYPE_DICT = {
     "125": SENSOR, #WSB3_40HUM,
     "128": SWITCH, # GCR3_11,
     "129": SWITCH, # GCH3_31,
-    #"136": SENSOR, # GSP3_100,
-    #"137": SENSOR, # GDB3_10,
+    
+    "136": SENSOR, # GSP3_100,
+    "137": SENSOR, # GDB3_10,
     "138": BUTTON, # GSB3_40SX,
     "139": BUTTON, # GSB3_60SX
     "140": BUTTON, # GSB3_20SX,
@@ -214,16 +227,13 @@ DEVICE_TYPE_DICT = {
 
     "147": LIGHT, # DAC3_04B,
     "148": LIGHT, # DAC3_04M,
-    #"150": LIGHT, # DCDA_33M,
-
-    "151": LIGHT, #DA3_66M,
+    "150": LIGHT, # DCDA_33M,
+    "151": LIGHT, # DA3_66M,
 
     "156": SENSOR, #ADC3_60M,
-
     "157": SENSOR,# TI3_10B,
     "158": SENSOR,# TI3_40B,
     "159": SENSOR,# TI3_60M,
-    
     "160": SENSOR, #IDRT3_1
     
     #"166": CLIMATE, #VIRT_CONTR
@@ -486,7 +496,7 @@ DAC3_04_DATA = {
 }
 
 DCDA_33M_DATA = {
-    DCDA_33M: [2],
+    ALERT: [2],
     OUT: [4, 5, 6, 7],
 }
 
@@ -518,6 +528,22 @@ CARD_DATA = { #Card holder/reader
     CARD_ID: list(range (4, 12)),
     LIGHT_IN: [12, 13, 14, 15],
     TEMP_IN: [16, 17],
+}
+
+GLASS_CONTROLLER_DATA = {
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
+}
+
+GSP3_100_DATA = {
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
 }
 
 GDB3_10_DATA = { #generalize with GBP3_60

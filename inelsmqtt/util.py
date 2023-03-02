@@ -14,6 +14,7 @@ from .const import (
     CARD_DATA,
     CARD_ID,
     DAC3_04_DATA,
+    DCDA_33M_DATA,
     DEVICE_TYPE_02_COMM_TEST,
     DEVICE_TYPE_06_DATA,
     DEVICE_TYPE_09_DATA,
@@ -37,6 +38,7 @@ from .const import (
     DEVICE_TYPE_12_DATA,
     DEVICE_TYPE_21_DATA,
     DEVICE_TYPE_29_DATA,
+    GLASS_CONTROLLER_DATA,
     GREEN,
     IOU3_108M_DATA,
     POSITION,
@@ -1062,11 +1064,39 @@ class DeviceValue(object):
                     set_val = "00\n" * 4
                     for d in aout:
                         set_val += f"{d:02X}\n"
+                elif self.__inels_type in DCDA_33M:
+                    digital_inputs = self.__trim_inels_status_values(DCDA_33M_DATA, ALERT, "")
+                    digital_inputs = f"0x{digital_inputs}"
+                    digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+
+                    sw = []
+                    coa = []
+                    for i in range(3):
+                        sw.append(digital_inputs[7-i] == "1")
+                        coa.append(digital_inputs[4-i] == "1")
+                    
+                    aout=[]
+                    aouts = self.__trim_inels_status_bytes(DCDA_33M_DATA, OUT)
+                    for i in range(len(aouts)):
+                        brightness = int(i, 16)
+                        brightness = brightness if brightness > 100 else 100
+                        aout.append(new_object(brightness=brightness))
+
+                    self.__ha_value = new_object(
+                        sw=sw,
+                        aout=aout,
+                    )
+
+                    set_val = "00\n"*4
+                    for i in range(4):
+                        aout_val = aout[i].brightness
+                        set_val += f"{aout_val:02X}\n"
+                    self.__inels_set_value = set_val
                 elif self.__inels_type is DA3_66M:
                     state = self.__trim_inels_status_values(
                         DA3_66M_DATA, ALERT, ""
                     )
-                    state = state = f"0x{state}"
+                    state = f"0x{state}"
                     state = f"{int(state, 16):0>16b}"
                     
                     toa = []
@@ -1431,12 +1461,12 @@ class DeviceValue(object):
                     )
                 elif self.__inels_type in [GSB3_20SX, GSB3_40SX, GSB3_60SX, GBP3_60]:
                     switches = self.__trim_inels_status_values(
-                        GSB3_DATA, SW, "")
+                        GLASS_CONTROLLER_DATA, SW, "")
                     switches = f"0x{switches}"
                     switches = f"{int(switches, 16):0>8b}"
                     
                     digital_inputs = self.__trim_inels_status_values(
-                        GSB3_DATA, SW, "")
+                        GLASS_CONTROLLER_DATA, SW, "")
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>8b}"
                     
@@ -1449,13 +1479,13 @@ class DeviceValue(object):
                         din.append(digital_inputs[7-i] == "1")
                     
                     temp = self.__trim_inels_status_values(
-                        GSB3_DATA, TEMP_IN, "")
+                        GLASS_CONTROLLER_DATA, TEMP_IN, "")
 
                     light_in = self.__trim_inels_status_values(
-                        GSB3_DATA, LIGHT_IN, "")
+                        GLASS_CONTROLLER_DATA, LIGHT_IN, "")
 
                     ain = self.__trim_inels_status_values(
-                        GSB3_DATA, AIN, "")
+                        GLASS_CONTROLLER_DATA, AIN, "")
 
                     self.__ha_value = new_object(
                         sw=sw,
@@ -1468,9 +1498,65 @@ class DeviceValue(object):
 
                         # AIN
                         ain=ain,
-                    )         
+                    )
+                elif self.__inels_type is GSP3_100:
+                    switches = self.__trim_inels_status_values(
+                        GLASS_CONTROLLER_DATA, SW, "")
+                    switches = f"0x{switches}"
+                    switches = f"{int(switches, 16):0>8b}"
+                    
+                    digital_inputs = self.__trim_inels_status_values(
+                        GLASS_CONTROLLER_DATA, SW, "")
+                    digital_inputs = f"0x{digital_inputs}"
+                    digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+
+                    sw = []
+                    for i in range(8):
+                        sw.append(switches[7-i] == "1")
+                    din = []
+                    for i in range(2):
+                        sw.append(digital_inputs[7-i]=="1")
+                        din.append(digital_inputs[5-i]=="1")
+                    
+                    temp_in = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, TEMP_IN, "")
+                    light_in = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, LIGHT_IN, "")
+                    ain = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, AIN, "")
+                    self.__ha_value = new_object(
+                        sw=sw,
+                        din=din,
+                        temp_in=temp_in,
+                        light_in=light_in,
+                        ain=ain,
+                    )
+                elif self.__inels_type is GDB3_10:
+                    switches = self.__trim_inels_status_values(
+                        GLASS_CONTROLLER_DATA, SW, "")
+                    switches = f"0x{switches}"
+                    switches = f"{int(switches, 16):0>8b}"
+                    
+                    digital_inputs = self.__trim_inels_status_values(
+                        GLASS_CONTROLLER_DATA, SW, "")
+                    digital_inputs = f"0x{digital_inputs}"
+                    digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+
+                    sw = []
+                    for i in range(3):
+                        sw.append(switches[6-2*i]=="1")
+                    for i in range(2):
+                        din.append(digital_inputs[7-i]=="1")
+                    
+                    temp_in = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, TEMP_IN, "")
+                    light_in = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, LIGHT_IN, "")
+                    ain = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, AIN, "")
+                    self.__ha_value = new_object(
+                        sw=sw,
+                        din=din,
+                        temp_in=temp_in,
+                        light_in=light_in,
+                        ain=ain,
+                    )
         except Exception as err:
-            _LOGGER.error("Error making homeassistant value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
+            _LOGGER.error("Error making HA value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
             raise
 
     def __trim_inels_status_values(
@@ -1609,6 +1695,12 @@ class DeviceValue(object):
                     set_val = "00\n" * 4
                     for d in self.ha_value.aout:
                         set_val += f"{d.brightness:02X}\n"
+                elif self.__inels_type in DCDA_33M:
+                    set_val = "00\n"*4
+                    for i in range(4):
+                        aout = self.__ha_value.out[i].brightness
+                        set_val += f"{aout:02X}\n"
+                    self.__inels_set_value = set_val
                 elif self.__inels_type is DA3_66M:
                     set_val = "00\n"*4
                     for i in range(4):
@@ -1642,20 +1734,6 @@ class DeviceValue(object):
                 if self.__inels_type is RF_WIRELESS_THERMOVALVE:
                     required_temp = int(round(self.__ha_value.climate.required * 2, 0))
                     self.__inels_set_value = f"00\n{required_temp:02X}\n00\n"
-            elif self.__device_type is BUTTON:
-                if self.__inels_type is GSB3_90SX:
-                    disabled = BUTTONARRAY_SET_DISABLED[self.__ha_value.disabled]
-                    backlit = BUTTONARRAY_SET_BACKLIT[self.__ha_value.backlit]
-
-                    self.__inels_set_value = "".join(["00\n" * 36, disabled, backlit])
-                elif self.__inels_type is GSB3_20SX: #TODO revisit for color values
-                    self.__inels_set_value = "".join("00\n" * 4)
-                elif self.__inels_type is GSB3_40SX:
-                    self.__inels_set_value = "".join("00\n" * 7)
-                elif self.__inels_type is GSB3_60SX:
-                    self.__inels_set_value = "".join("00\n" * 10)
-                elif self.__inels_type is IDRT3_1:
-                    self.__inels_set_value = "".join("00\n" * 9)
         except Exception as err:
             _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
             raise
