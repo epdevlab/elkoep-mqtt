@@ -611,14 +611,17 @@ class DeviceValue(object):
                 re = []
                 re.append(state[5] == "1")
                 
-                card_ok = (state[4] == "1")
-                card_ko = (state[3] == "1")
+                card_read = (state[4] == "1")
+                card_present = (state[3] == "1")
 
-                card_read_state = Card_read_state.No_card
-                if card_ko:
-                    card_read_state = Card_read_state.Failure
-                elif card_ok:
-                    card_read_state = Card_read_state.Success
+                # card_ok = (state[4] == "1")
+                # card_ko = (state[3] == "1")
+
+                # card_read_state = Card_read_state.No_card
+                # if card_ko:
+                #     card_read_state = Card_read_state.Failure
+                # elif card_ok:
+                #     card_read_state = Card_read_state.Success
 
                 card_id = self.__trim_inels_status_values(CARD_DATA, CARD_ID, "")
 
@@ -634,7 +637,9 @@ class DeviceValue(object):
                     re=re,
                     sw=sw,
                     temp_in=temp_in,
-                    card_read_state=card_read_state,
+                    card_read=card_read,
+                    card_present=card_present,
+                    #card_read_state=card_read_state,
                     card_id=card_id,
                 )
         elif self.__device_type is SENSOR:  # temperature sensor
