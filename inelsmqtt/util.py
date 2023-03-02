@@ -38,6 +38,7 @@ from .const import (
     DEVICE_TYPE_21_DATA,
     DEVICE_TYPE_29_DATA,
     GREEN,
+    IOU3_108M_DATA,
     POSITION,
     RED,
     REQUIRED_TEMP,
@@ -425,6 +426,38 @@ class DeviceValue(object):
                     set_val += RELAY_SET[r]
 
                 self.__inels_set_value = set_val
+            elif self.__inels_type is IOU3_108M:
+                re=[]
+                for relay in self.__trim_inels_status_bytes(IOU3_108M_DATA, RELAY):
+                    re.append((int(relay, 16) & 1) != 0)
+                
+                temps = self.__trim_inels_status_values(IOU3_108M_DATA, TEMP_IN)
+                temps = [temps[0:4], temps[4:8]]
+                
+                digital_inputs = self.__trim_inels_status_values(
+                    IOU3_108M_DATA, DIN, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+
+                din = []
+                for i in range(8):
+                    din.append(digital_inputs[7-i] == '1')
+
+                digital_inputs = self.__trim_inels_status_values(
+                    IOU3_108M_DATA, RELAY_OVERFLOW, "")
+                digital_inputs = f"0x{digital_inputs}"
+                digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+
+                relay_overflow = []
+                for i in range(8):
+                    relay_overflow.append(digital_inputs[7-1] == '1')
+
+                self.__ha_value = new_object(
+                    re=re,
+                    temps=temps,
+                    din=din,
+                    relay_overflow=relay_overflow,
+                )
             elif self.__inels_type is RC3_610DALI:
                 #aout
                 aout=[]
@@ -576,10 +609,10 @@ class DeviceValue(object):
                 state = f"{int(state, 16):0>16b}"
 
                 re = []
-                re.append(state[13] == "1")
+                re.append(state[11] == "1")
                 
                 card_ok = (state[12] == "1")
-                card_ko = (state[11] == "1")
+                card_ko = (state[13] == "1")
 
                 card_read_state = Card_read_state.No_card
                 if card_ko:
@@ -590,9 +623,9 @@ class DeviceValue(object):
                 card_id = self.__trim_inels_status_values(CARD_DATA, CARD_ID, "")
 
                 sw = []
-                sw.append(state[8] == "1")
-                sw.append(state[5] == "1")
+                sw.append(state[15] == "1")
                 sw.append(state[3] == "1")
+                sw.append(state[5] == "1")
 
                 light_in = self.__trim_inels_status_values(CARD_DATA, LIGHT_IN, "")
 
@@ -1487,7 +1520,7 @@ class DeviceValue(object):
                     self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                 else:
                     self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
-            elif self.__inels_type in [SA3_01B, SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M]:
+            elif self.__inels_type in [SA3_01B, SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M, IOU3_108M]:
                 value = ""
                 for re in self.__ha_value.re:
                     value += RELAY_SET[re]

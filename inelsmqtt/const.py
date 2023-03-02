@@ -550,10 +550,10 @@ IM3_240B_DATA = {
 
 IOU3_108M_DATA = {
     RELAY: list(range(8)),
-    TEMP_IN: [8, 9, 10, 11],
-    TEMP_OUT: [12, 13, 14, 15],
+    TEMP_IN: [8, 9, 10, 11, 12, 13, 14, 15],
     DIN: [24],
-    ALERT: [25, 26],
+    RELAY_OVERFLOW: [25],
+    ALERT: [26],
 }
 
 SA3_02B_DATA = {
