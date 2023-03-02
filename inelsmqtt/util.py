@@ -1470,7 +1470,7 @@ class DeviceValue(object):
                         ain=ain,
                     )         
         except Exception as err:
-            _LOGGER.error("Error making homeassistant value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value if self.inels_status_value is not None else 'None')
+            _LOGGER.error("Error making homeassistant value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
             raise
 
     def __trim_inels_status_values(
@@ -1657,7 +1657,7 @@ class DeviceValue(object):
                 elif self.__inels_type is IDRT3_1:
                     self.__inels_set_value = "".join("00\n" * 9)
         except Exception as err:
-            _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value if self.inels_status_value is not None else 'None')
+            _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
             raise
 
     def __find_keys_by_value(self, array: dict, value, last_value) -> Any:
