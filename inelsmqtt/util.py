@@ -611,8 +611,7 @@ class DeviceValue(object):
                 re = []
                 re.append(state[5] == "1")
                 
-                card_read = (state[4] == "1")
-                card_present = (state[3] == "1")
+                card_present = (state[4] == "1")
 
                 # card_ok = (state[4] == "1")
                 # card_ko = (state[3] == "1")
@@ -637,7 +636,6 @@ class DeviceValue(object):
                     re=re,
                     sw=sw,
                     temp_in=temp_in,
-                    card_read=card_read,
                     card_present=card_present,
                     #card_read_state=card_read_state,
                     card_id=card_id,
