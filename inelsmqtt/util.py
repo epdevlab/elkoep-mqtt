@@ -956,7 +956,7 @@ class DeviceValue(object):
 
                         out = []
                         out.append(
-                            new_object(brightness=int(brightness, 16))
+                            new_object(brightness=brightness)
                         )
                         self.__ha_value = new_object(out=out)
                 elif self.__inels_type is RF_DIMMER_RGB:
