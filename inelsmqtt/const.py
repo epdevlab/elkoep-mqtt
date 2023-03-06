@@ -145,8 +145,8 @@ INELS_DEVICE_TYPE_DICT = {
     "128": GCR3_11,
     "129": GCH3_31,
     
-    "136": GSP3_100, #util
-    "137": GDB3_10, #util
+    "136": GSP3_100,
+    "137": GDB3_10,
     "138": GSB3_40SX,
     "139": GSB3_60SX,
     "140": GSB3_20SX,
@@ -154,10 +154,10 @@ INELS_DEVICE_TYPE_DICT = {
     "147": DAC3_04B,
     "148": DAC3_04M,
     
-    "150": DCDA_33M, #util
+    "150": DCDA_33M,
     "151": DA3_66M,
     
-    "156": ADC3_60M, #util
+    "156": ADC3_60M,
     "157": TI3_10B,
     "158": TI3_40B,
     "159": TI3_60M,

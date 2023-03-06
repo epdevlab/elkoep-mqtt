@@ -64,6 +64,8 @@ Supported bus devices
 - WSB3-40 (123)
 - WSB3-20H (124)
 - WSB3-40H (125)
+- GCR3-11 (128)
+- GCH3-31 (129)
 - GSB3-40SX (138)
 - GSB3-60SX (139)
 - GSB3-20SX (140)
