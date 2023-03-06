@@ -1059,7 +1059,7 @@ class DeviceValue(object):
                     for d in aout_str:
                         d = int(d, 16)
                         d = d if d <= 100 else 100
-                        aout.append(new_object(brightness(d)))
+                        aout.append(new_object(brightness=d))
                     
                     self.__ha_value = new_object(
                         temp_in=temp_in,
