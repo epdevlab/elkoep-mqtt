@@ -1068,7 +1068,7 @@ class DeviceValue(object):
 
                     set_val = "00\n" * 4
                     for d in aout:
-                        set_val += f"{d:02X}\n"
+                        set_val += f"{d.brightness:02X}\n"
                 elif self.__inels_type in DCDA_33M:
                     digital_inputs = self.__trim_inels_status_values(DCDA_33M_DATA, ALERT, "")
                     digital_inputs = f"0x{digital_inputs}"
