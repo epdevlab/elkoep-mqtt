@@ -1291,7 +1291,6 @@ class DeviceValue(object):
                         is_holiday=is_holiday, #is holiday
                         regulator_disabled=regulator_disabled, #"if 'on' reacts according to window-detector-in"
                     )
-                    
                 elif self.__inels_type is VIRT_HEAT_REG:
                     state=int(self.__trim_inels_status_values(
                         VIRT_REG_DATA, STATE, ""
@@ -1309,7 +1308,6 @@ class DeviceValue(object):
                         heat_reg=heat_reg,
                         heat_source=heat_source,
                     )
-                    
                 elif self.__inels_type is VIRT_COOL_REG:
                     state=int(self.__trim_inels_status_values(
                         VIRT_REG_DATA, STATE, ""

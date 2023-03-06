@@ -141,8 +141,9 @@ INELS_DEVICE_TYPE_DICT = {
     "123": WSB3_40,
     "124": WSB3_20H,
     "125": WSB3_40H,
-    "128": GCR3_11, #util
-    "129": GCH3_31, #util
+    
+    "128": GCR3_11,
+    "129": GCH3_31,
     
     "136": GSP3_100, #util
     "137": GDB3_10, #util
