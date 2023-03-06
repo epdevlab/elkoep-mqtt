@@ -196,6 +196,11 @@ from .const import (
 ConfigType = Dict[str, str]
 _LOGGER = logging.getLogger(__name__)
 
+# To prevent the value as being none, 
+# if anything goes wrong when calculating the value,
+# we give an empty object that will simply not match with any keywords
+# it is filtered out in set_val
+dummy_val = object()
 
 def new_object(**kwargs):
     """Create new anonymous object."""
@@ -1555,7 +1560,8 @@ class DeviceValue(object):
                     )
         except Exception as err:
             _LOGGER.error("Error making HA value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
-            raise
+            self.__ha_value = dummy_val
+            #raise
 
     def __trim_inels_status_values(
         self, selector: "dict[str, Any]", fragment: str, jointer: str
@@ -1577,164 +1583,165 @@ class DeviceValue(object):
     # Forms a set value from the ha value
     def __find_inels_value(self) -> None:
         """Find inels mqtt value for specific device."""
-        try:
-            if self.__device_type is SWITCH:
-                if self.__inels_type is RF_SINGLE_SWITCH:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
-                    else:
-                        self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n"
-                elif self.__inels_type is RF_SWITCHING_UNIT:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_02_COMM_TEST
-                    else:
-                        self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
-                elif self.__inels_type is RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
-                    else:
-                        self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.re[0]]
-                elif self.__inels_type is RF_SWITCHING_UNIT:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
-                    else:
-                        self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
-                elif self.__inels_type in [SA3_01B, SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M, IOU3_108M]:
-                    value = ""
-                    for re in self.__ha_value.re:
-                        value += RELAY_SET[re]
-                    self.__inels_set_value = value
-                elif self.__inels_type is SA3_022M:
-                    value = ""
-                    for re in self.__ha_value.re:
-                        value += RELAY_SET[re]
-                    for s in self.__ha_value.shutter_motors:
-                        value += RELAY_SET[s]
-                    for v in self.__ha_value.valve:
-                        value += RELAY_SET[v]
-                    self.__inels_set_value = value
-                elif self.__inels_type is RC3_610DALI:
-                    set_val = "00\n" * 4 #4 bytes
-                    for a in self.__ha_value.aout:
-                        set_val += f"{a:02X}\n"
-                    set_val += "00\n" * 2 #8 bytes
-                    for r in self.__ha_value.re:
-                        set_val += RELAY_SET[r] #16 bytes
-                    set_val += "00\n" * 4 #20 bytes
-                    for i in range(4):
-                        set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
-                    set_val += "00\n" * 4
-                    for i in range(4, 8):
-                        set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
-                    set_val += "00\n" * 4
-                    for i in range(8, 12):
-                        set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
-                    set_val += "00\n" * 4
-                    for i in range(12, 16):
-                        set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
-                        
-                    self.__inels_set_value = set_val
-                elif self.__inels_type is FA3_612M:
-                    original_status = self.ha_value.last_status_val.split("\n")
-                    
-                    set_val = "00\n" * 4
-                    for a in self.ha_value.aout:
-                        set_val += f"{a.brightness:02X}\n"
-                    for i in range(4):
-                        set_val += f"{original_status[8 + i]}\n"
-                    fan_val = ""
-                    for i in range(3):
-                        fan_val += RELAY_SET[self.ha_value.fan_speed == (i + 1)]
-                    set_val += fan_val
-                    set_val += f"{original_status[15]}\n"
-                    
-                    self.__inels_set_value = set_val
-                elif self.__inels_type in [GCR3_11, GCH3_31]:
-                    set_val = "04\n" if self.ha_value.re[0] else "00\n"
-                    set_val += "00\n" * 9
-                    self.__inels_set_value = set_val 
-            elif self.__device_type is LIGHT:
-                if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_05_COMM_TEST
-                    else:
-                        out = round(self.__ha_value.out[0].brightness, -1)
-                        out = out if out < 100 else 100
-
-                        b = int((((0xFFFF - out) + 10000) * 1000) / 5)
-                        b = 0xFFFF - ((int(out/5)*1000) + 10000)
-                        b_str = f"{b:04X}"
-                        self.__inels_set_value = f"01\n{b_str[0]}{b_str[1]}\n{b_str[2]}{b_str[3]}\n"
-                elif self.__inels_type is RF_DIMMER_RGB:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
-                    else:
-                        rgb = self.__ha_value.rgb[0]
-                        self.__inels_set_value = f"01\n{rgb.r:02X}\n{rgb.g:02X}\n{rgb.b:02X}\n{int(rgb.brightness*2.55):02X}\n00\n"
-                elif self.__inels_type is RF_LIGHT_BULB:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
-                    else:
-                        self.__inels_set_value = f"15\n00\n00\n00{self.ha_value.out[0].brightness*2.55:02X}\n00\n"
-                elif self.__inels_type is DA3_22M:
-                    # correct the values
-                    out1 = round(self.__ha_value.out[0].brightness, -1)
-                    out1 = out1 if out1 < 100 else 100
-
-                    out2 = round(self.__ha_value.out[1].brightness, -1)
-                    out2 = out2 if out2 < 100 else 100
-
-                    out1_str = f"{out1:02X}\n"
-                    out2_str = f"{out2:02X}\n"
-
-                    # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
-                    self.__inels_set_value = "".join(["00\n" * 4, out1_str, out2_str])
-                elif self.__inels_type in [DAC3_04B, DAC3_04M]:
-                    set_val = "00\n" * 4
-                    for d in self.ha_value.aout:
-                        set_val += f"{d.brightness:02X}\n"
-                elif self.__inels_type in DCDA_33M:
-                    set_val = "00\n"*4
-                    for i in range(4):
-                        aout = self.__ha_value.out[i].brightness
-                        set_val += f"{aout:02X}\n"
-                    self.__inels_set_value = set_val
-                elif self.__inels_type is DA3_66M:
-                    set_val = "00\n"*4
-                    for i in range(4):
-                        out = self.__ha_value.out[i].brightness
-                        out = out if out <= 100 else 100
-                        set_val += f"{out:02X}\n"
-                    set_val += "00\n"*4
-                    for i in range(4, 6):
-                        out = self.__ha_value.out[i].brightness
-                        out = out if out <= 100 else 100
-                        set_val += f"{out:02X}\n"
-                    set_val += "00\n"*12
-                    self.__inels_set_value = set_val
-            elif self.__device_type is COVER:
-                if self.__inels_type is RF_SHUTTERS:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
-                    else:
-                        shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0].state]
-                        self.__inels_set_value = shutter_set + "00\n00\n"
-                elif self.__device_type is RF_SHUTTER_UNIT:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
-                    else:
-                        if self.__ha_value.shutters_with_pos[0].set_pos:
-                            shutter_set = f"0A\n00\n{self.__ha_value.shutters_with_pos[0].position:02X}\n"
+        if self.__ha_value is not dummy_val:
+            try:
+                if self.__device_type is SWITCH:
+                    if self.__inels_type is RF_SINGLE_SWITCH:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                         else:
-                            shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters_with_pos[0].state] + "00\n00\n"
-                        self.__inels_set_value = shutter_set
-            elif self.__device_type is CLIMATE:
-                if self.__inels_type is RF_WIRELESS_THERMOVALVE:
-                    required_temp = int(round(self.__ha_value.climate.required * 2, 0))
-                    self.__inels_set_value = f"00\n{required_temp:02X}\n00\n"
-        except Exception as err:
-            _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
-            raise
+                            self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n"
+                    elif self.__inels_type is RF_SWITCHING_UNIT:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_02_COMM_TEST
+                        else:
+                            self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
+                    elif self.__inels_type is RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
+                        else:
+                            self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.re[0]]
+                    elif self.__inels_type is RF_SWITCHING_UNIT:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
+                        else:
+                            self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
+                    elif self.__inels_type in [SA3_01B, SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M, IOU3_108M]:
+                        value = ""
+                        for re in self.__ha_value.re:
+                            value += RELAY_SET[re]
+                        self.__inels_set_value = value
+                    elif self.__inels_type is SA3_022M:
+                        value = ""
+                        for re in self.__ha_value.re:
+                            value += RELAY_SET[re]
+                        for s in self.__ha_value.shutter_motors:
+                            value += RELAY_SET[s]
+                        for v in self.__ha_value.valve:
+                            value += RELAY_SET[v]
+                        self.__inels_set_value = value
+                    elif self.__inels_type is RC3_610DALI:
+                        set_val = "00\n" * 4 #4 bytes
+                        for a in self.__ha_value.aout:
+                            set_val += f"{a:02X}\n"
+                        set_val += "00\n" * 2 #8 bytes
+                        for r in self.__ha_value.re:
+                            set_val += RELAY_SET[r] #16 bytes
+                        set_val += "00\n" * 4 #20 bytes
+                        for i in range(4):
+                            set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
+                        set_val += "00\n" * 4
+                        for i in range(4, 8):
+                            set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
+                        set_val += "00\n" * 4
+                        for i in range(8, 12):
+                            set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
+                        set_val += "00\n" * 4
+                        for i in range(12, 16):
+                            set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
+                            
+                        self.__inels_set_value = set_val
+                    elif self.__inels_type is FA3_612M:
+                        original_status = self.ha_value.last_status_val.split("\n")
+                        
+                        set_val = "00\n" * 4
+                        for a in self.ha_value.aout:
+                            set_val += f"{a.brightness:02X}\n"
+                        for i in range(4):
+                            set_val += f"{original_status[8 + i]}\n"
+                        fan_val = ""
+                        for i in range(3):
+                            fan_val += RELAY_SET[self.ha_value.fan_speed == (i + 1)]
+                        set_val += fan_val
+                        set_val += f"{original_status[15]}\n"
+                        
+                        self.__inels_set_value = set_val
+                    elif self.__inels_type in [GCR3_11, GCH3_31]:
+                        set_val = "04\n" if self.ha_value.re[0] else "00\n"
+                        set_val += "00\n" * 9
+                        self.__inels_set_value = set_val 
+                elif self.__device_type is LIGHT:
+                    if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_05_COMM_TEST
+                        else:
+                            out = round(self.__ha_value.out[0].brightness, -1)
+                            out = out if out < 100 else 100
+
+                            b = int((((0xFFFF - out) + 10000) * 1000) / 5)
+                            b = 0xFFFF - ((int(out/5)*1000) + 10000)
+                            b_str = f"{b:04X}"
+                            self.__inels_set_value = f"01\n{b_str[0]}{b_str[1]}\n{b_str[2]}{b_str[3]}\n"
+                    elif self.__inels_type is RF_DIMMER_RGB:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
+                        else:
+                            rgb = self.__ha_value.rgb[0]
+                            self.__inels_set_value = f"01\n{rgb.r:02X}\n{rgb.g:02X}\n{rgb.b:02X}\n{int(rgb.brightness*2.55):02X}\n00\n"
+                    elif self.__inels_type is RF_LIGHT_BULB:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
+                        else:
+                            self.__inels_set_value = f"15\n00\n00\n00{self.ha_value.out[0].brightness*2.55:02X}\n00\n"
+                    elif self.__inels_type is DA3_22M:
+                        # correct the values
+                        out1 = round(self.__ha_value.out[0].brightness, -1)
+                        out1 = out1 if out1 < 100 else 100
+
+                        out2 = round(self.__ha_value.out[1].brightness, -1)
+                        out2 = out2 if out2 < 100 else 100
+
+                        out1_str = f"{out1:02X}\n"
+                        out2_str = f"{out2:02X}\n"
+
+                        # EX: 00\n00\n00\n00\n64\n64\n # 100%/100%
+                        self.__inels_set_value = "".join(["00\n" * 4, out1_str, out2_str])
+                    elif self.__inels_type in [DAC3_04B, DAC3_04M]:
+                        set_val = "00\n" * 4
+                        for d in self.ha_value.aout:
+                            set_val += f"{d.brightness:02X}\n"
+                    elif self.__inels_type in DCDA_33M:
+                        set_val = "00\n"*4
+                        for i in range(4):
+                            aout = self.__ha_value.out[i].brightness
+                            set_val += f"{aout:02X}\n"
+                        self.__inels_set_value = set_val
+                    elif self.__inels_type is DA3_66M:
+                        set_val = "00\n"*4
+                        for i in range(4):
+                            out = self.__ha_value.out[i].brightness
+                            out = out if out <= 100 else 100
+                            set_val += f"{out:02X}\n"
+                        set_val += "00\n"*4
+                        for i in range(4, 6):
+                            out = self.__ha_value.out[i].brightness
+                            out = out if out <= 100 else 100
+                            set_val += f"{out:02X}\n"
+                        set_val += "00\n"*12
+                        self.__inels_set_value = set_val
+                elif self.__device_type is COVER:
+                    if self.__inels_type is RF_SHUTTERS:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
+                        else:
+                            shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0].state]
+                            self.__inels_set_value = shutter_set + "00\n00\n"
+                    elif self.__device_type is RF_SHUTTER_UNIT:
+                        if self.__ha_value is None:
+                            self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
+                        else:
+                            if self.__ha_value.shutters_with_pos[0].set_pos:
+                                shutter_set = f"0A\n00\n{self.__ha_value.shutters_with_pos[0].position:02X}\n"
+                            else:
+                                shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters_with_pos[0].state] + "00\n00\n"
+                            self.__inels_set_value = shutter_set
+                elif self.__device_type is CLIMATE:
+                    if self.__inels_type is RF_WIRELESS_THERMOVALVE:
+                        required_temp = int(round(self.__ha_value.climate.required * 2, 0))
+                        self.__inels_set_value = f"00\n{required_temp:02X}\n00\n"
+            except Exception as err:
+                _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
+                raise
 
     def __find_keys_by_value(self, array: dict, value, last_value) -> Any:
         """Return key from dict by value
