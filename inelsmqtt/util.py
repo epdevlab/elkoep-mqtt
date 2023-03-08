@@ -1189,7 +1189,7 @@ class DeviceValue(object):
                         shutter_val = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, SHUTTER, ""))
                         shutter_val = ((shutter_val >> 1) & 1) | (shutter_val & 1) << 1 #swap bit 0 with bit 1
 
-                        if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]:
+                        if (self.__last_value is not None) and (shutter_val not in [Shutter_state.Open, Shutter_state.Closed]):
                             shutter_val = self.__last_value.shutters[0].state
 
                         position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""), 16)
@@ -1274,6 +1274,21 @@ class DeviceValue(object):
                     cool_mode = binary_vals[4] == "1"
                     is_holiday = binary_vals[3] == "1"
                     regulator_disabled = binary_vals[2] == "1"
+
+                    control_mode = int(control_mode)
+                    #if control_mode == 2:
+                        
+
+                    #0 -> user control (?)
+                    #1 -> 2 temp
+                    #2 -> single temp
+
+                    climate=new_object(
+                        current=temp_current,
+                        required=temp_required,
+                        required_heat=temp_required_heat,
+                        required_cool=temp_required_cool,
+                    )
 
                     self.__ha_value = new_object(
                         temp_current=temp_current,
