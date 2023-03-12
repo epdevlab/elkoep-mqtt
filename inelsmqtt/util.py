@@ -191,6 +191,8 @@ from .const import (
 
     DEVICE_TYPE_07_COMM_TEST,
     Shutter_state,
+    Climate_action,
+    Climate_modes,
 )
 
 ConfigType = Dict[str, str]
@@ -206,6 +208,10 @@ def new_object(**kwargs):
     """Create new anonymous object."""
     return type("Object", (), kwargs)
 
+def break_into_bytes(line: str):
+    if len(line)%2 == 0:
+        return [line[i:i+2] for i in range(0, len(line), 2)]
+    return []
 
 class DeviceValue(object):
     """Device value interpretation object."""
@@ -1237,9 +1243,9 @@ class DeviceValue(object):
                     temp_current = self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CURRENT_TEMP, ""
                     )
-                    temp_critical_max = self.__trim_inels_status_values(
+                    temp_critical_max = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CRITICAL_MAX_TEMP, ""
-                    )
+                    ), 16) / 100
                     temp_required_heat = self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, REQUIRED_HEAT_TEMP, ""
                     )
@@ -1252,15 +1258,15 @@ class DeviceValue(object):
                     temp_required_cool = self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, REQUIRED_COOL_TEMP, ""
                     )
-                    temp_correction = self.__trim_inels_status_values(
+                    temp_correction = (self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, TEMP_CORRECTION, ""
-                    )
-                    holiday_mode = self.__trim_inels_status_values(
+                    ), 16)/100
+                    holiday_mode = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, PUBLIC_HOLIDAY, ""
-                    )
-                    control_mode = self.__trim_inels_status_values(
+                    ), 16)
+                    control_mode = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CONTROL_MODE, ""
-                    )
+                    ))
                     
                     binary_vals = self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, VIRT_CONTR, ""
@@ -1272,44 +1278,57 @@ class DeviceValue(object):
                     manual_mode = binary_vals[6] == "1"
                     heat_mode = binary_vals[5] == "1"
                     cool_mode = binary_vals[4] == "1"
-                    is_holiday = binary_vals[3] == "1"
+                    vacation = binary_vals[3] == "1"
                     regulator_disabled = binary_vals[2] == "1"
 
                     control_mode = int(control_mode)
-                    #if control_mode == 2:
-                        
-
                     #0 -> user control (?)
                     #1 -> 2 temp
                     #2 -> single temp
 
-                    climate=new_object(
-                        current=temp_current,
-                        required=temp_required,
-                        required_heat=temp_required_heat,
-                        required_cool=temp_required_cool,
-                    )
+                    current_mode = Climate_modes.Off 
+                    if controller_on: #TODO review all of this
+                        current_mode = Climate_modes.Heat_cool #both manual and automatic 2 temperatures will be heat_cool
+                        if control_mode == 2: # 1 temp
+                            if temp_current > temp_required_heat:
+                                current_mode = Climate_modes.Cool
+                            else:
+                                current_mode = Climate_modes.Heat
+
+                    current_action = Climate_action.Off
+                    if controller_on:
+                        current_action = Climate_action.Idle
+                        if heat_mode:
+                            current_action = Climate_action.Heating
+                        elif cool_mode:
+                            current_action = Climate_action.Cooling
 
                     self.__ha_value = new_object(
-                        temp_current=temp_current,
-                        temp_critical_max=temp_critical_max, #floor heating shutoff temp
-                        temp_required_heat=temp_required_heat, #desired temperature
-                        temp_max=temp_max, #maximum temperature
-                        temp_critical_min=temp_critical_min, #floor heating force on temp (prevent pipe damage)
-                        temp_required_cool=temp_required_cool, #desired temperature
-                        temp_correction=temp_correction, #temperature correction
-                        holiday_mode=holiday_mode, #holiday mode represents handling mode (>0, holidays enabled)
-                        control_mode=control_mode,
-                            # user control (user physically controls temp)
-                            # autonomous 2 temperature (temperature moves between min and max malue)
-                            # autonomous single temp (moves around 1 temperature)
-                        
-                        controller_on=controller_on, #controller is on
-                        manual_mode=manual_mode, #driving mode (automatic, manual[physical])
-                        heat_mode=heat_mode, #heating on
-                        cool_mode=cool_mode, #cooling on
-                        is_holiday=is_holiday, #is holiday
-                        regulator_disabled=regulator_disabled, #"if 'on' reacts according to window-detector-in"
+                        climate_controller=new_object(
+                            current=temp_current, #current_temperature
+                            
+                            required=temp_required_heat, #target_temperature
+                            required_heat=temp_required_heat, #target_temperature_high
+                            required_cool=temp_required_cool, #target_temperature_low
+
+                            current_mode=current_mode, #hvac_mode: Off/Heat_cool/Heat/Cool
+                            # Off -> controller is turned off
+                            # Heat_cool -> follow temp range
+                            # Heat -> only heating
+                            # Cool -> only cooling
+
+                            current_action=current_action, #hvac_action: Off/Heating/Cooling/Idle 
+                            # Off -> controller is off
+                            # Heating -> heating is on
+                            # Cooling -> cooling is on
+                            # Idle -> temp is in range
+
+                            #non exposed
+                            critical_temp=temp_critical_max,
+                            correction_temp=temp_correction,
+                            public_holiday=holiday_mode,
+                            vacation=vacation,
+                        ),
                     )
                 elif self.__inels_type is VIRT_HEAT_REG:
                     state=int(self.__trim_inels_status_values(
@@ -1324,9 +1343,7 @@ class DeviceValue(object):
                     heat_source = reg[6] == "1"
                     
                     self.__ha_value = new_object(
-                        state=state,
-                        heat_reg=heat_reg,
-                        heat_source=heat_source,
+                        heating_out = heat_reg
                     )
                 elif self.__inels_type is VIRT_COOL_REG:
                     state=int(self.__trim_inels_status_values(
@@ -1341,9 +1358,7 @@ class DeviceValue(object):
                     cool_source = reg[6] == "1"
                     
                     self.__ha_value = new_object(
-                        state=state,
-                        cool_reg=cool_reg,
-                        cool_source=cool_source,
+                        cooling_out=cool_reg,
                     )
             elif self.__device_type is BUTTON:
                 if self.__inels_type is RF_CONTROLLER:
@@ -1754,6 +1769,42 @@ class DeviceValue(object):
                     if self.__inels_type is RF_WIRELESS_THERMOVALVE:
                         required_temp = int(round(self.__ha_value.climate.required * 2, 0))
                         self.__inels_set_value = f"00\n{required_temp:02X}\n00\n"
+                    elif self.__inels_type is VIRT_CONTR:
+                        cc = self.ha_value.climate_controller
+
+                        current_temp = f"{(cc.current * 100):08X}"
+                        current_temp = break_into_bytes(cc.current_temp)
+
+                        critical_temp = f"{(cc.critical_temp * 100):08X}"
+                        critical_temp = break_into_bytes(critical_temp)
+
+                        manual_temp = f"{((cc.required + cc.correction_temp) * 100):08X}"
+                        manual_temp = break_into_bytes(manual_temp)
+
+                        manual_cool_temp = f"{((cc.required_cool + cc.correction_temp) * 100):08X}"
+                        manual_cool_temp = break_into_bytes(manual_cool_temp)
+
+                        plan_in = "00\n"
+                        if cc.public_holiday > 0:
+                            plan_in = "80\n"
+                        elif cc.vacation:
+                            plan_in = "40\n"
+
+                        manual_in = 0
+                        if cc.control_mode == 0: #manual mode
+                            manual_in = 7
+
+                        byte18 = 1 #TODO review this
+
+                        set_val = "\n".join(current_temp) + "\n"
+                        set_val += "\n".join(critical_temp) + "\n"
+                        set_val += "\n".join(manual_temp) + "\n"
+                        set_val += "\n".join(manual_cool_temp) + "\n"
+                        set_val += plan_in
+                        set_val += f"{manual_in:02X}\n"
+                        set_val += f"{byte18:02X}\n"
+
+                        self.__inels_set_value = set_val
             except Exception as err:
                 _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value)
                 raise

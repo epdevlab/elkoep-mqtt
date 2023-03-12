@@ -164,8 +164,8 @@ INELS_DEVICE_TYPE_DICT = {
     "160": IDRT3_1,
 
     #"166": VIRT_CONTR,
-    #"167": VIRT_HEAT_REG,
-    #"168": VIRT_COOL_REG,
+    "167": VIRT_HEAT_REG,
+    "168": VIRT_COOL_REG,
 }
 
 #TODO retire this system
@@ -238,8 +238,8 @@ DEVICE_TYPE_DICT = {
     "160": SENSOR, #IDRT3_1
     
     #"166": CLIMATE, #VIRT_CONTR
-    #"167": CLIMATE, #VIRT_HEAT_REG
-    #"168": CLIMATE, #VIRT_COOL_REG
+    "167": CLIMATE, #VIRT_HEAT_REG
+    "168": CLIMATE, #VIRT_COOL_REG
 }
 
 
@@ -345,6 +345,25 @@ class Card_read_state(IntEnum):
     No_card = 0
     Success = 1
     Failure = 2
+
+class Climate_modes(IntEnum):
+    Off = 0
+    Heat = 1
+    Cool = 2
+    Heat_cool = 3
+    Auto = 4
+
+class Climate_action(IntEnum):
+    Off = 0
+    Idle = 1
+    Heating = 2
+    Cooling = 3
+
+class Climate_presets(IntEnum):
+    Regular = 0
+    Vacation = 1
+    Holiday = 2
+
 
 SHUTTER_STATE_LIST = [STATE_OPEN, STATE_CLOSED]
 
