@@ -535,14 +535,12 @@ class DeviceValue(object):
                         din=din,
                         #relay_overflow=relay_overflow,
                     )
-                elif self.__inels_type is RC3_610DALI:
+                elif self.__inels_type is RC3_610DALI: 
                     #aout
-                    aout=[]
+                    aout_brightness=[]
                     for a in self.__trim_inels_status_bytes(RC3_610DALI_DATA, AOUT):
-                        aout.append(
-                            new_object(brightness=int(a, 16))
-                        )
-                    
+                        aout_brightness.append(int(a, 16))
+
                     #relays
                     re=[]
                     for relay in self.__trim_inels_status_bytes(RC3_610DALI_DATA, RELAY):
@@ -595,6 +593,17 @@ class DeviceValue(object):
                         sync_error.append(alerts[7-i == "1"])
                     for i in range(4, 6):
                         aout_coa.append(alerts[7-i] == "1")
+
+                    
+                    aout=[]
+                    for i in range(2):
+                        aout.append(
+                            new_object(
+                                brightness=aout_brightness[i],
+                                coa=aout_coa[i]
+                            )
+                        )
+
                     alert_dali_power = alerts[1] == "1"
                     alert_dali_communication = alerts[0] == "1"
                     
@@ -602,7 +611,11 @@ class DeviceValue(object):
                         RC3_610DALI_DATA, DALI)
                     dali = []
                     for d in dali_raw:
-                        dali.append(new_object(brightness=int(d, 16)))
+                        dali.append(new_object(
+                            brightness=int(d, 16)),
+                            alert_dali_communication=alert_dali_communication,
+                            alert_dali_power=alert_dali_power,
+                        )
                     
                     self.__ha_value = new_object(
                         relay=relay,
@@ -1036,11 +1049,11 @@ class DeviceValue(object):
                         brightness = int((((0xFFFF - brightness) - 10000)/1000)*5)
                         brightness = round(brightness, -1)
 
-                        out = []
-                        out.append(
+                        simple_light = []
+                        simple_light.append(
                             new_object(brightness=brightness)
                         )
-                        self.__ha_value = new_object(out=out)
+                        self.__ha_value = new_object(simple_light=simple_light)
                 elif self.__inels_type is RF_DIMMER_RGB:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was None for %s", RF_DIMMER_RGB)
@@ -1071,13 +1084,13 @@ class DeviceValue(object):
                         self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         self.__ha_value = None
                     else:
-                        out = []
-                        out.append(new_object(brightness=int(
+                        simple_light = []
+                        simple_light.append(new_object(brightness=int(
                             int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, OUT, ""), 16) * 100.0/255.0
                         )))
 
 
-                        self.__ha_value=new_object(out=out)
+                        self.__ha_value=new_object(simple_light=simple_light)
                 elif self.__inels_type is DA3_22M:
                     temp = self.__trim_inels_status_values(DA3_22M_DATA, TEMP_IN, "")
 
@@ -1085,6 +1098,15 @@ class DeviceValue(object):
                         DA3_22M_DATA, DA3_22M, "")
                     state_hex_str = f"0x{state}"
                     state_bin_str = f"{int(state_hex_str, 16):0>8b}"
+
+                    toa=[ # thermal overload alarm
+                        state_bin_str[3] == "1",
+                        state_bin_str[2] == "1",
+                    ],
+                    coa=[ # current overload alrm
+                        state_bin_str[1] == "1", #6
+                        state_bin_str[0] == "1", #7
+                    ],
 
                     out1 = int(
                         self.__trim_inels_status_values(
@@ -1097,11 +1119,20 @@ class DeviceValue(object):
                             DA3_22M_DATA, DIM_OUT_2, ""
                         ), 16
                     )
-                    
-                    out = [
-                        new_object(brightness=(out1 if out1 <= 100 else 100)),
-                        new_object(brightness=(out2 if out2 <= 100 else 100)),
-                    ]
+                    out1 = out1 if out1 <= 100 else 100
+                    out2 = out2 if out2 <= 100 else 100
+                    out = [out1, out2]
+
+                    light_toa_coa = []
+                    for i in range(2):
+                        light_toa_coa.append(
+                            new_object(
+                                brightness=out[i],
+                                thermal_alert=toa[i],
+                                current_alert=coa[i],
+                            )
+                        )
+
                     self.__ha_value = new_object(
                         #May not be that interesting for HA
                         sw=[
@@ -1113,35 +1144,62 @@ class DeviceValue(object):
                             state_bin_str[4] == "1"
                         ],
 
-                        toa=[ # thermal overload alarm
-                            state_bin_str[3] == "1",
-                            state_bin_str[2] == "1",
-
-                        ],
-                        coa=[ # current overload alrm
-                            state_bin_str[1] == "1", #6
-                            state_bin_str[0] == "1", #7
-                        ],
-
-                        # This might be important
                         temp_in=temp,
-                        
-                        #generalization for multiple channel dimmers
-                        out=out, # array
+                        light_toa_coa=light_toa_coa,
                     )
                     
                     set_val = "00\n00\n00\n00\n"
-                    for i in range(len(self.__ha_value.out)):
-                        set_val +=  f"{self.__ha_value.out[i].brightness:02X}\n"
+                    for i in range(len(self.__ha_value.light_toa_coa)):
+                        set_val +=  f"{self.__ha_value.light_toa_coa[i].brightness:02X}\n"
                     self.__inels_set_value = set_val
-                elif self.__inels_type in [DAC3_04B, DAC3_04M]:
+                elif self.__inels_type is DAC3_04B:
                     temp_in = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_IN, "")
+                    
+                    aout_alert = int(self.__trim_inels_status_values(DAC3_04_DATA, ALERT, ""), 16) != 0
+
                     aout_str = self.__trim_inels_status_bytes(DAC3_04_DATA, OUT)
                     aout = []
                     for d in aout_str:
                         d = int(d, 16)
                         d = d if d <= 100 else 100
-                        aout.append(new_object(brightness=d))
+                        aout.append(
+                            new_object(
+                                brightness=d,
+                                aout_coa=aout_alert,
+                            )
+                        )
+                    
+                    self.__ha_value = new_object(
+                        temp_in=temp_in,
+                        aout=aout,
+                    )
+
+                    set_val = "00\n" * 4
+                    for d in aout:
+                        set_val += f"{d.brightness:02X}\n"
+                elif self.__inels_type is DAC3_04M:
+                    temp_in = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_IN, "")
+
+                    aout_alert = self.__trim_inels_status_values(DAC3_04_DATA, ALERT, "")
+                    aout_coa=[]
+                    for i in range(4):
+                        aout_coa.append(aout_alert[6-i] == "1") #skip first bit
+
+                    aout_str = self.__trim_inels_status_bytes(DAC3_04_DATA, OUT)
+                    aout_val = []
+                    for d in aout_str:
+                        d = int(d, 16)
+                        d = d if d <= 100 else 100
+                        aout_val.append(d)
+
+                    aout=[]
+                    for i in range(4):
+                        aout.append(
+                            new_object(
+                                brightness=aout_val[i],
+                                aout_coa=aout_coa[i],
+                            )
+                        )
                     
                     self.__ha_value = new_object(
                         temp_in=temp_in,
@@ -1219,22 +1277,30 @@ class DeviceValue(object):
                     )
                     
                     for o in outs:
-                        out.append(new_object(brightness=(int(o, 16))))
+                        out.append(int(o, 16))
+
+                    light_toa_coa=[]
+                    for i in range(6):
+                        light_toa_coa.append(
+                            new_object(
+                                brightness=out[i],
+                                toa=toa[i],
+                                coa=coa[i],
+                            )
+                        )
 
                     self.__ha_value = new_object(
-                        toa=toa,
-                        coa=coa,
                         sw=sw,
                         din=din,
-                        out=out,
+                        light_toa_coa=light_toa_coa,
                     )
                     
                     set_val = "00\n"*4
                     for i in range(4):
-                        set_val += f"{self.__ha_value.out[i].brightness:02X}\n"
+                        set_val += f"{self.__ha_value.light_toa_coa[i].brightness:02X}\n"
                     set_val += "00\n"*4
                     for i in range(4, 6):
-                        set_val += f"{self.__ha_value.out[i].brightness:02X}\n"
+                        set_val += f"{self.__ha_value.light_toa_coa[i].brightness:02X}\n"
                     set_val += "00\n"*12
                     self.__inels_set_value = set_val
             elif self.__device_type is COVER:  # Shutters
@@ -1776,7 +1842,7 @@ class DeviceValue(object):
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_05_COMM_TEST
                         else:
-                            out = round(self.__ha_value.out[0].brightness, -1)
+                            out = round(self.__ha_value.simple_light[0].brightness, -1)
                             out = out if out < 100 else 100
 
                             b = int((((0xFFFF - out) + 10000) * 1000) / 5)
@@ -1793,13 +1859,13 @@ class DeviceValue(object):
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         else:
-                            self.__inels_set_value = f"15\n00\n00\n00{self.ha_value.out[0].brightness*2.55:02X}\n00\n"
+                            self.__inels_set_value = f"15\n00\n00\n00{self.ha_value.simple_light[0].brightness*2.55:02X}\n00\n"
                     elif self.__inels_type is DA3_22M:
                         # correct the values
-                        out1 = round(self.__ha_value.out[0].brightness, -1)
+                        out1 = round(self.__ha_value.light_toa_coa[0].brightness, -1)
                         out1 = out1 if out1 < 100 else 100
 
-                        out2 = round(self.__ha_value.out[1].brightness, -1)
+                        out2 = round(self.__ha_value.light_toa_coa[1].brightness, -1)
                         out2 = out2 if out2 < 100 else 100
 
                         out1_str = f"{out1:02X}\n"
@@ -1820,12 +1886,12 @@ class DeviceValue(object):
                     elif self.__inels_type is DA3_66M:
                         set_val = "00\n"*4
                         for i in range(4):
-                            out = self.__ha_value.out[i].brightness
+                            out = self.__ha_value.light_toa_coa[i].brightness
                             out = out if out <= 100 else 100
                             set_val += f"{out:02X}\n"
                         set_val += "00\n"*4
                         for i in range(4, 6):
-                            out = self.__ha_value.out[i].brightness
+                            out = self.__ha_value.light_toa_coa[i].brightness
                             out = out if out <= 100 else 100
                             set_val += f"{out:02X}\n"
                         set_val += "00\n"*12
