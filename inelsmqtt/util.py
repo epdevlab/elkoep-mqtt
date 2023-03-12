@@ -1,4 +1,5 @@
 """Utility classes."""
+from dataclasses import dataclass
 import logging
 
 from operator import itemgetter
@@ -195,6 +196,18 @@ from .const import (
     Climate_modes,
 )
 
+#relay
+@dataclass
+class SimpleRelay():
+    """Create simple relay"""
+    is_on: bool
+
+@dataclass
+class Relay(SimpleRelay):
+    """Create relay with overflow detection."""
+    overflow: bool
+
+
 ConfigType = Dict[str, str]
 _LOGGER = logging.getLogger(__name__)
 
@@ -251,44 +264,56 @@ class DeviceValue(object):
                         self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                         self.__ha_value = None
                     else:
-                        re = []
-                        re.append(int(self.__trim_inels_status_values(DEVICE_TYPE_02_DATA, RELAY, ""), 16) != 0)
-
-                        self.__ha_value = new_object(
-                            re=re,
+                        simple_relay: list[SimpleRelay] = []
+                        simple_relay.append(
+                            SimpleRelay(
+                                is_on=int(self.__trim_inels_status_values(DEVICE_TYPE_02_DATA, RELAY, ""), 16) != 0
+                            )
                         )
 
-                        self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n"
+                        self.__ha_value = new_object(
+                            simple_relay=simple_relay,
+                        )
+
+                        self.__inels_set_value = f"{(2 - (self.__ha_value.simple_relay[0].is_on)):02X}\n00\n"
                 elif self.__inels_type is RF_SWITCHING_UNIT:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was 'None' for %s", RF_SWITCHING_UNIT)
                         self.__inels_set_value = DEVICE_TYPE_02_COMM_TEST
                         self.__ha_value = None
                     else:
-                        re = []
-                        re.append(int(self.__trim_inels_status_values(DEVICE_TYPE_02_DATA, RELAY, ""), 16) != 0)
-
-                        self.__ha_value = new_object(
-                            re=re,
+                        simple_relay: list[SimpleRelay] = []
+                        simple_relay.append(
+                            SimpleRelay(
+                                is_on=int(self.__trim_inels_status_values(DEVICE_TYPE_02_DATA, RELAY, ""), 16) != 0
+                            )
                         )
 
-                        self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
+                        self.__ha_value = new_object(
+                            simple_relay=simple_relay,
+                        )
+
+                        self.__inels_set_value = f"{(2 - (self.__ha_value.simple_relay[0].is_on * 1)):02X}\n00\n00\n"
                 elif self.__inels_type is RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was 'None' for %s", RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR)
                         self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                         self.__ha_value = None
                     else:
-                        re = []
-                        re.append(int(self.__trim_inels_status_values(DEVICE_TYPE_07_DATA, RELAY, ""), 16) & 1 != 0)
+                        simple_relay: list[SimpleRelay] = []
+                        simple_relay.append(
+                            SimpleRelay(
+                                is_on=int(self.__trim_inels_status_values(DEVICE_TYPE_07_DATA, RELAY, ""), 16) != 0
+                            )
+                        )
                         temp = self.__trim_inels_status_values(DEVICE_TYPE_07_DATA, TEMP_OUT, "")
 
                         self.__ha_value = new_object(
-                            re=re,
+                            simple_relay=simple_relay,
                             temp_out=temp,
                         )
 
-                        self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.re[0]]            
+                        self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.simple_relay[0].is_on]            
                 elif self.__inels_type is SA3_01B:
                     re = []
                     re.append(int(self.__trim_inels_status_values(SA3_01B_DATA, RELAY, ""), 16) & 1 != 0) 
@@ -298,31 +323,42 @@ class DeviceValue(object):
                     relay_overflow = []
                     relay_overflow.append(int(self.__trim_inels_status_values(SA3_01B_DATA, RELAY_OVERFLOW, ""),16) == 1)
                     
+                    relay: list[Relay] = []
+                    for i in range(len(re)):
+                        relay.append(
+                            Relay(
+                                is_on=re[i],
+                                overflow=relay_overflow[i],
+                            )
+                        )
+
                     self.__ha_value = new_object(
-                        re=re,
+                        #re=re,
                         temp_in=temp,
-                        relay_overflow=relay_overflow
+                        #relay_overflow=relay_overflow
+
+                        relay=relay
                     )
-                    self.__inels_set_value = RELAY_SET[self.__ha_value.re[0]]
+                    self.__inels_set_value = RELAY_SET[self.__ha_value.relay[0].is_on]
                 elif self.__inels_type is SA3_02B:
-                    re = []
+                    simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_02B_DATA, RELAY):
-                        re.append((int(relay, 16) & 1) != 0)
+                        simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
                     
                     temp_in = self.__trim_inels_status_values(SA3_02B_DATA, TEMP_IN, "")
                     self.__ha_value = new_object(
-                        re=re,
+                        simple_relay=simple_relay,
                         temp_in=temp_in,
                     )
                     
                     set_val = ""
-                    for r in re:
-                        set_val += "07\n" if r else "06\n"
+                    for r in simple_relay:
+                        set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
                 elif self.__inels_type is SA3_02M: #TODO: generalize SA3_02M/04M/06M
-                    re = []
+                    simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_02M_DATA, RELAY):
-                        re.append((int(relay, 16) & 1) != 0)
+                        simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
                     
                     digital_inputs = self.__trim_inels_status_values(
                         SA3_02M_DATA, SW, "")
@@ -333,18 +369,18 @@ class DeviceValue(object):
                         sw.append(digital_inputs[7 - i] == "1")
                         
                     self.__ha_value = new_object(
-                        re=re,
+                        simple_relay=simple_relay,
                         sw=sw,
                     )
                     
                     set_val = ""
-                    for r in re:
+                    for r in simple_relay:
                         set_val += "07\n" if r else "06\n"
                     self.__inels_set_value=set_val
                 elif self.__inels_type is SA3_04M:
-                    re = []
+                    simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_04M_DATA, RELAY):
-                        re.append((int(relay, 16) & 1) != 0)
+                        simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
                     
                     digital_inputs = self.__trim_inels_status_values(
                         SA3_04M_DATA, SW, "")
@@ -355,18 +391,18 @@ class DeviceValue(object):
                         sw.append(digital_inputs[7 - i] == "1")
                         
                     self.__ha_value = new_object(
-                        re=re,
+                        simple_relay=simple_relay,
                         sw=sw,
                     )
                     
                     set_val = ""
-                    for r in re:
-                        set_val += "07\n" if r else "06\n"
+                    for r in simple_relay:
+                        set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
                 elif self.__inels_type is SA3_06M:
-                    re = []
+                    simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_06M_DATA, RELAY):
-                        re.append((int(relay, 16) & 1) != 0)
+                        simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
 
                     digital_inputs = self.__trim_inels_status_values(
                         SA3_06M_DATA, SW, "")
@@ -377,19 +413,19 @@ class DeviceValue(object):
                         sw.append(digital_inputs[7 - i] == "1")
                         
                     self.__ha_value = new_object(
-                        re=re,
+                        simple_relay=simple_relay,
                         sw=sw,
                     )
                     
                     set_val = ""
-                    for r in re:
-                        set_val += "07\n" if r else "06\n"
+                    for r in simple_relay:
+                        set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
                 elif self.__inels_type is SA3_012M:
-                    re=[]
+                    simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_012M_DATA, RELAY):
-                        re.append((int(relay, 16) & 1) != 0)
-                    
+                        simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
+
                     digital_inputs = self.__trim_inels_status_values(
                         SA3_012M_DATA, SA3_012M, "")
                     digital_inputs = f"0x{digital_inputs}"
@@ -402,18 +438,38 @@ class DeviceValue(object):
                         sw.append(digital_inputs[15 - i] == "1")
                     
                     self.__ha_value = new_object(
-                        re=re,
+                        simple_relay=simple_relay,
                         sw=sw,
                     )
                     set_val = ""
-                    for r in re:
-                        set_val += "07\n" if r else "06\n"
+                    for r in simple_relay:
+                        set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
                 elif self.__inels_type is SA3_022M:
                     re=[]
                     for relay in self.__trim_inels_status_bytes(SA3_022M_DATA, RELAY):
                         re.append((int(relay, 16) & 1) != 0)
-                        
+                    
+                    overflows=[]
+                    alerts = self.__trim_inels_status_values(
+                        SA3_022M_DATA, RELAY_OVERFLOW, ""
+                    )
+                    alerts = f"0x{alerts}"
+                    alerts = f"{int(alerts, 16):0>16b}"
+                    for i in range(8): #0-7
+                        overflows.append(alerts[7-i] == "1")
+                    for i in range(8): #8-15
+                        overflows.append(alerts[15-i] == "1")
+                    
+                    relay: list[Relay] = []
+                    for i in range(re):
+                        relay.append(
+                            Relay(
+                                is_on=re[i],
+                                overflow=overflows[i]
+                            )
+                        )
+
                     shutter=[]
                     for s in self.__trim_inels_status_bytes(SA3_022M_DATA, SHUTTER):
                         shutter.append((int(s, 16) & 1) != 0)
@@ -423,18 +479,18 @@ class DeviceValue(object):
                         valve.append((int(v, 16) & 1) != 0)
 
                     self.__ha_value = new_object(
-                        re=re,
+                        relay=relay,
                         shutter_motors=shutter,
                         valve=valve,
                     )
 
                     set_val = ""
-                    for r in self.ha_value.re:
-                        set_val += RELAY_SET[r]
+                    for r in self.ha_value.relay:
+                        set_val += RELAY_SET[r.is_on]
                     for s in self.ha_value.shutter_motors:
-                        set_val += RELAY_SET[r]
+                        set_val += RELAY_SET[s]
                     for v in self.ha_value.valve:
-                        set_val += RELAY_SET[r]
+                        set_val += RELAY_SET[v]
 
                     self.__inels_set_value = set_val
                 elif self.__inels_type is IOU3_108M:
@@ -463,11 +519,21 @@ class DeviceValue(object):
                     for i in range(8):
                         relay_overflow.append(digital_inputs[7-1] == '1')
 
+                    relay: list[Relay] = []
+                    for i in range(8):
+                        relay.append(
+                            Relay(
+                                is_on=re[i],
+                                overflow=relay_overflow[i],
+                            )
+                        )
+
                     self.__ha_value = new_object(
-                        re=re,
+                        relay=relay,
+                        #re=re,
                         temps=temps,
                         din=din,
-                        relay_overflow=relay_overflow,
+                        #relay_overflow=relay_overflow,
                     )
                 elif self.__inels_type is RC3_610DALI:
                     #aout
@@ -508,7 +574,16 @@ class DeviceValue(object):
                     overflows = f"{int(overflows, 16):0>8b}"
                     for i in range(len(re)):
                         relay_overflow.append(overflows[7-i] == "1")
-                        
+                    
+                    relay: list[Relay] = []
+                    for i in range(len(re)):
+                        relay.append(
+                            Relay(
+                                is_on=re[i],
+                                overflow=relay_overflow[i],
+                            )
+                        )
+
                     sync_error = []
                     aout_coa = []
                     alerts = self.__trim_inels_status_values(
@@ -530,10 +605,11 @@ class DeviceValue(object):
                         dali.append(new_object(brightness=int(d, 16)))
                     
                     self.__ha_value = new_object(
-                        re=re,
+                        relay=relay,
+                        #re=re,
+                        #relay_overflow=relay_overflow,
                         temps=temps,
                         din=din,
-                        relay_overflow=relay_overflow,
                         aout=aout,
                         aout_coa=aout_coa,
                         sync_error=sync_error,
@@ -619,8 +695,8 @@ class DeviceValue(object):
                     state = f"0x{state}"
                     state = f"{int(state, 16):0>16b}"
 
-                    re = []
-                    re.append(state[5] == "1")
+                    simple_relay: list[SimpleRelay] = []
+                    simple_relay.append(SimpleRelay(new_object(state[5] == "1")))
                     
                     card_present = (state[4] == "1")
 
@@ -639,7 +715,7 @@ class DeviceValue(object):
 
                     temp_in = self.__trim_inels_status_values(CARD_DATA, TEMP_IN, "")
                     self.__ha_value = new_object(
-                        re=re,
+                        simple_relay=simple_relay,
                         sw=sw,
                         temp_in=temp_in,
                         card_present=card_present,
@@ -1620,43 +1696,48 @@ class DeviceValue(object):
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                         else:
-                            self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n"
+                            self.__inels_set_value = f"{(2 - (self.__ha_value.simple_relay[0].is_on)):02X}\n00\n"
                     elif self.__inels_type is RF_SWITCHING_UNIT:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_02_COMM_TEST
                         else:
-                            self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
+                            self.__inels_set_value = f"{(2 - (self.__ha_value.simple_relay[0].is_on)):02X}\n00\n00\n"
                     elif self.__inels_type is RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                         else:
-                            self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.re[0]]
-                    elif self.__inels_type is RF_SWITCHING_UNIT:
-                        if self.__ha_value is None:
-                            self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
-                        else:
-                            self.__inels_set_value = f"{(2 - (self.__ha_value.re[0] * 1)):02X}\n00\n00\n"
+                            self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.simple_relay[0].is_on]            
                     elif self.__inels_type in [SA3_01B, SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M, IOU3_108M]:
                         value = ""
-                        for re in self.__ha_value.re:
-                            value += RELAY_SET[re]
-                        self.__inels_set_value = value
+                        if hasattr(self.__ha_value, "simple_relay"):
+                            for re in self.__ha_value.simple_relay:
+                                value += RELAY_SET[re.is_on]
+                            self.__inels_set_value = value
+                        elif hasattr(self.__ha_value, "relay"):
+                            for re in self.__ha_value.relay:
+                                value += RELAY_SET[re.is_on]
+                            self.__inels_set_value = value
                     elif self.__inels_type is SA3_022M:
                         value = ""
-                        for re in self.__ha_value.re:
-                            value += RELAY_SET[re]
+                        for r in self.__ha_value.relay:
+                            set_val += RELAY_SET[r.is_on]
                         for s in self.__ha_value.shutter_motors:
                             value += RELAY_SET[s]
                         for v in self.__ha_value.valve:
                             value += RELAY_SET[v]
                         self.__inels_set_value = value
+                    elif self.__inels_type is IOU3_108M:
+                        set_val = ""
+                        for r in self.__ha_value.relay:
+                            set_val += RELAY_SET[r.is_on]
+                        self.__inels_set_value = set_val
                     elif self.__inels_type is RC3_610DALI:
                         set_val = "00\n" * 4 #4 bytes
                         for a in self.__ha_value.aout:
                             set_val += f"{a:02X}\n"
                         set_val += "00\n" * 2 #8 bytes
-                        for r in self.__ha_value.re:
-                            set_val += RELAY_SET[r] #16 bytes
+                        for r in self.__ha_value.relay:
+                            set_val += RELAY_SET[r.is_on] #16 bytes
                         set_val += "00\n" * 4 #20 bytes
                         for i in range(4):
                             set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
@@ -1687,7 +1768,7 @@ class DeviceValue(object):
                         
                         self.__inels_set_value = set_val
                     elif self.__inels_type in [GCR3_11, GCH3_31]:
-                        set_val = "04\n" if self.ha_value.re[0] else "00\n"
+                        set_val = "04\n" if self.ha_value.simple_relay[0].is_on else "00\n"
                         set_val += "00\n" * 9
                         self.__inels_set_value = set_val 
                 elif self.__device_type is LIGHT:
