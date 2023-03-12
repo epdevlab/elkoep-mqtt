@@ -624,10 +624,6 @@ class DeviceValue(object):
                         temps=temps,
                         din=din,
                         aout=aout,
-                        aout_coa=aout_coa,
-                        sync_error=sync_error,
-                        alert_dali_power=alert_dali_power,
-                        alert_dali_communication=alert_dali_communication,
                         dali=dali,
                     )
                 elif self.__inels_type is FA3_612M:
