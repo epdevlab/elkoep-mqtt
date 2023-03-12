@@ -1220,12 +1220,22 @@ class DeviceValue(object):
                         sw.append(digital_inputs[7-i] == "1")
                         coa.append(digital_inputs[4-i] == "1")
                     
-                    aout=[]
+                    coa.append(False) #only 3 alerts, so I fake the last one
+
+                    aout_val=[]
                     aouts = self.__trim_inels_status_bytes(DCDA_33M_DATA, OUT)
                     for i in range(len(aouts)):
                         brightness = int(i, 16)
                         brightness = brightness if brightness > 100 else 100
-                        aout.append(new_object(brightness=brightness))
+                        aout_val.append(brightness)
+
+                    aout=[]
+                    for i in range(4):
+                        aout.append(
+                            brightness=aout_val[i],
+                            aout_coa=coa[i],
+                        )
+
 
                     self.__ha_value = new_object(
                         sw=sw,
