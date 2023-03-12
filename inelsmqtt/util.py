@@ -590,7 +590,7 @@ class DeviceValue(object):
                     alerts = f"{int(alerts, 16):0>8b}"
                     
                     for i in range(4):
-                        sync_error.append(alerts[7-i == "1"])
+                        sync_error.append(alerts[7-i] == "1")
                     for i in range(4, 6):
                         aout_coa.append(alerts[7-i] == "1")
 
@@ -600,7 +600,7 @@ class DeviceValue(object):
                         aout.append(
                             new_object(
                                 brightness=aout_brightness[i],
-                                coa=aout_coa[i]
+                                aout_coa=aout_coa[i]
                             )
                         )
 
@@ -611,16 +611,16 @@ class DeviceValue(object):
                         RC3_610DALI_DATA, DALI)
                     dali = []
                     for d in dali_raw:
-                        dali.append(new_object(
-                            brightness=int(d, 16)),
-                            alert_dali_communication=alert_dali_communication,
-                            alert_dali_power=alert_dali_power,
+                        dali.append(
+                            new_object(
+                                brightness=int(d, 16),
+                                alert_dali_communication=alert_dali_communication,
+                                alert_dali_power=alert_dali_power,
+                            )
                         )
                     
                     self.__ha_value = new_object(
                         relay=relay,
-                        #re=re,
-                        #relay_overflow=relay_overflow,
                         temps=temps,
                         din=din,
                         aout=aout,
