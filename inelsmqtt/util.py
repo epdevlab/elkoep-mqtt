@@ -1734,7 +1734,7 @@ class DeviceValue(object):
                     elif self.__inels_type is RC3_610DALI:
                         set_val = "00\n" * 4 #4 bytes
                         for a in self.__ha_value.aout:
-                            set_val += f"{a:02X}\n"
+                            set_val += f"{a.brightness:02X}\n"
                         set_val += "00\n" * 2 #8 bytes
                         for r in self.__ha_value.relay:
                             set_val += RELAY_SET[r.is_on] #16 bytes
