@@ -715,17 +715,18 @@ class DeviceValue(object):
                     if card_id_int == 0 and self.__last_value is not None:
                         card_id = self.__last_value.card_id
 
-                    sw = []
-                    sw.append(state[0] == "1")
-                    sw.append(state[12] == "1")
-                    sw.append(state[10] == "1")
+                    interface = [
+                        state[0] == "1",
+                        state[12] == "1",
+                        state[10] == "1"
+                    ]
 
                     light_in = self.__trim_inels_status_values(CARD_DATA, LIGHT_IN, "")
 
                     temp_in = self.__trim_inels_status_values(CARD_DATA, TEMP_IN, "")
                     self.__ha_value = new_object(
                         simple_relay=simple_relay,
-                        sw=sw,
+                        interface=interface,
                         temp_in=temp_in,
                         card_present=card_present,
                         card_id=card_id,
@@ -830,14 +831,12 @@ class DeviceValue(object):
                             digital_inputs_bin_str[7] == "1", #0 -> 7, reverse endianness
                             digital_inputs_bin_str[6] == "1",
                         ],
-                        sw=[# 5
+                        interface=[# 5
                             digital_inputs_bin_str[5] == "1",
                             digital_inputs_bin_str[4] == "1",
                             digital_inputs_bin_str[3] == "1",
                             digital_inputs_bin_str[2] == "1",
                             digital_inputs_bin_str[1] == "1", #6
-                        ],
-                        plusminus=[
                             plusminus[7] == "1", # plus
                             plusminus[6] == "1", # minus
                         ],
@@ -866,9 +865,9 @@ class DeviceValue(object):
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>8b}"
                     
-                    sw=[] #up/down buttons
+                    interface=[] #up/down buttons
                     for i in range(WSB3_AMOUNTS[self.__inels_type]):
-                        sw.append(switches[7 - i] == "1")
+                        interface.append(switches[7 - i] == "1")
                     
                     din=[]
                     for i in range(2):
@@ -882,7 +881,7 @@ class DeviceValue(object):
                     )
                     
                     self.__ha_value = new_object(
-                        sw=sw,
+                        interface=interface,
                         din=din,
                         temp_in=temp_in,
                         ain=ain,
@@ -898,10 +897,10 @@ class DeviceValue(object):
                         WSB3_240HUM_DATA, DIN, "")
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>8b}"
-                    sw=[] #up/down buttons
+                    interface=[] #up/down buttons
                     din=[]
                     for i in range(WSB3_AMOUNTS[self.__inels_type]):
-                        sw.append(switches[7 - i] == "1")
+                        interface.append(switches[7 - i] == "1")
                     for i in range(2):
                         din.append(digital_inputs[7 - i] == "1")
                 
@@ -914,7 +913,7 @@ class DeviceValue(object):
                     dewpoint = self.__trim_inels_status_values(WSB3_240HUM_DATA, DEW_POINT, "")
 
                     self.__ha_value = new_object(
-                        sw=sw,
+                        interface=interface,
                         din=din,
                         temp_in=temp_in,
                         ain=ain,
@@ -1017,23 +1016,21 @@ class DeviceValue(object):
                     inputs = f"0x{inputs}"
                     inputs = f"{int(inputs, 16):0>8b}"
                     
-                    sw = []
+                    interface = []
                     din = []
                     for i in range(2):
                         din.append(inputs[7-i]=="1")
-                        sw.append(inputs[5-i]=="1")
+                        interface.append(inputs[5-i]=="1")
                     
                     temp_in = self.__trim_inels_status_values(IDRT3_1_DATA, TEMP_IN, "")
                     temp_out = self.__trim_inels_status_values(IDRT3_1_DATA, TEMP_OUT, "")
                     
                     self.__ha_value = new_object(
-                        sw=sw,
+                        interface=interface,
                         din=din,
                         temp_in=temp_in,
                         temp_out=temp_out,
                     )
-                else:
-                    self.__ha_value = self.__inels_status_value
             elif self.__device_type is LIGHT:  # dimmer
                 if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
                     if self.inels_status_value is None:
@@ -1602,7 +1599,7 @@ class DeviceValue(object):
                         GSB3_90SX_DATA, DEW_POINT, "")
 
                     self.__ha_value = new_object(
-                        sw=[
+                        interface=[
                             digital_inputs[7] == "1",#0
                             digital_inputs[6] == "1",
                             digital_inputs[5] == "1",
@@ -1651,9 +1648,9 @@ class DeviceValue(object):
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>8b}"
                     
-                    sw = []
+                    interface = []
                     for i in range(GSB3_AMOUNTS[self.__inels_type]):
-                        sw.append(switches[7-i] == "1")
+                        interface.append(switches[7-i] == "1")
                     
                     din = []
                     for i in range(2):
@@ -1669,7 +1666,7 @@ class DeviceValue(object):
                         GLASS_CONTROLLER_DATA, AIN, "")
 
                     self.__ha_value = new_object(
-                        sw=sw,
+                        interface=interface,
                         din=din,
                         # temperature
                         temp_in=temp,
@@ -1691,19 +1688,19 @@ class DeviceValue(object):
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>8b}"
 
-                    sw = []
+                    interface = []
                     for i in range(8):
-                        sw.append(switches[7-i] == "1")
+                        interface.append(switches[7-i] == "1")
                     din = []
                     for i in range(2):
-                        sw.append(digital_inputs[7-i]=="1")
+                        interface.append(digital_inputs[7-i]=="1")
                         din.append(digital_inputs[5-i]=="1")
                     
                     temp_in = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, TEMP_IN, "")
                     light_in = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, LIGHT_IN, "")
                     ain = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, AIN, "")
                     self.__ha_value = new_object(
-                        sw=sw,
+                        interface=interface,
                         din=din,
                         temp_in=temp_in,
                         light_in=light_in,
@@ -1720,9 +1717,9 @@ class DeviceValue(object):
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>8b}"
 
-                    sw = []
+                    interface = []
                     for i in range(3):
-                        sw.append(switches[6-2*i]=="1")
+                        interface.append(switches[6-2*i]=="1")
                     for i in range(2):
                         din.append(digital_inputs[7-i]=="1")
                     
@@ -1730,7 +1727,7 @@ class DeviceValue(object):
                     light_in = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, LIGHT_IN, "")
                     ain = self.__trim_inels_status_values(GLASS_CONTROLLER_DATA, AIN, "")
                     self.__ha_value = new_object(
-                        sw=sw,
+                        interface=interface,
                         din=din,
                         temp_in=temp_in,
                         light_in=light_in,
