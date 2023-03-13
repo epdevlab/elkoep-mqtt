@@ -1095,11 +1095,11 @@ class DeviceValue(object):
                     toa=[ # thermal overload alarm
                         state_bin_str[3] == "1",
                         state_bin_str[2] == "1",
-                    ],
+                    ]
                     coa=[ # current overload alrm
                         state_bin_str[1] == "1", #6
                         state_bin_str[0] == "1", #7
-                    ],
+                    ]
 
                     out1 = int(
                         self.__trim_inels_status_values(
