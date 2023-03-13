@@ -6,7 +6,7 @@ import uuid
 import copy
 
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 import paho.mqtt.client as mqtt
 
@@ -76,7 +76,7 @@ class InelsMqtt:
         self.client.on_publish = self.__on_publish
         self.client.on_subscribe = self.__on_subscribe
         self.client.on_disconnect = self.__on_disconnect
-
+        self.__connection_error: Optional[str] = None
         self.__client.enable_logger()
 
         u_name = config.get(MQTT_USERNAME)
@@ -120,6 +120,10 @@ class InelsMqtt:
     def list_of_listeners(self) -> dict[str, dict[str, Callable[[Any], Any]]]:
         """List of listeners."""
         return self.__listeners
+
+    @property
+    def connection_error(self) -> Optional[str]:
+        return self.__connection_error
 
     def is_subscribed(self, topic) -> bool:
         """Get info if the topic is subscribed in device
@@ -217,7 +221,7 @@ class InelsMqtt:
         self,
         client: mqtt.Client,  # pylint: disable=unused-argument
         userdata,  # pylint: disable=unused-argument
-        flag,  # pylint: disable=unused-argument
+        flags,
         reason_code,
         properties=None,  # pylint: disable=unused-argument
     ) -> None:
@@ -228,7 +232,13 @@ class InelsMqtt:
             properties (_type_, optional): Props from mqtt sets. Defaults None
         """
         self.__try_connect = True
-        self.__is_available = reason_code == mqtt.CONNACK_ACCEPTED
+        if reason_code == mqtt.CONNACK_ACCEPTED:
+            self.__is_available = True
+            self.__connection_error = None
+        else:
+            self.__is_available = False
+            self.__connection_error = mqtt.connack_string(reason_code)
+        
         _LOGGER.info(
             "Mqtt broker %s:%s %s",
             self.__host,
