@@ -1483,7 +1483,8 @@ class DeviceValue(object):
                     reg=self.__trim_inels_status_values(
                         VIRT_REG_DATA, VIRT_HEAT_REG, ""
                     )
-                    
+                    reg = f"{int(reg, 16):0>8b}"
+
                     heat_reg=reg[7] == "1"
                     heat_source = reg[6] == "1"
                     
@@ -1498,7 +1499,8 @@ class DeviceValue(object):
                     reg=self.__trim_inels_status_values(
                         VIRT_REG_DATA, VIRT_HEAT_REG, ""
                     )
-                    
+                    reg = f"{int(reg, 16):0>8b}"
+
                     cool_reg=reg[7] == "1"
                     cool_source = reg[6] == "1"
                     
