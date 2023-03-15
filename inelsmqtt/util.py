@@ -967,7 +967,7 @@ class DeviceValue(object):
                     binary_input3 = []
                     inputs = self.__trim_inels_status_values(IM3_140M_DATA, IN, "")
                     inputs = f"0x{inputs}"
-                    inputs = f"{int(inputs, 16):0>64b}"
+                    inputs = f"{int(inputs, 16):0>32b}"
                     
                     for i in range(4):
                         binary_input.append(int(inputs[7-2*i-1] + inputs[7-2*i], 2))
@@ -977,7 +977,7 @@ class DeviceValue(object):
                     binary_input.extend(binary_input3)
                     
                     for i in range(2):
-                        binary_input.append(int(inputs[63-2*i-1] + inputs[63-2*i], 2))
+                        binary_input.append(int(inputs[31-2*i-1] + inputs[31-2*i], 2))
                     
                     self.__ha_value = new_object(
                         input=binary_input
