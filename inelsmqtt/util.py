@@ -1736,7 +1736,7 @@ class DeviceValue(object):
                         ain=ain,
                     )
         except Exception as err:
-            _LOGGER.error("Error making HA value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value.replace("\n", " "))
+            _LOGGER.error("Error making HA value for device of type '%s', status value was '%s'", self.__inels_type, None if not self.inels_status_value else self.inels_status_value.replace("\n", " "))
             self.__ha_value = dummy_val
             #raise
 
@@ -1958,7 +1958,7 @@ class DeviceValue(object):
 
                         self.__inels_set_value = set_val
             except Exception as err:
-                _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s'", self.__inels_type, self.inels_status_value.replace("\n", " "))
+                _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s'", self.__inels_type, None if not self.inels_status_value else self.inels_status_value.replace("\n", " "))
                 raise
 
     def __find_keys_by_value(self, array: dict, value, last_value) -> Any:
