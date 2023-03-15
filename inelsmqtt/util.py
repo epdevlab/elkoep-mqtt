@@ -461,6 +461,17 @@ class DeviceValue(object):
                     for i in range(8): #8-15
                         overflows.append(alerts[15-i] == "1")
                     
+                    digital_inputs = self.__trim_inels_status_values(
+                        SA3_012M_DATA, SA3_012M, "")
+                    digital_inputs = f"0x{digital_inputs}"
+                    digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+                    
+                    sw=[]
+                    for i in range(8):
+                        sw.append(digital_inputs[7 - i] == "1")
+                    for i in range(8):
+                        sw.append(digital_inputs[15 - i] == "1")
+
                     relay: list[Relay] = []
                     for i in range(len(re)):
                         relay.append(
@@ -482,6 +493,7 @@ class DeviceValue(object):
                         relay=relay,
                         shutter_motors=shutter,
                         valve=valve,
+                        sw=sw,
                     )
 
                     set_val = ""
