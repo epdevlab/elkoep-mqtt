@@ -1116,9 +1116,9 @@ class DeviceValue(object):
                     out2 = out2 if out2 <= 100 else 100
                     out = [out1, out2]
 
-                    light_toa_coa = []
+                    light_coa_toa = []
                     for i in range(2):
-                        light_toa_coa.append(
+                        light_coa_toa.append(
                             new_object(
                                 brightness=out[i],
                                 thermal_alert=toa[i],
@@ -1138,12 +1138,12 @@ class DeviceValue(object):
                         ],
 
                         temp_in=temp,
-                        light_toa_coa=light_toa_coa,
+                        light_coa_toa=light_coa_toa,
                     )
                     
                     set_val = "00\n00\n00\n00\n"
-                    for i in range(len(self.__ha_value.light_toa_coa)):
-                        set_val +=  f"{self.__ha_value.light_toa_coa[i].brightness:02X}\n"
+                    for i in range(len(self.__ha_value.light_coa_toa)):
+                        set_val +=  f"{self.__ha_value.light_coa_toa[i].brightness:02X}\n"
                     self.__inels_set_value = set_val
                 elif self.__inels_type is DAC3_04B:
                     temp_in = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_IN, "")
@@ -1282,9 +1282,9 @@ class DeviceValue(object):
                     for o in outs:
                         out.append(int(o, 16))
 
-                    light_toa_coa=[]
+                    light_coa_toa=[]
                     for i in range(6):
-                        light_toa_coa.append(
+                        light_coa_toa.append(
                             new_object(
                                 brightness=out[i],
                                 toa=toa[i],
@@ -1295,15 +1295,15 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         sw=sw,
                         din=din,
-                        light_toa_coa=light_toa_coa,
+                        light_coa_toa=light_coa_toa,
                     )
                     
                     set_val = "00\n"*4
                     for i in range(4):
-                        set_val += f"{self.__ha_value.light_toa_coa[i].brightness:02X}\n"
+                        set_val += f"{self.__ha_value.light_coa_toa[i].brightness:02X}\n"
                     set_val += "00\n"*4
                     for i in range(4, 6):
-                        set_val += f"{self.__ha_value.light_toa_coa[i].brightness:02X}\n"
+                        set_val += f"{self.__ha_value.light_coa_toa[i].brightness:02X}\n"
                     set_val += "00\n"*12
                     self.__inels_set_value = set_val
             elif self.__device_type is COVER:  # Shutters
@@ -1867,10 +1867,10 @@ class DeviceValue(object):
                             self.__inels_set_value = f"15\n00\n00\n00{self.ha_value.simple_light[0].brightness*2.55:02X}\n00\n"
                     elif self.__inels_type is DA3_22M:
                         # correct the values
-                        out1 = round(self.__ha_value.light_toa_coa[0].brightness, -1)
+                        out1 = round(self.__ha_value.light_coa_toa[0].brightness, -1)
                         out1 = out1 if out1 < 100 else 100
 
-                        out2 = round(self.__ha_value.light_toa_coa[1].brightness, -1)
+                        out2 = round(self.__ha_value.light_coa_toa[1].brightness, -1)
                         out2 = out2 if out2 < 100 else 100
 
                         out1_str = f"{out1:02X}\n"
@@ -1892,12 +1892,12 @@ class DeviceValue(object):
                     elif self.__inels_type is DA3_66M:
                         set_val = "00\n"*4
                         for i in range(4):
-                            out = self.__ha_value.light_toa_coa[i].brightness
+                            out = self.__ha_value.light_coa_toa[i].brightness
                             out = out if out <= 100 else 100
                             set_val += f"{out:02X}\n"
                         set_val += "00\n"*4
                         for i in range(4, 6):
-                            out = self.__ha_value.light_toa_coa[i].brightness
+                            out = self.__ha_value.light_coa_toa[i].brightness
                             out = out if out <= 100 else 100
                             set_val += f"{out:02X}\n"
                         set_val += "00\n"*12
