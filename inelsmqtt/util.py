@@ -1791,7 +1791,7 @@ class DeviceValue(object):
                     elif self.__inels_type is SA3_022M:
                         value = ""
                         for r in self.__ha_value.relay:
-                            set_val += RELAY_SET[r.is_on]
+                            value += RELAY_SET[r.is_on]
                         for s in self.__ha_value.shutter_motors:
                             value += RELAY_SET[s]
                         for v in self.__ha_value.valve:
@@ -1882,6 +1882,7 @@ class DeviceValue(object):
                         set_val = "00\n" * 4
                         for d in self.ha_value.aout:
                             set_val += f"{d.brightness:02X}\n"
+                        self.__inels_set_value = set_val
                     elif self.__inels_type in DCDA_33M:
                         set_val = "00\n"*4
                         for i in range(4):
