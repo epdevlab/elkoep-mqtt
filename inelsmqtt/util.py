@@ -717,7 +717,7 @@ class DeviceValue(object):
                     state = f"{int(state, 16):0>16b}"
 
                     simple_relay: list[SimpleRelay] = []
-                    simple_relay.append(SimpleRelay(is_on=new_object(state[5] == "1")))
+                    simple_relay.append(SimpleRelay(is_on=state[5] == "1"))
                     
                     card_present = (state[4] == "1")
 
