@@ -76,7 +76,7 @@ class InelsMqtt:
         self.client.on_publish = self.__on_publish
         self.client.on_subscribe = self.__on_subscribe
         self.client.on_disconnect = self.__on_disconnect
-        self.__connection_error: Optional[str] = None
+        self.__connection_error: Optional[int] = None
         self.__client.enable_logger()
 
         u_name = config.get(MQTT_USERNAME)
@@ -156,7 +156,7 @@ class InelsMqtt:
         """
         return self.__messages
 
-    def test_connection(self) -> bool:
+    def test_connection(self) -> Optional[int]:
         """Test connection. It's used only for connection
             testing. After that is disconnected
         Returns:
@@ -165,7 +165,7 @@ class InelsMqtt:
         self.__connect()
         self.disconnect()
 
-        return self.__is_available
+        return self.__connection_error
 
     def subscribe_listener(self, topic: str, unique_id: str, fnc: Callable[[Any], Any]) -> None:
         """Append new item into the datachange listener."""
@@ -182,8 +182,6 @@ class InelsMqtt:
         purposes.
         """
         if self.__client.is_connected() is False:
-            _LOGGER.warning("Host: %s, Port: %s\n", self.__host, self.__port)
-            
             self.__client.connect(self.__host, self.__port)
             self.__client.loop_start()
 
@@ -237,7 +235,7 @@ class InelsMqtt:
             self.__connection_error = None
         else:
             self.__is_available = False
-            self.__connection_error = mqtt.connack_string(reason_code)
+            self.__connection_error = reason_code
         
         _LOGGER.info(
             "Mqtt broker %s:%s %s",
