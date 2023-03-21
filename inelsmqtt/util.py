@@ -1355,7 +1355,7 @@ class DeviceValue(object):
                         if (self.__last_value is not None) and (shutter_val not in [Shutter_state.Open, Shutter_state.Closed]):
                             shutter_val = self.__last_value.shutters[0].state
 
-                        position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""), 16)
+                        position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""), 16) * 100.0 / 255.0
 
                         shutters_with_pos.append(
                             new_object(
@@ -1926,7 +1926,7 @@ class DeviceValue(object):
                             self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
                         else:
                             if self.__ha_value.shutters_with_pos[0].set_pos:
-                                shutter_set = f"0A\n00\n{self.__ha_value.shutters_with_pos[0].position:02X}\n"
+                                shutter_set = f"0A\n00\n{int(round(self.__ha_value.shutters_with_pos[0].position*2.55, 1)):02X}\n"
                             else:
                                 shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters_with_pos[0].state] + "00\n00\n"
                             self.__inels_set_value = shutter_set
