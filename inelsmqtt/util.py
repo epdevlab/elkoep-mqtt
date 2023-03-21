@@ -1921,7 +1921,7 @@ class DeviceValue(object):
                         else:
                             shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0].state]
                             self.__inels_set_value = shutter_set + "00\n00\n"
-                    elif self.__device_type is RF_SHUTTER_UNIT:
+                    elif self.__inels_type is RF_SHUTTER_UNIT:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
                         else:
