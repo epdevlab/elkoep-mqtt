@@ -510,7 +510,7 @@ DA3_66M_DATA = {
 }
 
 DAC3_04_DATA = {
-    TEMP_IN: [0, 1],
+    TEMP_OUT: [0, 1],
     ALERT: [2],
     OUT: [4, 5, 6, 7],
 }

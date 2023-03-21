@@ -1158,7 +1158,7 @@ class DeviceValue(object):
                         set_val +=  f"{self.__ha_value.light_coa_toa[i].brightness:02X}\n"
                     self.__inels_set_value = set_val
                 elif self.__inels_type is DAC3_04B:
-                    temp_in = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_IN, "")
+                    temp_out = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_OUT, "")
                     
                     aout_alert = int(self.__trim_inels_status_values(DAC3_04_DATA, ALERT, ""), 16) != 0
 
@@ -1175,7 +1175,7 @@ class DeviceValue(object):
                         )
                     
                     self.__ha_value = new_object(
-                        temp_in=temp_in,
+                        temp_out=temp_in,
                         aout=aout,
                     )
 
@@ -1183,7 +1183,7 @@ class DeviceValue(object):
                     for d in aout:
                         set_val += f"{d.brightness:02X}\n"
                 elif self.__inels_type is DAC3_04M:
-                    temp_in = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_IN, "")
+                    temp_out = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_OUT, "")
 
                     aout_alert = self.__trim_inels_status_values(DAC3_04_DATA, ALERT, "")
                     aout_coa=[]
@@ -1207,7 +1207,7 @@ class DeviceValue(object):
                         )
                     
                     self.__ha_value = new_object(
-                        temp_in=temp_in,
+                        temp_out=temp_in,
                         aout=aout,
                     )
 
