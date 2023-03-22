@@ -1358,10 +1358,11 @@ class DeviceValue(object):
                         shutters_with_pos = []
                         
                         position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""), 16)
+
                         shutter_val = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, SHUTTER, ""))
                         shutter_val = ((shutter_val >> 1) & 1) | (shutter_val & 1) << 1 #swap bit 0 with bit 1
 
-                        if shutter_val == Shutter_state.Closed and position != 0:
+                        if shutter_val == Shutter_state.Closed and position != 100:
                             shutter_val = Shutter_state.Open
 
                         if (self.__last_value is not None) and (shutter_val not in [Shutter_state.Open, Shutter_state.Closed]):
