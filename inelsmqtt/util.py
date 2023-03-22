@@ -97,6 +97,7 @@ from .const import (
     SA3_012M,
     IM3_80B,
     IM3_140M,
+    WHITE,
     WSB3_20H,
     GSB3_60SX,
     IDRT3_1,
@@ -770,8 +771,8 @@ class DeviceValue(object):
 
                     ain = int(self.__trim_inels_status_values(DEVICE_TYPE_15_DATA, AIN, ""), 16) /100
 
-                    low_battery=state[0] == "1"
-                    flooded=state[7]=="1"
+                    low_battery=state[7] == "1"
+                    flooded=state[1]=="1"
                     ains=[]
                     ains.append(ain)
                     self.__ha_value = new_object(
@@ -1090,10 +1091,16 @@ class DeviceValue(object):
                         self.__ha_value = None
                     else:
                         simple_light = []
-                        simple_light.append(new_object(brightness=int(
-                            int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, OUT, ""), 16) * 100.0/255.0
-                        )))
-
+                        simple_light.append(
+                            new_object(
+                                    brightness=int(
+                                        int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, OUT, ""), 16) * 100.0/255.0
+                                    ),
+                                    white=int(
+                                        int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, WHITE, ""), 16) * 100.0/255.0
+                                    )
+                                ),
+                            )
 
                         self.__ha_value=new_object(simple_light=simple_light)
                 elif self.__inels_type is DA3_22M:
@@ -1355,7 +1362,7 @@ class DeviceValue(object):
                         if (self.__last_value is not None) and (shutter_val not in [Shutter_state.Open, Shutter_state.Closed]):
                             shutter_val = self.__last_value.shutters[0].state
 
-                        position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""), 16) * 100.0 / 255.0
+                        position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""), 16)
 
                         shutters_with_pos.append(
                             new_object(
@@ -1876,7 +1883,7 @@ class DeviceValue(object):
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         else:
-                            self.__inels_set_value = f"15\n00\n00\n00\n{int(self.ha_value.simple_light[0].brightness*2.55):02X}\n00\n"
+                            self.__inels_set_value = f"15\n00\n00\n00\n{round(self.ha_value.simple_light[0].brightness*2.55):02X}\n{round(self.ha_value.simple_light[0].white*2.55):02X}\n"
                     elif self.__inels_type is DA3_22M:
                         # correct the values
                         out1 = round(self.__ha_value.light_coa_toa[0].brightness, -1)
@@ -1926,7 +1933,7 @@ class DeviceValue(object):
                             self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
                         else:
                             if self.__ha_value.shutters_with_pos[0].set_pos:
-                                shutter_set = f"0A\n00\n{int(round(self.__ha_value.shutters_with_pos[0].position*2.55, 1)):02X}\n"
+                                shutter_set = f"0A\n00\n{round(self.__ha_value.shutters_with_pos[0].position):02X}\n"
                             else:
                                 shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters_with_pos[0].state] + "00\n00\n"
                             self.__inels_set_value = shutter_set
