@@ -1182,7 +1182,7 @@ class DeviceValue(object):
                         )
                     
                     self.__ha_value = new_object(
-                        temp_out=temp_in,
+                        temp_out=temp_out,
                         aout=aout,
                     )
 
@@ -1214,7 +1214,7 @@ class DeviceValue(object):
                         )
                     
                     self.__ha_value = new_object(
-                        temp_out=temp_in,
+                        temp_out=temp_out,
                         aout=aout,
                     )
 
