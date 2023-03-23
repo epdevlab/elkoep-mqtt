@@ -1888,7 +1888,7 @@ class DeviceValue(object):
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         else:
-                            self.__inels_set_value = f"15\n00\n00\n00\n{round(self.ha_value.simple_light[0].brightness*2.55):02X}\n{round(self.ha_value.simple_light[0].white*2.55):02X}\n"
+                            self.__inels_set_value = f"0F\n00\n00\n00\n{round(self.ha_value.simple_light[0].brightness*2.55):02X}\n{round(self.ha_value.simple_light[0].white*2.55):02X}\n"
                     elif self.__inels_type is DA3_22M:
                         # correct the values
                         out1 = round(self.__ha_value.light_coa_toa[0].brightness, -1)
