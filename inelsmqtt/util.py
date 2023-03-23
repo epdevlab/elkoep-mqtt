@@ -786,12 +786,15 @@ class DeviceValue(object):
                     state = f"0x{state}"
                     state = f"{int(state, 16):0>8b}"
 
+                    
                     low_battery=state[4] == "1"
                     detected=state[3] == "1"
+                    tamper=state[1]=="1"
 
                     self.__ha_value = new_object(
                         low_battery=low_battery,
                         detected=detected,
+                        tamper=tamper,
                     )
                 elif self.__inels_type is RF_MOTION_DETECTOR:
                     state = self.__trim_inels_status_values(
@@ -801,10 +804,12 @@ class DeviceValue(object):
 
                     low_battery=state[4] == "1"
                     motion=state[3] == "1"
+                    tamper=state[1]=="1"
 
                     self.__ha_value = new_object(
                         low_battery=low_battery,
                         motion=motion,
+                        tamper=tamper,
                     )
                 elif self.__inels_type is RF_TEMPERATURE_HUMIDITY_SENSOR:
                     battery = int(self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, BATTERY, ""), 16)
