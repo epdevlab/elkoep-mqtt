@@ -786,8 +786,8 @@ class DeviceValue(object):
                     state = f"0x{state}"
                     state = f"{int(state, 16):0>8b}"
 
-                    low_battery=state[3] == "1"
-                    detected=state[4] == "1"
+                    low_battery=state[4] == "1"
+                    detected=state[3] == "1"
 
                     self.__ha_value = new_object(
                         low_battery=low_battery,
@@ -799,8 +799,8 @@ class DeviceValue(object):
                     state = f"0x{state}"
                     state = f"{int(state, 16):0>8b}"
 
-                    low_battery=state[3] == "1"
-                    motion=state[4] == "1"
+                    low_battery=state[4] == "1"
+                    motion=state[3] == "1"
 
                     self.__ha_value = new_object(
                         low_battery=low_battery,
