@@ -772,7 +772,7 @@ class DeviceValue(object):
                     ain = int(self.__trim_inels_status_values(DEVICE_TYPE_15_DATA, AIN, ""), 16) /100
 
                     low_battery=state[7] == "1"
-                    flooded=state[1]=="1"
+                    flooded=state[6]=="1"
                     ains=[]
                     ains.append(ain)
                     self.__ha_value = new_object(
