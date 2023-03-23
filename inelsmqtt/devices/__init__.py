@@ -279,35 +279,43 @@ class Device(object):
 
         return json_serialized
 
-    def add_ha_callback(self, key: str, index: int, fnc: Callable[[Any], Any]) -> None:
+    def add_ha_callback(self, key: str, index: int, fnc: Callable[[], Any]) -> None:
         t: tuple[str, int] = (key, index)
         if self.__entity_callbacks is None:
             self.__entity_callbacks = dict()
         self.__entity_callbacks[t] = fnc
 
-    def ha_diff(self, last_val, curr_val, new_val):
+    def ha_diff(self, last_val, curr_val):
         for k in (key for key in dir(curr_val) if not key.startswith('_')):
             if type(curr_val.__dict__[k]) is list:
                 for i in range(len(curr_val.__dict__[k])):
                     if curr_val.__dict__[k][i] != last_val.__dict__[k][i]:
                         t: tuple[str, int] = (k, i)
                         if t in self.__entity_callbacks:
-                            self.__entity_callbacks[t](new_val)
+                            self.__entity_callbacks[t]()
             else:
                 if curr_val.__dict__[k] != last_val.__dict__[k]:
                     t: tuple[str, int] = (k, -1)
                     if t in self.__entity_callbacks:
-                        self.__entity_callbacks[t](new_val)
+                        self.__entity_callbacks[t]()
 
-    def callback(self, new_value: Any) -> None:
+    def complete_callback(self) -> None:
+        for v in self.__entity_callbacks.values():
+            v()
+
+    def callback(self, availability_update: bool) -> None:
         """Update value in device and call the callbacks of the respective entities."""
-        self.update_value(new_value) #calculate status value
+        self.get_value()
 
-        self.ha_diff(
-            last_val=self.last_values.ha_value,
-            curr_val=self.__values.ha_value,
-            new_val=new_value,
-        )   
+        if availability_update: #recalculate state for all the entities as they became unavailable/available
+            self.complete_callback()
+        else:
+            self.ha_diff( #differential availability 
+                last_val=self.last_values.ha_value,
+                curr_val=self.__values.ha_value,
+            )   
+
+
 
 class DeviceInfo(object):
     """Device info class."""

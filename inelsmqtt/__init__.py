@@ -171,7 +171,9 @@ class InelsMqtt:
         """Append new item into the datachange listener."""
         #if topic not in self.__listeners:
         #    self.__listeners[topic] = dict[str, Callable[[Any], Any]]()
-        self.__listeners[topic][unique_id] = fnc
+        
+        stripped_topic = "/".join(topic.split("/")[2:])
+        self.__listeners[stripped_topic][unique_id] = fnc
 
     def unsubscribe_listeners(self) -> bool:
         """Unsubscribe listeners."""
@@ -433,7 +435,10 @@ class InelsMqtt:
             msg (object): Topic with payload from broker
         """
         self.__message_readed = True
-        device_type = msg.topic.split("/")[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
+        message_parts = msg.topic.split("/")
+        device_type = message_parts[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
+
+        message_type = message_parts[TOPIC_FRAGMENTS[FRAGMENT_STATE]]
 
         if device_type in DEVICE_TYPE_DICT:
             # keep last value
@@ -443,15 +448,16 @@ class InelsMqtt:
                 else msg.payload
             )
             self.__messages[msg.topic] = msg.payload
-            # update info that the topic is subscribed
-            #self.__is_subscribed_list[msg.topic] = True
 
-        if len(self.__listeners) > 0 and msg.topic in self.__listeners:
+        stripped_topic = "/".join(message_parts[2:])
+
+        is_connected_message = message_type == "connected"
+
+        if len(self.__listeners) > 0 and stripped_topic in self.__listeners:
             # This pass data change directely into the device.
-            if len(self.__listeners[msg.topic]) > 0:
-                for unique_id in list(self.__listeners[msg.topic]): #prevents the dictionary increased in size during iteration exception
-                    self.__listeners[msg.topic][unique_id](msg.payload)
-            
+            if len(self.__listeners[stripped_topic]) > 0:
+                for unique_id in list(self.__listeners[stripped_topic]): #prevents the dictionary increased in size during iteration exception
+                    self.__listeners[stripped_topic][unique_id](is_connected_message)
 
     def __on_subscribe(
         self,
