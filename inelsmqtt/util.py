@@ -1357,7 +1357,7 @@ class DeviceValue(object):
                     else:
                         shutters_with_pos = []
                         
-                        position = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""), 16)
+                        position = 100 - int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, POSITION, ""), 16)
 
                         shutter_val = int(self.__trim_inels_status_values(DEVICE_TYPE_21_DATA, SHUTTER, ""))
                         shutter_val = ((shutter_val >> 1) & 1) | (shutter_val & 1) << 1 #swap bit 0 with bit 1
@@ -1938,7 +1938,7 @@ class DeviceValue(object):
                             self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
                         else:
                             if self.__ha_value.shutters_with_pos[0].set_pos:
-                                shutter_set = f"0A\n00\n{round(self.__ha_value.shutters_with_pos[0].position):02X}\n"
+                                shutter_set = f"0A\n00\n{100 - round(self.__ha_value.shutters_with_pos[0].position):02X}\n"
                             else:
                                 shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters_with_pos[0].state] + "00\n00\n"
                             self.__inels_set_value = shutter_set
