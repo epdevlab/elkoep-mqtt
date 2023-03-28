@@ -162,9 +162,13 @@ class InelsMqtt:
         Returns:
             bool: Is broker available or not
         """
-        self.__connect()
-        self.disconnect()
-
+        try:
+            self.__connect()
+            self.disconnect()
+        except Exception as e:
+            _LOGGER.warning("connection error was %d". self.__connection_error)
+            _LOGGER.error(e)
+            raise
         return self.__connection_error
 
     def subscribe_listener(self, topic: str, unique_id: str, fnc: Callable[[Any], Any]) -> None:
