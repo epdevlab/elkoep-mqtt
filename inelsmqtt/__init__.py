@@ -164,11 +164,13 @@ class InelsMqtt:
         """
         try:
             self.__connect()
-            self.disconnect()
+            self.disconnect()            
         except Exception as e:
-            _LOGGER.warning("connection error was %d", self.__connection_error)
-            _LOGGER.error(e)
-            raise
+            if isinstance(e, ConnectionRefusedError):
+                self.__connection_error = 3 # cannot connect
+            else:
+                self.__connection_error = 6 # unknown
+        
         return self.__connection_error
 
     def subscribe_listener(self, topic: str, unique_id: str, fnc: Callable[[Any], Any]) -> None:
