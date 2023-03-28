@@ -166,7 +166,7 @@ class InelsMqtt:
             self.__connect()
             self.disconnect()
         except Exception as e:
-            _LOGGER.warning("connection error was %d". self.__connection_error)
+            _LOGGER.warning("connection error was %d", self.__connection_error)
             _LOGGER.error(e)
             raise
         return self.__connection_error
