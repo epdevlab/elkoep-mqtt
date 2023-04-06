@@ -1446,7 +1446,7 @@ class DeviceValue(object):
 
                     interface=[]
                     digital_inputs = self.__trim_inels_status_values(
-                        JA3_018M, SW, "")
+                        JA3_018M_DATA, SW, "")
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>16b}"
 
@@ -1456,9 +1456,9 @@ class DeviceValue(object):
                         interface.append(digital_inputs[15-i] == "1")
                     
                     alerts = self.__trim_inels_status_values(
-                        JA3_018M, ALERT, "")
+                        JA3_018M_DATA, ALERT, "")
                     alerts = f"0x{alerts}"
-                    alerts = f"{int(alerts, 16):0>16b}"
+                    alerts = f"{int(alerts, 16):0>8b}"
 
                     for i in range(2):
                         interface.append(alerts[7-i] == "1")
@@ -1472,9 +1472,9 @@ class DeviceValue(object):
                     
                     relay_overflow=[alerts[0]=="1"]
                     overflows = self.__trim_inels_status_values(
-                        JA3_018M, RELAY_OVERFLOW, "")
+                        JA3_018M_DATA, RELAY_OVERFLOW, "")
                     overflows = f"0x{overflows}"
-                    overflows = f"{int(overflows, 16):0>16b}"
+                    overflows = f"{int(overflows, 16):0>8b}"
 
                     #TODO add overflows and alerts to the shutters
 
