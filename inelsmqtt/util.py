@@ -1426,7 +1426,7 @@ class DeviceValue(object):
                 elif self.__inels_type is JA3_018M:
                     shutter_relays=[]
                     for r in self.__trim_inels_status_bytes(JA3_018M_DATA, SHUTTER):
-                        shutter_relays.append((int(s, 16) & 1) != 0)
+                        shutter_relays.append((int(r, 16) & 1) != 0)
                     
                     simple_shutters = []
                     shutters = list(zip(shutter_relays[::2], shutter_relays[1::2]))
