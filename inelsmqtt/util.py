@@ -1470,16 +1470,17 @@ class DeviceValue(object):
                         alerts[1]=="1"
                     ]
                     
-                    relay_overflow=[alerts[0]=="1"]
                     overflows = self.__trim_inels_status_values(
                         JA3_018M_DATA, RELAY_OVERFLOW, "")
                     overflows = f"0x{overflows}"
                     overflows = f"{int(overflows, 16):0>8b}"
 
                     #TODO add overflows and alerts to the shutters
-
+                    relay_overflow=[]
                     for i in range(8):
                         relay_overflow.append(overflows[7-i] == "1")
+
+                    relay_overflow.append(alerts[0]=="1")
 
                     #I'll register them as an interface and replace the names to SW 1 up/down, etc...
 
