@@ -686,8 +686,8 @@ RC3_610DALI_DATA = {
 JA3_018M_DATA = {
     SHUTTER: list(range(18)),
     SW: [18, 19],
-    ALERT: [20, 21],
-    RELAY_OVERFLOW: [22],
+    ALERT: [20],
+    RELAY_OVERFLOW: [21],
 }
 
 DEVICE_TYPE_166_DATA = {
