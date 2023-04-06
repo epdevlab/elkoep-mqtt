@@ -1456,7 +1456,7 @@ class DeviceValue(object):
                         interface.append(digital_inputs[15-i] == "1")
                     
                     alerts = self.__trim_inels_status_values(
-                        JA3_018M, SW, "")
+                        JA3_018M, ALERT, "")
                     alerts = f"0x{alerts}"
                     alerts = f"{int(alerts, 16):0>16b}"
 
@@ -1472,7 +1472,7 @@ class DeviceValue(object):
                     
                     relay_overflow=[alerts[0]=="1"]
                     overflows = self.__trim_inels_status_values(
-                        JA3_018M, SW, "")
+                        JA3_018M, RELAY_OVERFLOW, "")
                     overflows = f"0x{overflows}"
                     overflows = f"{int(overflows, 16):0>16b}"
 
