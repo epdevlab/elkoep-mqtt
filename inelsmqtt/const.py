@@ -342,6 +342,13 @@ RF_SHUTTER_STATE_SET = {
     Shutter_state.Stop_down: "06\n",
 }
 
+SIMPLE_SHUTTER_STATE_SET = {
+    Shutter_state.Open: "07\n06\n",
+    Shutter_state.Closed: "06\n07\n",
+    Shutter_state.Stop_up: "06\n06\n",
+    Shutter_state.Stop_down: "06\n06\n",
+}
+
 class Card_read_state(IntEnum):
     No_card = 0
     Success = 1

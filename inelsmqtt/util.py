@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import logging
 
 from operator import itemgetter
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from inelsmqtt.mqtt_client import GetMessageType
 
@@ -67,6 +67,7 @@ from .const import (
     SHUTTER_SET,
     SHUTTER_STATE_LIST,
     SHUTTER_STATES,
+    SIMPLE_SHUTTER_STATE_SET,
     SWITCH,
     SWITCH_SET,
     SWITCH_STATE,
@@ -208,6 +209,17 @@ class Relay(SimpleRelay):
     """Create relay with overflow detection."""
     overflow: bool
 
+@dataclass
+class Shutter():
+    """Create a simple shutter."""
+    state: Shutter_state
+    is_closed: Optional[bool]
+
+@dataclass
+class Shutter_pos(Shutter):
+    """Create a shutter with position."""
+    position: int
+    set_pos: bool
 
 ConfigType = Dict[str, str]
 _LOGGER = logging.getLogger(__name__)
@@ -486,6 +498,24 @@ class DeviceValue(object):
                     for s in self.__trim_inels_status_bytes(SA3_022M_DATA, SHUTTER):
                         shutter.append((int(s, 16) & 1) != 0)
                     
+                    shutters = []
+                    for i in range(len(shutters)/2):
+                        up = shutter[2*i]
+                        down = shutter[2*i+1]
+
+                        if up:
+                            state = Shutter_state.Open
+                        elif down:
+                            state = Shutter_state.Closed
+
+                    simple_shutters = []
+                    simple_shutters.append(
+                        Shutter(
+                            state=Shutter_state.Stop_up,
+                            is_closed=None
+                        )
+                    )
+
                     valve=[]
                     for v in self.__trim_inels_status_bytes(SA3_022M_DATA, VALVE):
                         valve.append((int(v, 16) & 1) != 0)
@@ -493,6 +523,7 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         relay=relay,
                         shutter_motors=shutter,
+                        simple_shutters=simple_shutters,
                         valve=valve,
                         sw=sw,
                     )
@@ -500,8 +531,10 @@ class DeviceValue(object):
                     set_val = ""
                     for r in self.ha_value.relay:
                         set_val += RELAY_SET[r.is_on]
-                    for s in self.ha_value.shutter_motors:
-                        set_val += RELAY_SET[s]
+                    # for s in self.ha_value.shutter_motors:
+                    #     set_val += RELAY_SET[s]
+                    for s in self.__ha_value.simple_shutters:
+                            value += SIMPLE_SHUTTER_STATE_SET[s.state]
                     for v in self.ha_value.valve:
                         set_val += RELAY_SET[v]
 
@@ -1346,7 +1379,10 @@ class DeviceValue(object):
                         if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]: 
                             shutter_val = self.__last_value.shutters[0].state
                         shutters.append(
-                            new_object(state=shutter_val)
+                            Shutter(
+                                state=shutter_val,
+                                is_closed=(shutter_val is Shutter_state.Closed)
+                            )
                         )
 
                         self.__ha_value = new_object(
@@ -1375,8 +1411,9 @@ class DeviceValue(object):
 
 
                         shutters_with_pos.append(
-                            new_object(
+                            Shutter_pos(
                                 state=shutter_val,
+                                is_closed=shutter_val is Shutter_state.Closed,
                                 position=position,
                                 set_pos=False,
                             )
@@ -1821,8 +1858,10 @@ class DeviceValue(object):
                         value = ""
                         for r in self.__ha_value.relay:
                             value += RELAY_SET[r.is_on]
-                        for s in self.__ha_value.shutter_motors:
-                            value += RELAY_SET[s]
+                        #for s in self.__ha_value.shutter_motors:
+                        #    value += RELAY_SET[s]
+                        for s in self.__ha_value.simple_shutters:
+                            value += SIMPLE_SHUTTER_STATE_SET[s.state]
                         for v in self.__ha_value.valve:
                             value += RELAY_SET[v]
                         self.__inels_set_value = value
@@ -1996,7 +2035,7 @@ class DeviceValue(object):
 
         Args:
             array (dict): dictionary where should I have to search
-            value Any: by this value I'm goning to find key
+            value Any: by this value I'm going to find key
         Returns:
             Any: value of the dict key
         """
