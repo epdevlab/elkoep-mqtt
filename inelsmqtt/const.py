@@ -83,6 +83,7 @@ WSB3_20 = "WSB3-20"
 WSB3_40 = "WSB3-40"
 WSB3_40H = "WSB3-40H"
 RC3_610DALI = "RC3-610DALI"
+JA3_018M = "JA3-018M"
 
 #Virtual bus
 VIRT_CONTR = "Virtual controller"
@@ -162,6 +163,8 @@ INELS_DEVICE_TYPE_DICT = {
     "158": TI3_40B,
     "159": TI3_60M,
     "160": IDRT3_1,
+    
+    "163": JA3_018M,
 
     #"166": VIRT_CONTR,
     "167": VIRT_HEAT_REG,
@@ -237,6 +240,8 @@ DEVICE_TYPE_DICT = {
     "159": SENSOR, # TI3_60M,
     "160": SENSOR, # IDRT3_1
     
+    "163": COVER, # JA3_018M
+
     #"166": CLIMATE, # VIRT_CONTR
     "167": CLIMATE, # VIRT_HEAT_REG
     "168": CLIMATE, # VIRT_COOL_REG
@@ -676,6 +681,13 @@ RC3_610DALI_DATA = {
     DIN: [24],
     RELAY_OVERFLOW: [25],
     ALERT: [26],
+}
+
+JA3_018M_DATA = {
+    SHUTTER: list(range(0, 18)),
+    SW: [18, 19],
+    ALERT: [20, 21],
+    RELAY_OVERFLOW: [22],
 }
 
 DEVICE_TYPE_166_DATA = {

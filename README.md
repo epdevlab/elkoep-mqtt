@@ -82,5 +82,6 @@ Supported bus devices
 - TI3-40B (158)
 - TI3-60M (159)
 - IDRT3-1 (160)
+- JA3-018M (163)
 - Virtual heating regulator (167)
 - Virtual cooling regulator (168)
