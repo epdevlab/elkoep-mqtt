@@ -1411,7 +1411,7 @@ class DeviceValue(object):
                         shutters_with_pos.append(
                             Shutter_pos(
                                 state=shutter_val,
-                                is_closed=shutter_val is Shutter_state.Closed,
+                                is_closed=shutter_val == Shutter_state.Closed,
                                 position=position,
                                 set_pos=False,
                             )
