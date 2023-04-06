@@ -498,23 +498,21 @@ class DeviceValue(object):
                     for s in self.__trim_inels_status_bytes(SA3_022M_DATA, SHUTTER):
                         shutter.append((int(s, 16) & 1) != 0)
                     
-                    shutters = []
-                    for i in range(len(shutters)/2):
-                        up = shutter[2*i]
-                        down = shutter[2*i+1]
-
-                        if up:
-                            state = Shutter_state.Open
-                        elif down:
-                            state = Shutter_state.Closed
-
                     simple_shutters = []
-                    simple_shutters.append(
-                        Shutter(
-                            state=Shutter_state.Stop_up,
-                            is_closed=None
+                    shutters = list(zip(shutter[::2], shutter[1::2]))
+                    for s in shutters:
+                        if s[0]:
+                            state = Shutter_state.Open
+                        elif s[1]:
+                            state = Shutter_state.Closed
+                        else:
+                            state = Shutter_state.Stop_down
+                        simple_shutters.append(
+                            Shutter(
+                                state=state,
+                                is_closed=None
+                            )
                         )
-                    )
 
                     valve=[]
                     for v in self.__trim_inels_status_bytes(SA3_022M_DATA, VALVE):
@@ -534,7 +532,7 @@ class DeviceValue(object):
                     # for s in self.ha_value.shutter_motors:
                     #     set_val += RELAY_SET[s]
                     for s in self.__ha_value.simple_shutters:
-                            value += SIMPLE_SHUTTER_STATE_SET[s.state]
+                        set_val += SIMPLE_SHUTTER_STATE_SET[s.state]
                     for v in self.ha_value.valve:
                         set_val += RELAY_SET[v]
 
