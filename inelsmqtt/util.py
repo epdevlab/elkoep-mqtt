@@ -1510,11 +1510,16 @@ class DeviceValue(object):
                     )
                     open_to_percentage = int(open_to_hex, 16) * 0.5
 
+                    climate_mode = Climate_modes.Off
+                    if temp_current < temp_required:
+                        climate_mode = Climate_modes.Heat
+
                     self.__ha_value = new_object(
                         low_battery=(battery!=0),
                         climate=new_object(
                             current=temp_current,
                             required=temp_required,
+                            climate_mode=climate_mode,
                             open_in_percentage=open_to_percentage,
                         )
                     )             
