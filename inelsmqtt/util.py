@@ -1570,14 +1570,14 @@ class DeviceValue(object):
                     #1 -> 2 temp
                     #2 -> single temp
 
-                    current_mode = Climate_modes.Off 
+                    climate_mode = Climate_modes.Off 
                     if controller_on: #TODO review all of this
-                        current_mode = Climate_modes.Heat_cool #both manual and automatic 2 temperatures will be heat_cool
+                        climate_mode = Climate_modes.Heat_cool #both manual and automatic 2 temperatures will be heat_cool
                         if control_mode == 2: # 1 temp
                             if temp_current > temp_required_heat:
-                                current_mode = Climate_modes.Cool
+                                climate_mode = Climate_modes.Cool
                             else:
-                                current_mode = Climate_modes.Heat
+                                climate_mode = Climate_modes.Heat
 
                     current_action = Climate_action.Off
                     if controller_on:
@@ -1595,7 +1595,7 @@ class DeviceValue(object):
                             required_heat=temp_required_heat, #target_temperature_high
                             required_cool=temp_required_cool, #target_temperature_low
 
-                            current_mode=current_mode, #hvac_mode: Off/Heat_cool/Heat/Cool
+                            climate_mode=climate_mode, #hvac_mode: Off/Heat_cool/Heat/Cool
                             # Off -> controller is turned off
                             # Heat_cool -> follow temp range
                             # Heat -> only heating
