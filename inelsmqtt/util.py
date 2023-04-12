@@ -1616,7 +1616,8 @@ class DeviceValue(object):
 
                             vacation=vacation,
 
-                            current_preset = last_preset
+                            control_mode=control_mode,
+                            current_preset=last_preset
                         ),
                     )
                 elif self.__inels_type is VIRT_HEAT_REG:
