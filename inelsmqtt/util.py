@@ -2074,7 +2074,7 @@ class DeviceValue(object):
                         cc = self.ha_value.climate_controller
 
                         current_temp = f"{int(cc.current * 100):08X}"
-                        current_temp = break_into_bytes(cc.current_temp)
+                        current_temp = break_into_bytes(current_temp)
                         current_temp.reverse()
 
                         critical_temp = f"{int(cc.critical_temp * 100):08X}"
