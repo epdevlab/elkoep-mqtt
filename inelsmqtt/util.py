@@ -1545,12 +1545,15 @@ class DeviceValue(object):
                     temp_correction = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, TEMP_CORRECTION, ""
                     ), 16) / 100
-                    holiday_mode = self.__trim_inels_status_values(
+                    holiday_mode = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, PUBLIC_HOLIDAY, ""
-                    ), 16
-                    control_mode = self.__trim_inels_status_values(
+                    ), 16)
+                    control_mode = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CONTROL_MODE, ""
-                    )
+                    ))
+                    #0 -> user control (?)
+                    #1 -> 2 temp
+                    #2 -> single temp
                     
                     binary_vals = self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, VIRT_CONTR, ""
@@ -1564,11 +1567,6 @@ class DeviceValue(object):
                     cool_mode = binary_vals[4] == "1"
                     vacation = binary_vals[3] == "1"
                     regulator_disabled = binary_vals[2] == "1"
-
-                    control_mode = int(control_mode)
-                    #0 -> user control (?)
-                    #1 -> 2 temp
-                    #2 -> single temp
 
                     climate_mode = Climate_modes.Off 
                     if controller_on: #TODO review all of this
