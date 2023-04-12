@@ -1587,6 +1587,10 @@ class DeviceValue(object):
                         elif cool_mode:
                             current_action = Climate_action.Cooling
 
+                    last_preset = 0 # off
+                    if self.__last_value:
+                        last_preset = self.__last_value.climate_controller.curr_preset
+
                     self.__ha_value = new_object(
                         climate_controller=new_object(
                             current=temp_current, #current_temperature
@@ -1611,7 +1615,10 @@ class DeviceValue(object):
                             critical_temp=temp_critical_max,
                             correction_temp=temp_correction,
                             public_holiday=holiday_mode,
+
                             vacation=vacation,
+
+                            current_preset = last_preset
                         ),
                     )
                 elif self.__inels_type is VIRT_HEAT_REG:
