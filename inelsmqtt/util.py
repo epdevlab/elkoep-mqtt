@@ -2093,6 +2093,8 @@ class DeviceValue(object):
                         manual_in = 0
                         if cc.control_mode == 0: #manual mode
                             manual_in = 7
+                        else:
+                            manual_in = cc.current_preset
 
                         byte18 = 1 #TODO review this
 
