@@ -1524,33 +1524,33 @@ class DeviceValue(object):
                         )
                     )             
                 elif self.__inels_type is VIRT_CONTR:
-                    temp_current = int(int(self.__trim_inels_status_values(
+                    temp_current = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CURRENT_TEMP, ""
-                    ), 16) / 100)
-                    temp_critical_max = int(int(self.__trim_inels_status_values(
+                    ), 16) / 100
+                    temp_critical_max = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CRITICAL_MAX_TEMP, ""
-                    ), 16) / 100)
-                    temp_required_heat = int(int(self.__trim_inels_status_values(
+                    ), 16) / 100
+                    temp_required_heat = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, REQUIRED_HEAT_TEMP, ""
-                    ), 16) / 100)
-                    temp_max = int(int(self.__trim_inels_status_values(
+                    ), 16) / 100
+                    temp_max = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, MAX_TEMP, ""
-                    ), 16) / 100)
-                    temp_critical_min = int(int(self.__trim_inels_status_values(
+                    ), 16) / 100
+                    temp_critical_min = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CRITICAL_MIN_TEMP, ""
-                    ), 16) / 100)
-                    temp_required_cool = int(int(self.__trim_inels_status_values(
+                    ), 16) / 100
+                    temp_required_cool = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, REQUIRED_COOL_TEMP, ""
-                    ), 16) / 100)
-                    temp_correction = int(int(self.__trim_inels_status_values(
+                    ), 16) / 100
+                    temp_correction = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, TEMP_CORRECTION, ""
-                    ), 16) / 100)
-                    holiday_mode = int(self.__trim_inels_status_values(
+                    ), 16) / 100
+                    holiday_mode = self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, PUBLIC_HOLIDAY, ""
-                    ), 16)
-                    control_mode = int(self.__trim_inels_status_values(
+                    ), 16
+                    control_mode = self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CONTROL_MODE, ""
-                    ))
+                    )
                     
                     binary_vals = self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, VIRT_CONTR, ""

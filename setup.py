@@ -8,7 +8,7 @@ setup(
     license="MIT",
     author="Elko EP s.r.o.",
     author_email="zed4805@gmail.com",
-    description="Python library for iNels mqtt protocol",
+    description="Python library for iNELS mqtt protocol",
     keywords=["iNels", "Elko EP", "Home assistant integration"],
     long_description_content_type="text/markdown",
     charset="UTF-8",
