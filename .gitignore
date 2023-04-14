@@ -130,3 +130,4 @@ dmypy.json
 
 # Pypirc for deploying new package to PyPI server
 .pypirc
+.vscode/settings.json
