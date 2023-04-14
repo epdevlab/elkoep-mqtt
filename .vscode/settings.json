@@ -1,26 +1,17 @@
 {
-    "python.pythonPath": "/usr/local/bin/python",
-    /** Enable format on save */
-    "editor.formatOnSave": true,
-    "python.testing.pytestEnabled": false,
-    "python.formatting.provider": "black",
-    "python.formatting.blackArgs": [
-        "\"--line-length\", \"80\""
-    ],
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "./tests",
-        "-p",
-        "*_test.py"
-    ],
-    "python.testing.unittestEnabled": true,
-    "editor.formatOnType": false,
-    "python.formatting.blackPath": "/usr/local/bin/black",
-    "python.analysis.extraPaths": [
-        "./inelsmqtt"
-    ],
-    "githubPullRequests.ignoredPullRequestBranches": [
-        "master"
-    ]
+  "python.pythonPath": "/usr/local/bin/python",
+  /** Enable format on save */
+  "editor.formatOnSave": true,
+  "python.testing.pytestEnabled": false,
+  "python.formatting.provider": "none",
+  "python.formatting.blackArgs": ["\"--line-length\", \"80\""],
+  "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "*_test.py"],
+  "python.testing.unittestEnabled": true,
+  "editor.formatOnType": false,
+  "python.formatting.blackPath": "/usr/local/bin/black",
+  "python.analysis.extraPaths": ["./inelsmqtt"],
+  "githubPullRequests.ignoredPullRequestBranches": ["master"],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
 }

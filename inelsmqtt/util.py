@@ -2069,15 +2069,19 @@ class DeviceValue(object):
 
                         current_temp = f"{int(cc.current * 100):08X}"
                         current_temp = break_into_bytes(current_temp)
+                        current_temp.reverse()
 
                         critical_temp = f"{int(cc.critical_temp * 100):08X}"
                         critical_temp = break_into_bytes(critical_temp)
+                        critical_temp.reverse()
 
                         manual_temp = f"{int((cc.required + cc.correction_temp) * 100):08X}"
                         manual_temp = break_into_bytes(manual_temp)
+                        manual_temp.reverse()
 
                         manual_cool_temp = f"{int((cc.required_cool + cc.correction_temp) * 100):08X}"
                         manual_cool_temp = break_into_bytes(manual_cool_temp)
+                        manual_cool_temp.reverse()
 
                         plan_in = "00\n"
                         if cc.public_holiday > 0:
