@@ -1582,7 +1582,7 @@ class DeviceValue(object):
 
                     last_preset = 0 # off
                     if self.__last_value:
-                        last_preset = self.__last_value.climate_controller.curr_preset
+                        last_preset = self.__last_value.ha_value.climate_controller.curr_preset
 
                     self.__ha_value = new_object(
                         climate_controller=new_object(
