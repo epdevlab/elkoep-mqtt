@@ -1560,7 +1560,7 @@ class DeviceValue(object):
                     binary_vals = f"{int(binary_vals, 16):0>8b}"
                     
                     controller_on = binary_vals[7] == "1" #if controller is on
-                    #manual_mode = binary_vals[6] == "1" # useless
+                    schedule_mode = binary_vals[6] == "1" # schedule or a set temperature
                     heat_mode = binary_vals[5] == "1" #if heating is connected
                     cool_mode = binary_vals[4] == "1" #if cooling is connected
                     vacation = binary_vals[3] == "1"
@@ -1579,10 +1579,12 @@ class DeviceValue(object):
                             current_action = Climate_action.Heating
                         elif cool_mode:
                             current_action = Climate_action.Cooling
-
-                    last_preset = 0 # off
-                    if self.__last_value:
-                        last_preset = self.__last_value.ha_value.climate_controller.current_preset
+                    # 1 -> schedule
+                    # 6 -> manual
+                    preset = 1 if schedule_mode else 6
+                    #last_preset = 0 # off
+                    #if self.__last_value:
+                    #    last_preset = self.__last_value.ha_value.climate_controller.current_preset
 
                     self.__ha_value = new_object(
                         climate_controller=new_object(
@@ -1612,7 +1614,7 @@ class DeviceValue(object):
                             vacation=vacation,
 
                             control_mode=control_mode,
-                            current_preset=last_preset,
+                            current_preset=preset,
                         ),
                     )
                 elif self.__inels_type is VIRT_HEAT_REG:
