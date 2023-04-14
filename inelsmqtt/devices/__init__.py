@@ -216,6 +216,7 @@ class Device(object):
             self.__device_type,
             self.__inels_type,
             inels_value=(val.decode() if val is not None else None),
+            last_value=self.last_values
         )
         self.__state = dev_value.ha_value
         self.__values = dev_value
