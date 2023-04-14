@@ -1527,16 +1527,13 @@ class DeviceValue(object):
                     temp_current = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CURRENT_TEMP, ""
                     ), 16) / 100
-                    temp_critical_max = int(self.__trim_inels_status_values(
+                    temp_critical_max = int(self.__trim_inels_status_values( #check if 0x7F FF FF FB -> make it 50
                         DEVICE_TYPE_166_DATA, CRITICAL_MAX_TEMP, ""
                     ), 16) / 100
                     temp_required_heat = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, REQUIRED_HEAT_TEMP, ""
                     ), 16) / 100
-                    temp_max = int(self.__trim_inels_status_values(
-                        DEVICE_TYPE_166_DATA, MAX_TEMP, ""
-                    ), 16) / 100
-                    temp_critical_min = int(self.__trim_inels_status_values(
+                    temp_critical_min = int(self.__trim_inels_status_values( #check if 0x7F FF FF FB -> make it -50
                         DEVICE_TYPE_166_DATA, CRITICAL_MIN_TEMP, ""
                     ), 16) / 100
                     temp_required_cool = int(self.__trim_inels_status_values(
@@ -1551,7 +1548,8 @@ class DeviceValue(object):
                     control_mode = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CONTROL_MODE, ""
                     ))
-                    #0 -> user control (?)
+                    #0 -> user control [ONLY IMPLEMENT THIS ONE FOR NOW]
+                    #   Has presets (Schedule, Fav1-4 and manual temp)
                     #1 -> 2 temp
                     #2 -> single temp
                     
@@ -1561,21 +1559,18 @@ class DeviceValue(object):
                     binary_vals = f"0x{binary_vals}"
                     binary_vals = f"{int(binary_vals, 16):0>8b}"
                     
-                    controller_on = binary_vals[7] == "1"
-                    manual_mode = binary_vals[6] == "1"
-                    heat_mode = binary_vals[5] == "1"
-                    cool_mode = binary_vals[4] == "1"
+                    controller_on = binary_vals[7] == "1" #if controller is on
+                    #manual_mode = binary_vals[6] == "1" # useless
+                    heat_mode = binary_vals[5] == "1" #if heating is connected
+                    cool_mode = binary_vals[4] == "1" #if cooling is connected
                     vacation = binary_vals[3] == "1"
-                    regulator_disabled = binary_vals[2] == "1"
+                    regulator_disabled = binary_vals[2] == "1" #window detection is on (?)
 
                     climate_mode = Climate_modes.Off 
                     if controller_on: #TODO review all of this
                         climate_mode = Climate_modes.Heat_cool #both manual and automatic 2 temperatures will be heat_cool
                         if control_mode == 2: # 1 temp
-                            if temp_current > temp_required_heat:
-                                climate_mode = Climate_modes.Cool
-                            else:
-                                climate_mode = Climate_modes.Heat
+                            climate_mode = Climate_modes.Heat
 
                     current_action = Climate_action.Off
                     if controller_on:
@@ -1617,7 +1612,7 @@ class DeviceValue(object):
                             vacation=vacation,
 
                             control_mode=control_mode,
-                            current_preset=last_preset
+                            current_preset=last_preset,
                         ),
                     )
                 elif self.__inels_type is VIRT_HEAT_REG:
@@ -2091,7 +2086,7 @@ class DeviceValue(object):
                             plan_in = "40\n"
 
                         manual_in = 0
-                        if cc.control_mode == 0: #manual mode
+                        if cc.current_preset == 5: #manual mode (in HA, this is the 5th preset)
                             manual_in = 7
                         else:
                             manual_in = cc.current_preset
