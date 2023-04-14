@@ -2090,10 +2090,10 @@ class DeviceValue(object):
                             plan_in = "40\n"
 
                         manual_in = 0
-                        if cc.current_preset == 5: #manual mode (in HA, this is the 5th preset)
+                        if cc.current_preset == 6: #manual mode (in HA, this is the 5th preset, includes a default)
                             manual_in = 7
                         else:
-                            manual_in = cc.current_preset
+                            manual_in = cc.current_preset - 1
 
                         byte18 = 1 #TODO review this
 
