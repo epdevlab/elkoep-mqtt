@@ -2114,8 +2114,9 @@ class DeviceValue(object):
                             manual_in = cc.current_preset
 
                         byte18 = 0  #TODO review this
-                        if cc.climate_mode != Climate_modes.Off:
-                            byte18 = 1
+                        if cc.climate_mode == Climate_modes.Cool:
+                            byte18 = 3
+                                
 
                         set_val = "\n".join(current_temp) + "\n"
                         set_val += "\n".join(critical_temp) + "\n"
