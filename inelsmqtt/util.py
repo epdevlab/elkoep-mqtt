@@ -1598,7 +1598,7 @@ class DeviceValue(object):
                         
                     # 1 -> schedule
                     # 6 -> manual
-                    preset = 1 if schedule_mode else 6
+                    preset = 0 if schedule_mode else 5
                     #last_preset = 0 # off
                     #if self.__last_value:
                     #    last_preset = self.__last_value.ha_value.climate_controller.current_preset
