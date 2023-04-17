@@ -1561,24 +1561,34 @@ class DeviceValue(object):
                     
                     controller_on = binary_vals[7] == "1" #if controller is on
                     schedule_mode = binary_vals[6] == "1" # schedule or a set temperature
-                    heat_mode = binary_vals[5] == "1" #if heating is connected
-                    cool_mode = binary_vals[4] == "1" #if cooling is connected
+                    heating_enabled = binary_vals[5] == "1" #if heating is connected
+                    cooling_enabled = binary_vals[4] == "1" #if cooling is connected
                     vacation = binary_vals[3] == "1"
                     regulator_disabled = binary_vals[2] == "1" #window detection is on (?)
 
                     climate_mode = Climate_modes.Off 
                     if controller_on: #TODO review all of this
                         climate_mode = Climate_modes.Heat_cool #both manual and automatic 2 temperatures will be heat_cool
-                        if control_mode == 2: # 1 temp
+                        if control_mode == 2: # single temp
                             climate_mode = Climate_modes.Heat
+                            if cooling_enabled and temp_current > temp_required_heat:
+                                climate_mode = Climate_modes.Cool
 
                     current_action = Climate_action.Off
                     if controller_on:
                         current_action = Climate_action.Idle
-                        if heat_mode:
-                            current_action = Climate_action.Heating
-                        elif cool_mode:
-                            current_action = Climate_action.Cooling
+                        # user controlled and two temp
+                        if climate_mode == Climate_modes.Heat_cool: 
+                            if temp_current < temp_required_heat:
+                                current_action = Climate_action.Heating
+                            if temp_current < temp_required_cool:
+                                current_action = Climate_action.Cooling
+                        else: # single temp
+                            if heating_enabled and temp_current < temp_required:
+                                current_action = Climate_action.Heating
+                            if cooling_enabled and temp_current > temp_required:
+                                current_action = Climate_action.Cooling
+                        
                     # 1 -> schedule
                     # 6 -> manual
                     preset = 1 if schedule_mode else 6
@@ -1590,8 +1600,7 @@ class DeviceValue(object):
                         climate_controller=new_object(
                             current=temp_current, #current_temperature
                             
-                            required=temp_required_heat, #target_temperature
-                            required_heat=temp_required_heat, #target_temperature_high
+                            required=temp_required_heat, #target_temperature / target_temperature_high
                             required_cool=temp_required_cool, #target_temperature_low
 
                             climate_mode=climate_mode, #hvac_mode: Off/Heat_cool/Heat/Cool
@@ -2097,7 +2106,9 @@ class DeviceValue(object):
                         else:
                             manual_in = cc.current_preset - 1
 
-                        byte18 = 1 #TODO review this
+                        byte18 = 0  #TODO review this
+                        if cc.climate_mode != Climate_modes.Off:
+                            byte18 = 1
 
                         set_val = "\n".join(current_temp) + "\n"
                         set_val += "\n".join(critical_temp) + "\n"
