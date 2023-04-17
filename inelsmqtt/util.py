@@ -1514,12 +1514,15 @@ class DeviceValue(object):
                     if temp_current < temp_required:
                         climate_mode = Climate_modes.Heat
 
+                    
+
                     self.__ha_value = new_object(
                         low_battery=(battery!=0),
-                        climate=new_object(
+                        thermovalve=new_object(
                             current=temp_current,
                             required=temp_required,
                             climate_mode=climate_mode,
+                            current_action=current_action,
                             open_in_percentage=open_to_percentage,
                         )
                     )             
@@ -1599,9 +1602,6 @@ class DeviceValue(object):
                     # 1 -> schedule
                     # 6 -> manual
                     preset = 0 if schedule_mode else 5
-                    #last_preset = 0 # off
-                    #if self.__last_value:
-                    #    last_preset = self.__last_value.ha_value.climate_controller.current_preset
 
                     self.__ha_value = new_object(
                         climate_controller=new_object(
@@ -2113,8 +2113,11 @@ class DeviceValue(object):
                         else:
                             manual_in = cc.current_preset
 
+                        # off
                         byte18 = 0  #TODO review this
-                        if cc.climate_mode == Climate_modes.Cool:
+                        if cc.climate_mode == Climate_modes.Heat:
+                            byte18 = 1
+                        elif cc.climate_mode == Climate_modes.Cool:
                             byte18 = 3
                                 
 
