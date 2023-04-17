@@ -1591,17 +1591,9 @@ class DeviceValue(object):
                             elif temp_current > temp_required_cool:
                                 current_action = Climate_action.Cooling
                         elif control_mode == 2: # one temp
-
-                        
-                        if climate_mode == Climate_modes.Heat_cool: 
                             if temp_current < temp_required_heat:
                                 current_action = Climate_action.Heating
-                            if temp_current < temp_required_cool:
-                                current_action = Climate_action.Cooling
-                        else: # single temp
-                            if heating_enabled and temp_current < temp_required:
-                                current_action = Climate_action.Heating
-                            if cooling_enabled and temp_current > temp_required:
+                            else:
                                 current_action = Climate_action.Cooling
                         
                     # 1 -> schedule
