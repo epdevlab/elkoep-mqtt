@@ -1568,16 +1568,31 @@ class DeviceValue(object):
 
                     climate_mode = Climate_modes.Off 
                     if controller_on: #TODO review all of this
-                        climate_mode = Climate_modes.Heat_cool #both manual and automatic 2 temperatures will be heat_cool
-                        if control_mode == 2: # single temp
-                            climate_mode = Climate_modes.Heat
-                            if cooling_enabled and temp_current > temp_required_heat:
+                        if control_mode == 0: #user control
+                            if heating_enabled:
+                                climate_mode = Climate_modes.Heat
+                            elif cooling_enabled:
                                 climate_mode = Climate_modes.Cool
+                        else:
+                            climate_mode = Climate_modes.Auto
 
                     current_action = Climate_action.Off
                     if controller_on:
                         current_action = Climate_action.Idle
                         # user controlled and two temp
+                        if control_mode == 0: # user control
+                            if climate_mode == Climate_modes.Heat and temp_current < temp_required_heat:
+                                current_action = Climate_action.Heating
+                            elif climate_mode == Climate_modes.Cool and temp_current > temp_required_cool:
+                                current_action = Climate_action.Cooling
+                        elif control_mode == 1: # two temp
+                            if temp_current < temp_required_heat:
+                                current_action = Climate_action.Heating
+                            elif temp_current > temp_required_cool:
+                                current_action = Climate_action.Cooling
+                        elif control_mode == 2: # one temp
+
+                        
                         if climate_mode == Climate_modes.Heat_cool: 
                             if temp_current < temp_required_heat:
                                 current_action = Climate_action.Heating
@@ -2101,10 +2116,10 @@ class DeviceValue(object):
                             plan_in = "40\n"
 
                         manual_in = 0
-                        if cc.current_preset == 6: #manual mode (in HA, this is the 5th preset, includes a default)
+                        if cc.current_preset == 5: #manual mode (in HA, this is the 4th preset, includes a default)
                             manual_in = 7
                         else:
-                            manual_in = cc.current_preset - 1
+                            manual_in = cc.current_preset
 
                         byte18 = 0  #TODO review this
                         if cc.climate_mode != Climate_modes.Off:
