@@ -1535,13 +1535,21 @@ class DeviceValue(object):
                     ), 16) / 100
                     temp_required_heat = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, REQUIRED_HEAT_TEMP, ""
-                    ), 16) / 100
+                    ), 16)
+                    if temp_required_heat == 0x7FFFFFFB:
+                        temp_required_heat = 0
+                    else:
+                        temp_required_heat /= 100
                     temp_critical_min = int(self.__trim_inels_status_values( #check if 0x7F FF FF FB -> make it -50
                         DEVICE_TYPE_166_DATA, CRITICAL_MIN_TEMP, ""
                     ), 16) / 100
                     temp_required_cool = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, REQUIRED_COOL_TEMP, ""
-                    ), 16) / 100
+                    ), 16)
+                    if temp_required_cool == 0x7FFFFFFB:
+                        temp_required_cool = 0
+                    else:
+                        temp_required_cool /= 100
                     temp_correction = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, TEMP_CORRECTION, ""
                     ), 16) / 100
