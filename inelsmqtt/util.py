@@ -228,18 +228,22 @@ class Shutter_pos(Shutter):
     set_pos: bool
 
 #lights
+@dataclass
 class SimpleLight():
     brightness: int
 
-class light_coa_toa(SimpleLight):
+@dataclass
+class LightCoaToa(SimpleLight):
     thermal_alert: bool
     current_alert: bool
 
+@dataclass
 class RGBLight(SimpleLight):
     r: int
     g: int
     b: int
 
+@dataclass
 class WarmLight(SimpleLight):
     white: int
 
