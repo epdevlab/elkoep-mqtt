@@ -15,6 +15,9 @@ from .const import (
     CARD_DATA,
     CARD_ID,
     DAC3_04_DATA,
+    DALI_DMX_UNIT,
+    DALI_DMX_UNIT_2,
+    DALI_DMX_UNIT_DATA,
     DCDA_33M_DATA,
     DEVICE_TYPE_02_COMM_TEST,
     DEVICE_TYPE_06_DATA,
@@ -211,6 +214,7 @@ class Relay(SimpleRelay):
     """Create relay with overflow detection."""
     overflow: bool
 
+#shutters
 @dataclass
 class Shutter():
     """Create a simple shutter."""
@@ -222,6 +226,22 @@ class Shutter_pos(Shutter):
     """Create a shutter with position."""
     position: int
     set_pos: bool
+
+#lights
+class SimpleLight():
+    brightness: int
+
+class light_coa_toa(SimpleLight):
+    thermal_alert: bool
+    current_alert: bool
+
+class RGBLight(SimpleLight):
+    r: int
+    g: int
+    b: int
+
+class WarmLight(SimpleLight):
+    white: int
 
 ConfigType = Dict[str, str]
 _LOGGER = logging.getLogger(__name__)
@@ -1130,7 +1150,7 @@ class DeviceValue(object):
                     else:
                         simple_light = []
                         simple_light.append(
-                            new_object(
+                            WarmLight(
                                     brightness=round(
                                         int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, OUT, ""), 16) * 100.0/255.0
                                     ),
@@ -1363,6 +1383,36 @@ class DeviceValue(object):
                         set_val += f"{self.__ha_value.light_coa_toa[i].brightness:02X}\n"
                     set_val += "00\n"*12
                     self.__inels_set_value = set_val
+                elif self.__inels_type is DALI_DMX_UNIT:
+                    outs = self.__trim_inels_status_bytes(DALI_DMX_UNIT_DATA, OUT)
+                    simple_light = []
+                    for o in outs:
+                        simple_light.append(
+                            SimpleLight(
+                                brightness= o if o <= 100 else 100,
+                            )
+                        )
+
+                    self.__ha_value = new_object(
+                        simple_light=simple_light,
+                    )
+
+                elif self.__inels_type is DALI_DMX_UNIT_2:
+                    outs = self.__trim_inels_status_bytes(DALI_DMX_UNIT_DATA, OUT)
+                    simple_light = []
+                    lights = list(zip(outs[::2], outs[1::2]))
+
+                    for l in lights:
+                        simple_light.append(
+                            WarmLight(
+                                brightness= l[0] if l[0] <= 100 else 100,
+                                white= l[1] if l[1] <= 100 else 100,
+                        )
+                    )
+                    
+                    self.__ha_value = new_object(
+                        simple_light=simple_light,
+                    )
             elif self.__device_type is COVER:  # Shutters
                 if self.__inels_type is RF_SHUTTERS:
                     if self.inels_status_value is None:
@@ -2067,6 +2117,24 @@ class DeviceValue(object):
                             out = out if out <= 100 else 100
                             set_val += f"{out:02X}\n"
                         set_val += "00\n"*12
+                        self.__inels_set_value = set_val
+                    elif self.__inels_type is DALI_DMX_UNIT:
+                        set_val = "00\n"*4
+                        for i in range(4):
+                            out = self.__ha_value.simple_light[i].brightness
+                            out = out if out <= 100 else 100
+                            set_val += f"{out:02X}\n"
+                        self.__inels_set_value = set_val
+                    elif self.__inels_type is DALI_DMX_UNIT_2:
+                        set_val = "00\n"*4
+                        for i in range(2):
+                            out = self.__ha_value.simple_light[i].brightness
+                            out = out if out <= 100 else 100
+
+                            white = self.__ha_value.simple_light[i].white
+                            white = white if white <= 100 else 100
+
+                            set_val += f"{out:02X}\n{white:02X}\n"
                         self.__inels_set_value = set_val
                 elif self.__device_type is COVER:
                     if self.__inels_type is RF_SHUTTERS:

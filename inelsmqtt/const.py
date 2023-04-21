@@ -84,6 +84,8 @@ WSB3_40 = "WSB3-40"
 WSB3_40H = "WSB3-40H"
 RC3_610DALI = "RC3-610DALI"
 JA3_018M = "JA3-018M"
+DALI_DMX_UNIT = "DALI-DMX-Unit"
+DALI_DMX_UNIT_2 = "DALI-DMX-Unit-2"
 
 #Virtual bus
 VIRT_CONTR = "Virtual controller"
@@ -165,7 +167,8 @@ INELS_DEVICE_TYPE_DICT = {
     "160": IDRT3_1,
     
     "163": JA3_018M,
-
+    "164": DALI_DMX_UNIT,
+    "165": DALI_DMX_UNIT_2,
     "166": VIRT_CONTR,
     "167": VIRT_HEAT_REG,
     "168": VIRT_COOL_REG,
@@ -241,7 +244,8 @@ DEVICE_TYPE_DICT = {
     "160": SENSOR, # IDRT3_1
     
     "163": COVER, # JA3_018M
-
+    "164": LIGHT, # DALI_DMX_UNIT
+    "165": LIGHT, # DALI_DMX_UNIT_2
     "166": CLIMATE, # VIRT_CONTR
     "167": CLIMATE, # VIRT_HEAT_REG
     "168": CLIMATE, # VIRT_COOL_REG
@@ -688,6 +692,10 @@ JA3_018M_DATA = {
     SW: [18, 19],
     ALERT: [20],
     RELAY_OVERFLOW: [21],
+}
+
+DALI_DMX_UNIT_DATA = {
+    OUT: list(range(4, 8)),
 }
 
 DEVICE_TYPE_166_DATA = {
