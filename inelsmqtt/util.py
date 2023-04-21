@@ -234,8 +234,8 @@ class SimpleLight():
 
 @dataclass
 class LightCoaToa(SimpleLight):
-    thermal_alert: bool
-    current_alert: bool
+    toa: bool
+    coa: bool
 
 @dataclass
 class RGBLight(SimpleLight):
@@ -244,8 +244,17 @@ class RGBLight(SimpleLight):
     b: int
 
 @dataclass
+class AOUTLight(SimpleLight):
+    aout_coa: bool
+
+@dataclass
 class WarmLight(SimpleLight):
     white: int
+
+@dataclass
+class DALILight(SimpleLight):
+    alert_dali_communication: bool
+    alert_dali_power: bool
 
 ConfigType = Dict[str, str]
 _LOGGER = logging.getLogger(__name__)
@@ -668,7 +677,7 @@ class DeviceValue(object):
                     aout=[]
                     for i in range(2):
                         aout.append(
-                            new_object(
+                            AOUTLight(
                                 brightness=aout_brightness[i],
                                 aout_coa=aout_coa[i]
                             )
@@ -682,7 +691,7 @@ class DeviceValue(object):
                     dali = []
                     for d in dali_raw:
                         dali.append(
-                            new_object(
+                            DALILight(
                                 brightness=int(d, 16),
                                 alert_dali_communication=alert_dali_communication,
                                 alert_dali_power=alert_dali_power,
@@ -727,11 +736,16 @@ class DeviceValue(object):
                     #for i in range(8):
                     #    relay_overflow.append(overflows[7-i] == "1")
                     
+                    i=0
                     aout=[]
                     for a in self.__trim_inels_status_bytes(FA3_612M_DATA, AOUT):
                         aout.append(
-                            new_object(brightness=int(a, 16))
+                            AOUTLight(
+                                brightness=int(a, 16),
+                                aout_coa=aout_coa[i],
+                            )
                         )
+                        i = i + 1
                     
                     re=[]
                     for relay in self.__trim_inels_status_bytes(FA3_612M_DATA, RELAY):
@@ -760,7 +774,6 @@ class DeviceValue(object):
 
                     self.__ha_value = new_object(
                         din=din,
-                        aout_coa=aout_coa,
                         sw=sw,
                         aout=aout,
                         valves=valves,
@@ -1119,7 +1132,7 @@ class DeviceValue(object):
 
                         simple_light = []
                         simple_light.append(
-                            new_object(brightness=brightness)
+                            SimpleLight(brightness=brightness)
                         )
                         self.__ha_value = new_object(simple_light=simple_light)
                 elif self.__inels_type is RF_DIMMER_RGB:
@@ -1135,7 +1148,7 @@ class DeviceValue(object):
 
                         rgb=[]
                         rgb.append(
-                            new_object(
+                            RGBLight(
                                 r=red,
                                 g=green,
                                 b=blue,
@@ -1200,10 +1213,10 @@ class DeviceValue(object):
                     light_coa_toa = []
                     for i in range(2):
                         light_coa_toa.append(
-                            new_object(
+                            LightCoaToa(
                                 brightness=out[i],
-                                thermal_alert=toa[i],
-                                current_alert=coa[i],
+                                toa=toa[i],
+                                coa=coa[i],
                             )
                         )
 
@@ -1237,7 +1250,7 @@ class DeviceValue(object):
                         d = int(d, 16)
                         d = d if d <= 100 else 100
                         aout.append(
-                            new_object(
+                            AOUTLight(
                                 brightness=d,
                                 aout_coa=aout_alert,
                             )
@@ -1269,7 +1282,7 @@ class DeviceValue(object):
                     aout=[]
                     for i in range(4):
                         aout.append(
-                            new_object(
+                            AOUTLight(
                                 brightness=aout_val[i],
                                 aout_coa=aout_coa[i],
                             )
@@ -1305,9 +1318,10 @@ class DeviceValue(object):
 
                     aout=[]
                     for i in range(4):
-                        aout.append(
-                            brightness=aout_val[i],
-                            aout_coa=coa[i],
+                        aout.append(AOUTLight(
+                                brightness=aout_val[i],
+                                aout_coa=coa[i],
+                            )
                         )
 
 
@@ -1366,7 +1380,7 @@ class DeviceValue(object):
                     light_coa_toa=[]
                     for i in range(6):
                         light_coa_toa.append(
-                            new_object(
+                            LightCoaToa(
                                 brightness=out[i],
                                 toa=toa[i],
                                 coa=coa[i],
@@ -1402,7 +1416,6 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         simple_light=simple_light,
                     )
-
                 elif self.__inels_type is DALI_DMX_UNIT_2:
                     outs = self.__trim_inels_status_bytes(DALI_DMX_UNIT_DATA, OUT)
                     simple_light = []
