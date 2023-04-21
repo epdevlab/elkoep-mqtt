@@ -1387,9 +1387,11 @@ class DeviceValue(object):
                     outs = self.__trim_inels_status_bytes(DALI_DMX_UNIT_DATA, OUT)
                     simple_light = []
                     for o in outs:
+                        o = int(o)
+                        o = o if o < 100 else 100
                         simple_light.append(
                             SimpleLight(
-                                brightness= o if o <= 100 else 100,
+                                brightness=o,
                             )
                         )
 
@@ -1403,10 +1405,14 @@ class DeviceValue(object):
                     lights = list(zip(outs[::2], outs[1::2]))
 
                     for l in lights:
+                        b = int(l[0])
+                        b = b if b < 100 else 100
+                        w = int(l[1])
+                        w = w if b < 100 else 100
                         simple_light.append(
                             WarmLight(
-                                brightness= l[0] if l[0] <= 100 else 100,
-                                white= l[1] if l[1] <= 100 else 100,
+                                brightness=b,
+                                white=w,
                         )
                     )
                     
