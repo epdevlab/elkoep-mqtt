@@ -249,7 +249,7 @@ class AOUTLight(SimpleLight):
 
 @dataclass
 class WarmLight(SimpleLight):
-    white: int
+    relative_ct: int
 
 @dataclass
 class DALILight(SimpleLight):
@@ -1171,7 +1171,7 @@ class DeviceValue(object):
                                     brightness=round(
                                         int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, OUT, ""), 16) * 100.0/255.0
                                     ),
-                                    white=round(
+                                    relative_ct=round(
                                         int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, WHITE, ""), 16) * 100.0/255.0
                                     )
                                 ),
@@ -1418,7 +1418,7 @@ class DeviceValue(object):
                     )
                 elif self.__inels_type is DALI_DMX_UNIT_2:
                     outs = self.__trim_inels_status_bytes(DALI_DMX_UNIT_DATA, OUT)
-                    simple_light = []
+                    warm_light = []
                     lights = list(zip(outs[::2], outs[1::2]))
 
                     for l in lights:
@@ -1426,15 +1426,15 @@ class DeviceValue(object):
                         b = b if b < 100 else 100
                         w = int(l[1], 16)
                         w = w if b < 100 else 100
-                        simple_light.append(
+                        warm_light.append(
                             WarmLight(
                                 brightness=b,
-                                white=w,
+                                relative_ct=w,
                         )
                     )
                     
                     self.__ha_value = new_object(
-                        simple_light=simple_light,
+                        warm_light=warm_light,
                     )
             elif self.__device_type is COVER:  # Shutters
                 if self.__inels_type is RF_SHUTTERS:
@@ -2103,7 +2103,7 @@ class DeviceValue(object):
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         else:
-                            self.__inels_set_value = f"0F\n00\n00\n00\n{round(self.ha_value.simple_light[0].brightness*2.55):02X}\n{round(self.ha_value.simple_light[0].white*2.55):02X}\n"
+                            self.__inels_set_value = f"0F\n00\n00\n00\n{round(self.ha_value.simple_light[0].brightness*2.55):02X}\n{round(self.ha_value.simple_light[0].relative_ct*2.55):02X}\n"
                     elif self.__inels_type is DA3_22M:
                         # correct the values
                         out1 = round(self.__ha_value.light_coa_toa[0].brightness, -1)
@@ -2151,11 +2151,11 @@ class DeviceValue(object):
                     elif self.__inels_type is DALI_DMX_UNIT_2:
                         set_val = "00\n"*4
                         for i in range(2):
-                            out = self.__ha_value.simple_light[i].brightness
-                            out = out if out <= 100 else 100
+                            out = self.__ha_value.warm_light[i].brightness
+                            out = min(out, 100)
 
-                            white = self.__ha_value.simple_light[i].white
-                            white = white if white <= 100 else 100
+                            white = self.__ha_value.warm_light[i].relative_ct
+                            white = min(white, 100)
 
                             set_val += f"{out:02X}\n{white:02X}\n"
                         self.__inels_set_value = set_val
