@@ -1428,8 +1428,8 @@ class DeviceValue(object):
                             WarmLight(
                                 brightness=b,
                                 relative_ct=w,
+                            )
                         )
-                    )
                     
                     self.__ha_value = new_object(
                         warm_light=warm_light,
