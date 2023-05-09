@@ -1422,10 +1422,8 @@ class DeviceValue(object):
                     lights = list(zip(outs[::2], outs[1::2]))
 
                     for l in lights:
-                        b = int(l[0], 16)
-                        b = b if b < 100 else 100
-                        w = int(l[1], 16)
-                        w = w if b < 100 else 100
+                        b = min(int(l[0], 16), 100)
+                        w = min(int(l[1], 16), 100)
                         warm_light.append(
                             WarmLight(
                                 brightness=b,
