@@ -1775,7 +1775,7 @@ class DeviceValue(object):
                                 False,
                             ]
                         else:
-                            btn = self.__last_value.btn
+                            btn = self.__last_value.ha_value.btn
 
                         if identity in BUTTON_NUMBER:
                             number = BUTTON_NUMBER[identity]
@@ -1804,7 +1804,7 @@ class DeviceValue(object):
                         if self.__last_value is None:
                             btn = [False, False]
                         else:
-                            btn = self.__last_value.btn
+                            btn = self.__last_value.ha_value.btn
                         
                         if identity in BUTTON_NUMBER:
                             number = BUTTON_NUMBER[identity]
