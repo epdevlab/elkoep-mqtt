@@ -1,7 +1,9 @@
 # Inels-mqtt
 
 A Python library that handles communication with inels over mqtt
-[iNels](https://www.inels.com/) by ElkoEP company.
+[iNELS](https://www.inels.com/) by ElkoEP company.
+
+[Pypi](https://pypi.org/project/inels-mqtt-new/)
 
 # Requirements
 
