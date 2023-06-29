@@ -2,6 +2,6 @@
 requires = ["setuptools>=63.0", "wheel", "paho-mqtt==1.6.1", "attrs>=21.2.0"]
 build-backend = "setuptools.build_meta"
 
-[project.urls]
+[urls]
 "Homepage" = "https://github.com/ZeD4805/inels-mqtt-new"
 "Bug Tracker" = "https://github.com/ZeD4805/inels-mqtt-new/issues"
