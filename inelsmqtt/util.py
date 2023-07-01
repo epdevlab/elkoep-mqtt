@@ -1601,6 +1601,10 @@ class DeviceValue(object):
                     temp_current = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CURRENT_TEMP, ""
                     ), 16) / 100
+                    if temp_required_heat == 0x7FFFFFFB:
+                        temp_required_heat = None
+                    else:
+                        temp_required_heat /= 100
                     temp_critical_max = int(self.__trim_inels_status_values( #check if 0x7F FF FF FB -> make it 50
                         DEVICE_TYPE_166_DATA, CRITICAL_MAX_TEMP, ""
                     ), 16) / 100
@@ -1608,7 +1612,7 @@ class DeviceValue(object):
                         DEVICE_TYPE_166_DATA, REQUIRED_HEAT_TEMP, ""
                     ), 16)
                     if temp_required_heat == 0x7FFFFFFB:
-                        temp_required_heat = 0
+                        temp_required_heat = None
                     else:
                         temp_required_heat /= 100
                     temp_critical_min = int(self.__trim_inels_status_values( #check if 0x7F FF FF FB -> make it -50
@@ -1618,7 +1622,7 @@ class DeviceValue(object):
                         DEVICE_TYPE_166_DATA, REQUIRED_COOL_TEMP, ""
                     ), 16)
                     if temp_required_cool == 0x7FFFFFFB:
-                        temp_required_cool = 0
+                        temp_required_cool = None
                     else:
                         temp_required_cool /= 100
                     temp_correction = int(self.__trim_inels_status_values(
