@@ -1600,7 +1600,7 @@ class DeviceValue(object):
                 elif self.__inels_type is VIRT_CONTR:
                     temp_current = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CURRENT_TEMP, ""
-                    ), 16) / 100
+                    ), 16)
                     if temp_current == 0x7FFFFFFB:
                         temp_current = 0
                     else:
