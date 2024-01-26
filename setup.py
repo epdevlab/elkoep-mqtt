@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="elkoep-mqtt",
-    version="0.2.24",
+    version="0.2.25",
     url="https://github.com/epdevlab/elkoep-mqtt",
     license="MIT",
     author="Elko EP s.r.o.",
