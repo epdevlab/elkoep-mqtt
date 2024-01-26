@@ -1,4 +1,4 @@
-name: Publish inels-mqtt 🐍 distributions 📦 to PyPI
+name: Publish elkoep-mqtt 🐍 distributions 📦 to PyPI
 
 on:
   release:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-n-publish:
-    name: Build and publish inels-mqtt 🐍 distributions 📦 to PyPI
+    name: Build and publish elkoep-mqtt 🐍 distributions 📦 to PyPI
     runs-on: ubuntu-latest
 
     steps:

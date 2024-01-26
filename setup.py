@@ -1,13 +1,13 @@
-"""Setup script for inels-mqtt package."""
+"""Setup script for elkoep-mqtt package."""
 from setuptools import setup, find_packages
 
 setup(
-    name="inels-mqtt-new",
-    version="0.2.23",
-    url="https://github.com/zed4805/inels-mqtt-new",
+    name="elkoep-mqtt",
+    version="0.2.24",
+    url="https://github.com/epdevlab/elkoep-mqtt",
     license="MIT",
     author="Elko EP s.r.o.",
-    author_email="zed4805@gmail.com",
+    author_email="epdevlab@gmail.com",
     description="Python library for iNELS mqtt protocol",
     keywords=["iNels", "Elko EP", "Home assistant integration"],
     long_description_content_type="text/markdown",
