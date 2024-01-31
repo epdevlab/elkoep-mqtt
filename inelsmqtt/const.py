@@ -50,6 +50,7 @@ GRT3_50 = "GRT3-50"
 GSB3_90SX = "GSB3-90SX"
 SA3_04M = "SA3-04M"
 SA3_012M = "SA3-012M"
+SA3_014M = "SA3-014M"
 IM3_80B = "IM3-80B"
 IM3_140M = "IM3-140M"
 WSB3_20H = "WSB3-20H"
@@ -84,6 +85,7 @@ WSB3_40 = "WSB3-40"
 WSB3_40H = "WSB3-40H"
 RC3_610DALI = "RC3-610DALI"
 JA3_018M = "JA3-018M"
+JA3_014M = "JA3-014M"
 DALI_DMX_UNIT = "DALI-DMX-Unit"
 DALI_DMX_UNIT_2 = "DALI-DMX-Unit-2"
 
@@ -128,6 +130,7 @@ INELS_DEVICE_TYPE_DICT = {
     "106": SA3_04M,
     "107": SA3_06M,
     "108": SA3_012M,
+    "169": SA3_014M,
     "109": SA3_022M,
 
     "111": FA3_612M,
@@ -172,6 +175,8 @@ INELS_DEVICE_TYPE_DICT = {
     "166": VIRT_CONTR,
     "167": VIRT_HEAT_REG,
     "168": VIRT_COOL_REG,
+
+    "170": JA3_014M,
 }
 
 #TODO retire this system
@@ -205,7 +210,8 @@ DEVICE_TYPE_DICT = {
     "105": SWITCH, # SA3_02M
     "106": SWITCH, # SA3_04M
     "107": SWITCH, # SA3_06M,
-    "108": SWITCH, # SA3_012M
+    "108": SWITCH, # SA3_012M,
+    "169": SWITCH, # SA3_014M,
     "109": SWITCH, # SA3_022M,
 
     "111": SWITCH, # FA3_612M,
@@ -249,6 +255,8 @@ DEVICE_TYPE_DICT = {
     "166": CLIMATE, # VIRT_CONTR
     "167": CLIMATE, # VIRT_HEAT_REG
     "168": CLIMATE, # VIRT_COOL_REG
+
+    "170": COVER, # JA3_014M
 }
 
 
@@ -482,6 +490,11 @@ SA3_012M_DATA = {
     SA3_012M: [12, 13], #switch inputs
 }
 
+SA3_014M_DATA = {
+    RELAY: list(range(14)), #relays
+    SA3_014M: [17, 18], #switch inputs
+}
+
 IM3_80B_DATA = {
     IN: [0, 1],
     TEMP_IN: [2, 3],
@@ -694,6 +707,13 @@ JA3_018M_DATA = {
     RELAY_OVERFLOW: [21],
 }
 
+JA3_014M_DATA = {
+    SHUTTER: list(range(14)),
+    SW: [17, 18],
+    ALERT: [16],
+    RELAY_OVERFLOW: [14, 15],
+}
+
 DALI_DMX_UNIT_DATA = {
     OUT: list(range(4, 8)),
 }
@@ -734,6 +754,7 @@ INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
     
     SA3_04M: SA3_04M_DATA,
     SA3_012M: SA3_012M_DATA,
+    SA3_014M: SA3_014M_DATA,
     IM3_80B: IM3_80B_DATA,
     IM3_140M: IM3_140M_DATA,
     WSB3_20H: DEVICE_TYPE_124_DATA,
@@ -771,6 +792,7 @@ SA3_AMOUNTS = {
     SA3_04M: 4,
     SA3_06M: 6,
     SA3_012M: 12,
+    SA3_014M: 14,
     SA3_022M: 16,
 }
 
@@ -906,6 +928,7 @@ RELAY_NUMBER = {
     SA3_01B: 1,
     SA3_04M: 4,
     SA3_012M: 12,
+    SA3_014M: 14,
 }
 
 # TWO CHANNEL DIMMER (101)

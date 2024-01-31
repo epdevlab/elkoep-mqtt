@@ -47,6 +47,8 @@ from .const import (
     IOU3_108M_DATA,
     JA3_018M,
     JA3_018M_DATA,
+    JA3_014M,
+    JA3_014M_DATA,
     POSITION,
     RED,
     REQUIRED_TEMP,
@@ -101,6 +103,7 @@ from .const import (
     GSB3_90SX,
     SA3_04M,
     SA3_012M,
+    SA3_014M,
     IM3_80B,
     IM3_140M,
     WHITE,
@@ -146,6 +149,7 @@ from .const import (
     GSB3_90SX_DATA,
     SA3_04M_DATA,
     SA3_012M_DATA,
+    SA3_014M_DATA,
     IM3_80B_DATA,
     IM3_140M_DATA,
     DEVICE_TYPE_124_DATA,
@@ -493,6 +497,30 @@ class DeviceValue(object):
                     for r in simple_relay:
                         set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
+                elif self.__inels_type is SA3_014M:
+                    simple_relay: list[SimpleRelay] = []
+                    for relay in self.__trim_inels_status_bytes(SA3_014M_DATA, RELAY):
+                        simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
+
+                    digital_inputs = self.__trim_inels_status_values(
+                        SA3_014M_DATA, SA3_014M, "")
+                    digital_inputs = f"0x{digital_inputs}"
+                    digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+
+                    sw = []
+                    for i in range(8):
+                        sw.append(digital_inputs[7 - i] == "1")
+                    for i in range(6):
+                        sw.append(digital_inputs[13 - i] == "1")
+
+                    self.__ha_value = new_object(
+                        simple_relay=simple_relay,
+                        sw=sw,
+                    )
+                    set_val = ""
+                    for r in simple_relay:
+                        set_val += "07\n" if r.is_on else "06\n"
+                    self.__inels_set_value = set_val
                 elif self.__inels_type is SA3_022M:
                     re=[]
                     for relay in self.__trim_inels_status_bytes(SA3_022M_DATA, RELAY):
@@ -1562,6 +1590,77 @@ class DeviceValue(object):
                     )
 
                     self.__inels_set_value = f"{''.join([SIMPLE_SHUTTER_STATE_SET[x.state] for x in simple_shutters])}"
+                elif self.__inels_type is JA3_014M:
+                    shutter_relays = []
+                    for r in self.__trim_inels_status_bytes(JA3_014M_DATA, SHUTTER):
+                        shutter_relays.append((int(r, 16) & 1) != 0)
+
+                    simple_shutters = []
+                    shutters = list(zip(shutter_relays[::2], shutter_relays[1::2]))
+
+                    for s in shutters:
+                        if s[0]:
+                            state = Shutter_state.Open
+                        elif s[1]:
+                            state = Shutter_state.Closed
+                        else:
+                            state = Shutter_state.Stop_down
+                        simple_shutters.append(
+                            Shutter(
+                                state=state,
+                                is_closed=None
+                            )
+                        )
+
+                    interface = []
+                    digital_inputs = self.__trim_inels_status_values(
+                        JA3_014M_DATA, SW, "")
+                    digital_inputs = f"0x{digital_inputs}"
+                    digital_inputs = f"{int(digital_inputs, 16):0>16b}"
+
+                    for i in range(8):
+                        interface.append(digital_inputs[7 - i] == "1")
+                    for i in range(6):
+                        interface.append(digital_inputs[13 - i] == "1")
+
+                    alerts = self.__trim_inels_status_values(
+                        JA3_014M_DATA, ALERT, "")
+                    alerts = f"0x{alerts}"
+                    alerts = f"{int(alerts, 16):0>8b}"
+
+                    for i in range(7):
+                        interface.append(alerts[6 - i] == "1")
+
+                    # alert_power = alerts[4] == "1"
+                    # alert_comm = [
+                    #     alerts[3] == "1",
+                    #     alerts[2] == "1",
+                    #     alerts[1] == "1"
+                    # ]
+
+                    overflows = self.__trim_inels_status_values(
+                        JA3_014M_DATA, RELAY_OVERFLOW, "")
+                    overflows = f"0x{overflows}"
+                    overflows = f"{int(overflows, 16):0>16b}"
+
+                    # TODO add overflows and alerts to the shutters
+                    relay_overflow = []
+                    for i in range(8):
+                        interface.append(overflows[7 - i] == "1")
+                    for i in range(6):
+                        interface.append(overflows[13 - i] == "1")
+
+                    # relay_overflow.append(alerts[0] == "1")
+
+                    # I'll register them as an interface and replace the names to SW 1 up/down, etc...
+
+                    self.__ha_value = new_object(
+                        simple_shutters=simple_shutters,
+                        interface=interface,
+
+                    )
+
+                    self.__inels_set_value = f"{''.join([SIMPLE_SHUTTER_STATE_SET[x.state] for x in simple_shutters])}"
             elif self.__device_type is CLIMATE:  # thermovalve
                 if self.__inels_type is RF_WIRELESS_THERMOVALVE:
                     # fetches all the status values and compacts them into a new object
@@ -2019,7 +2118,7 @@ class DeviceValue(object):
                             self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                         else:
                             self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.simple_relay[0].is_on]            
-                    elif self.__inels_type in [SA3_01B, SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M, IOU3_108M]:
+                    elif self.__inels_type in [SA3_01B, SA3_02B, SA3_02M, SA3_04M, SA3_06M, SA3_012M, SA3_014M, IOU3_108M]:
                         value = ""
                         if hasattr(self.__ha_value, "simple_relay"):
                             for re in self.__ha_value.simple_relay:
@@ -2177,7 +2276,7 @@ class DeviceValue(object):
                             else:
                                 shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters_with_pos[0].state] + "00\n00\n"
                             self.__inels_set_value = shutter_set
-                    elif self.__inels_type is JA3_018M:
+                    elif self.__inels_type in [JA3_018M, JA3_014M]:
                         self.__inels_set_value = f"{''.join([SIMPLE_SHUTTER_STATE_SET[x.state] for x in self.__ha_value.simple_shutters])}"
                 elif self.__device_type is CLIMATE:
                     if self.__inels_type is RF_WIRELESS_THERMOVALVE:
