@@ -1,6 +1,8 @@
 """Utility classes."""
 from dataclasses import dataclass
 import logging
+import json
+import re
 
 from operator import itemgetter
 from typing import Any, Dict, Optional
@@ -205,7 +207,23 @@ from .const import (
     Shutter_state,
     Climate_action,
     Climate_modes,
+
+    BITS,
+    INTEGERS,
+    NUMBER,
 )
+
+#bit
+@dataclass
+class Bit():
+    is_on: bool
+    addr: str
+
+#number
+@dataclass
+class Number():
+    value: int
+    addr: str
 
 #relay
 @dataclass
@@ -277,6 +295,29 @@ def break_into_bytes(line: str):
     if len(line)%2 == 0:
         return [line[i:i+2] for i in range(0, len(line), 2)]
     return []
+
+def xparse_formated_json(data):
+    regex = r"state\":\{(.*)\}\}"
+    match = re.search(regex, data)
+    addr_val_list = []
+    if match != None:
+        states = match.group(1)
+        addr_value_pair_list = states.split(',')
+        for item in addr_value_pair_list:
+            addr, val = item.split(':')
+            addr_val_list.append(
+                (addr, int(val))
+            )
+    return addr_val_list
+
+def parse_formated_json(data):
+    addr_val_list = []
+    data = json.loads(data)
+    for addr, val in data['state'].items():
+        addr_val_list.append(
+            (addr, val)
+        )
+    return addr_val_list
 
 class DeviceValue(object):
     """Device value interpretation object."""
@@ -842,6 +883,42 @@ class DeviceValue(object):
                         card_present=card_present,
                         card_id=card_id,
                     )
+                elif self.__inels_type is BITS:
+                    bit: list[Bit] = []
+                    for addr, val in parse_formated_json(self.__inels_status_value):
+                        bit.append(
+                            Bit(
+                                is_on=val, addr=addr
+                            )
+                        )
+
+                    self.__ha_value = new_object(
+                        bit=bit,
+                    )
+
+                    set_val = {}
+                    for bit in self.ha_value.bit:
+                        set_val[bit.addr] = bit.is_on
+
+                    self.__inels_set_value = json.dumps({"cmd": set_val})
+            elif self.__device_type is NUMBER:
+                number: list[Number] = []
+                for addr, val in parse_formated_json(self.__inels_status_value):
+                    number.append(
+                        Number(
+                            value=val, addr=addr
+                        )
+                    )
+
+                self.__ha_value = new_object(
+                    number=number,
+                )
+
+                set_val = {}
+                for number in self.ha_value.number:
+                    set_val[number.addr] = number.value
+
+                self.__inels_set_value = json.dumps({"cmd": set_val})
             elif self.__device_type is SENSOR:  # temperature sensor
                 if self.__inels_type is RF_TEMPERATURE_INPUT:
                     battery = int(self.__trim_inels_status_values(DEVICE_TYPE_10_DATA, BATTERY, ""), 16)
@@ -1193,8 +1270,8 @@ class DeviceValue(object):
                         self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         self.__ha_value = None
                     else:
-                        simple_light = []
-                        simple_light.append(
+                        warm_light = []
+                        warm_light.append(
                             WarmLight(
                                     brightness=round(
                                         int(self.__trim_inels_status_values(DEVICE_TYPE_13_DATA, OUT, ""), 16) * 100.0/255.0
@@ -1205,7 +1282,7 @@ class DeviceValue(object):
                                 ),
                             )
 
-                        self.__ha_value=new_object(simple_light=simple_light)
+                        self.__ha_value=new_object(warm_light=warm_light)
                 elif self.__inels_type is DA3_22M:
                     temp = self.__trim_inels_status_values(DA3_22M_DATA, TEMP_IN, "")
 
@@ -2181,7 +2258,19 @@ class DeviceValue(object):
                     elif self.__inels_type in [GCR3_11, GCH3_31]:
                         set_val = "04\n" if self.ha_value.simple_relay[0].is_on else "00\n"
                         set_val += "00\n" * 9
-                        self.__inels_set_value = set_val 
+                        self.__inels_set_value = set_val
+                    elif self.__inels_type is BITS:
+                        set_val = {}
+                        for bit in self.ha_value.bit:
+                            set_val[bit.addr] = int(bit.is_on)
+
+                        self.__inels_set_value = json.dumps({"cmd": set_val})
+                elif self.__device_type is NUMBER:
+                    set_val = {}
+                    for number in self.ha_value.number:
+                        set_val[number.addr] = int(number.value)
+
+                    self.__inels_set_value = json.dumps({"cmd": set_val})
                 elif self.__device_type is LIGHT:
                     if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
                         if self.__ha_value is None:
@@ -2204,7 +2293,7 @@ class DeviceValue(object):
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         else:
-                            self.__inels_set_value = f"0F\n00\n00\n00\n{round(self.ha_value.simple_light[0].brightness*2.55):02X}\n{round(self.ha_value.simple_light[0].relative_ct*2.55):02X}\n"
+                            self.__inels_set_value = f"0F\n00\n00\n00\n{round(self.ha_value.warm_light[0].brightness*2.55):02X}\n{round(self.ha_value.warm_light[0].relative_ct*2.55):02X}\n"
                     elif self.__inels_type is DA3_22M:
                         # correct the values
                         out1 = round(self.__ha_value.light_coa_toa[0].brightness, -1)

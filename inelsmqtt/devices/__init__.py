@@ -18,6 +18,7 @@ from inelsmqtt.const import (
     FRAGMENT_DEVICE_TYPE,
     FRAGMENT_SERIAL_NUMBER,
     FRAGMENT_UNIQUE_ID,
+    GW_CONNECTED,
     DEVICE_CONNECTED,
     VERSION,
 )
@@ -66,6 +67,7 @@ class Device(object):
             self.__set_topic = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]}/set/{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}/{fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]}/{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"  # noqa: E501
 
         self.__connected_topic = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]}/connected/{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}/{fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]}/{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"  # noqa: E501
+        self.__gw_connected_topic = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]}/connected/{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}/gw"  # noqa: E501
         self.__title = title if title is not None else self.__unique_id
         self.__domain = fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]
         self.__state: Any = None
@@ -137,7 +139,11 @@ class Device(object):
         Returns:
             bool: True/False
         """
-        val = self.__mqtt.messages()[self._Device__connected_topic]
+        gw = self.__mqtt.messages().get(self._Device__gw_connected_topic)
+        if not GW_CONNECTED.get(gw):
+            return False
+
+        val = self.__mqtt.messages().get(self._Device__connected_topic)
         if isinstance(val, (bytes, bytearray)):
             val = val.decode()
 

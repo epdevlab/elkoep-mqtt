@@ -411,10 +411,10 @@ class InelsMqtt:
         device_type = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         action = fragments[TOPIC_FRAGMENTS[FRAGMENT_STATE]]
 
-        if device_type in DEVICE_TYPE_DICT:
-            topic = msg.topic.split("/")[2:]
-            topic = "/".join(topic)
+        topic = msg.topic.split("/")[2:]
+        topic = "/".join(topic)
 
+        if device_type in DEVICE_TYPE_DICT:
             if action == "status":
                 self.__discovered[topic] = msg.payload
                 self.__last_values[msg.topic] = msg.payload
@@ -426,6 +426,14 @@ class InelsMqtt:
                     self.__last_values[msg.topic] = msg.payload
                     self.__is_subscribed_list[msg.topic] = True
                 _LOGGER.info("Device of type %s found [connected].\n", device_type)
+        else:
+            if device_type == "gw" and action == "connected":
+                if msg.topic not in self.__is_subscribed_list:
+                    client.subscribe(msg.topic, 0, None, None)
+                    self.__messages[msg.topic] = msg.payload
+                    self.__last_values[msg.topic] = copy.copy(msg.topic)
+                    self.__is_subscribed_list[msg.topic] = True
+                    _LOGGER.info("Device of type %s found [gw].\n", device_type)
             
     def __on_message(
         self,
@@ -446,7 +454,7 @@ class InelsMqtt:
 
         message_type = message_parts[TOPIC_FRAGMENTS[FRAGMENT_STATE]]
 
-        if device_type in DEVICE_TYPE_DICT:
+        if device_type in DEVICE_TYPE_DICT or device_type == "gw":
             # keep last value
             self.__last_values[msg.topic] = (
                 copy.copy(self.__messages[msg.topic])

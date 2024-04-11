@@ -39,6 +39,7 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
+.tests/
 .tox/
 .nox/
 .coverage
@@ -131,3 +132,6 @@ dmypy.json
 # Pypirc for deploying new package to PyPI server
 .pypirc
 .vscode/settings.json
+
+# IDE metadata
+.idea/

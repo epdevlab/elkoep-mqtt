@@ -14,6 +14,7 @@ COVER = "cover"
 CLIMATE = "climate"
 BUTTON = "button"
 BINARY_SENSOR = "binary_sensor"
+NUMBER = "number"
 
 # RF
 RF_SINGLE_SWITCH = "Single switching unit"  # 01
@@ -88,6 +89,8 @@ JA3_018M = "JA3-018M"
 JA3_014M = "JA3-014M"
 DALI_DMX_UNIT = "DALI-DMX-Unit"
 DALI_DMX_UNIT_2 = "DALI-DMX-Unit-2"
+INTEGERS = "INTEGERS"
+BITS = "BITS"
 
 #Virtual bus
 VIRT_CONTR = "Virtual controller"
@@ -177,6 +180,9 @@ INELS_DEVICE_TYPE_DICT = {
     "168": VIRT_COOL_REG,
 
     "170": JA3_014M,
+
+    "bits": BITS,
+    "integers": INTEGERS,
 }
 
 #TODO retire this system
@@ -257,6 +263,9 @@ DEVICE_TYPE_DICT = {
     "168": CLIMATE, # VIRT_COOL_REG
 
     "170": COVER, # JA3_014M
+
+    "bits": SWITCH,
+    "integers": NUMBER,
 }
 
 
@@ -843,9 +852,16 @@ TOPIC_FRAGMENTS = {
     FRAGMENT_UNIQUE_ID: 4,
 }
 
+GW_CONNECTED = {
+    b"{\"status\": true}": True,
+    b"{\"status\": false}": False,
+}
+
 DEVICE_CONNECTED = {
     "on\n": True,
     "off\n": False,
+    "{\"status\": true}": True,
+    "{\"status\": false}": False,
 }
 
 # SWITCH CONSTANTS
