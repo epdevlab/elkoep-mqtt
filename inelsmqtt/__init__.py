@@ -164,20 +164,20 @@ class InelsMqtt:
         """
         try:
             self.__connect()
-            self.disconnect()            
+            self.disconnect()
         except Exception as e:
             if isinstance(e, ConnectionRefusedError):
                 self.__connection_error = 3 # cannot connect
             else:
                 self.__connection_error = 6 # unknown
-        
+
         return self.__connection_error
 
     def subscribe_listener(self, topic: str, unique_id: str, fnc: Callable[[Any], Any]) -> None:
         """Append new item into the datachange listener."""
         #if topic not in self.__listeners:
         #    self.__listeners[topic] = dict[str, Callable[[Any], Any]]()
-        
+
         stripped_topic = "/".join(topic.split("/")[2:])
         self.__listeners[stripped_topic][unique_id] = fnc
 
@@ -244,7 +244,7 @@ class InelsMqtt:
         else:
             self.__is_available = False
             self.__connection_error = reason_code
-        
+
         _LOGGER.info(
             "Mqtt broker %s:%s %s",
             self.__host,
@@ -399,7 +399,7 @@ class InelsMqtt:
         """Special callback function used only in discover_all function
         placed in on_message. It is the same as on_message callback func,
         but does different things
-        
+
         Args:
             client (MqttClient): Mqtt broker instance
             msg (object): Topic with payload from broker
@@ -434,7 +434,7 @@ class InelsMqtt:
                     self.__last_values[msg.topic] = copy.copy(msg.topic)
                     self.__is_subscribed_list[msg.topic] = True
                     _LOGGER.info("Device of type %s found [gw].\n", device_type)
-            
+
     def __on_message(
         self,
         client: mqtt.Client,  # pylint: disable=unused-argument
@@ -463,15 +463,26 @@ class InelsMqtt:
             )
             self.__messages[msg.topic] = msg.payload
 
+        if  device_type == "gw" and message_type == "connected":
+            mac = message_parts[2]
+            for stripped_topic in self.__listeners:
+                if stripped_topic.startswith(mac):
+                    self.__notify_listeners(stripped_topic, True)
+            return
+
         stripped_topic = "/".join(message_parts[2:])
 
         is_connected_message = message_type == "connected"
 
         if len(self.__listeners) > 0 and stripped_topic in self.__listeners:
             # This pass data change directely into the device.
-            if len(self.__listeners[stripped_topic]) > 0:
-                for unique_id in list(self.__listeners[stripped_topic]): #prevents the dictionary increased in size during iteration exception
-                    self.__listeners[stripped_topic][unique_id](is_connected_message)
+            self.__notify_listeners(stripped_topic, is_connected_message)
+
+    def __notify_listeners(self, stripped_topic: str, is_connected_message: bool) -> None:
+        """Notify listeners for a specific topic."""
+        if len(self.__listeners[stripped_topic]) > 0:
+            for unique_id in list(self.__listeners[stripped_topic]): #prevents the dictionary increased in size during iteration exception
+                self.__listeners[stripped_topic][unique_id](is_connected_message)
 
     def __on_subscribe(
         self,
