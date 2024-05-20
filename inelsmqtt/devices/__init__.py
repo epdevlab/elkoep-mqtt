@@ -51,6 +51,7 @@ class Device(object):
         fragments = state_topic.split("/")
 
         self.__mqtt = mqtt
+        self.__device_class = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         self.__device_type = DEVICE_TYPE_DICT[
             fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
         ]
@@ -148,7 +149,11 @@ class Device(object):
         if isinstance(val, (bytes, bytearray)):
             val = val.decode()
 
-        return DEVICE_CONNECTED.get(val) and self.__values is not None and self.__values._DeviceValue__ha_value is not None
+        # Temporary workaround to provide an always-online status for DT [164, 165, 166, 167, 168]
+        if self.__device_class in ["164", "165", "166", "167", "168"]:
+            return self.__values is not None and self.__values._DeviceValue__ha_value is not None
+        else:
+            return DEVICE_CONNECTED.get(val) and self.__values is not None and self.__values._DeviceValue__ha_value is not None
 
     @property
     def set_topic(self) -> str:
