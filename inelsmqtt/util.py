@@ -1373,9 +1373,10 @@ class DeviceValue(object):
                     temp_out = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_OUT, "")
 
                     aout_alert = self.__trim_inels_status_values(DAC3_04_DATA, ALERT, "")
+                    aout_alert_bits = f"{int(aout_alert, 16):0>8b}"
                     aout_coa=[]
                     for i in range(4):
-                        aout_coa.append(aout_alert[6-i] == "1") #skip first bit
+                        aout_coa.append(aout_alert_bits[6-i] == "1") #skip first bit
 
                     aout_str = self.__trim_inels_status_bytes(DAC3_04_DATA, OUT)
                     aout_val = []
