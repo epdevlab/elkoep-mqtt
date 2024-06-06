@@ -89,6 +89,15 @@ JA3_018M = "JA3-018M"
 JA3_014M = "JA3-014M"
 DALI_DMX_UNIT = "DALI-DMX-Unit"
 DALI_DMX_UNIT_2 = "DALI-DMX-Unit-2"
+MSB3_40 = "MSB3-40"
+MSB3_60 = "MSB3-60"
+MSB3_90 = "MSB3-90"
+GSB3_40_V2 = "GSB3-40-V2"
+GSB3_60_V2 = "GSB3-60-V2"
+GSB3_90_V2 = "GSB3-90-V2"
+GSB3_40SX_V2 = "GSB3-40SX-V2"
+GSB3_60SX_V2 = "GSB3-60SX-V2"
+GSB3_90SX_V2 = "GSB3-90SX-V2"
 INTEGERS = "INTEGERS"
 BITS = "BITS"
 
@@ -160,6 +169,11 @@ INELS_DEVICE_TYPE_DICT = {
     "139": GSB3_60SX,
     "140": GSB3_20SX,
     "141": GBP3_60,
+
+    "143": GSB3_40_V2,
+    "144": GSB3_60_V2,
+    "146": GSB3_90_V2,
+
     "147": DAC3_04B,
     "148": DAC3_04M,
     
@@ -180,6 +194,13 @@ INELS_DEVICE_TYPE_DICT = {
     "168": VIRT_COOL_REG,
 
     "170": JA3_014M,
+
+    "174": GSB3_40SX_V2,
+    "175": GSB3_60SX_V2,
+    "176": GSB3_90SX_V2,
+    "177": MSB3_40,
+    "178": MSB3_60,
+    "179": MSB3_90,
 
     "bits": BITS,
     "integers": INTEGERS,
@@ -238,11 +259,15 @@ DEVICE_TYPE_DICT = {
     "129": SWITCH, # GCH3_31,
     
     "136": SENSOR, # GSP3_100,
-    "137": SENSOR, # GDB3_10,
+    "137": BUTTON, # GDB3_10,
     "138": BUTTON, # GSB3_40SX,
     "139": BUTTON, # GSB3_60SX
     "140": BUTTON, # GSB3_20SX,
     "141": BUTTON, # GBP3_60,
+
+    "143": SENSOR, # GSB3_40_V2
+    "144": SENSOR, # GSB3_60_V2
+    "146": SENSOR, # GSB3_90_V2
 
     "147": LIGHT, # DAC3_04B,
     "148": LIGHT, # DAC3_04M,
@@ -263,6 +288,13 @@ DEVICE_TYPE_DICT = {
     "168": CLIMATE, # VIRT_COOL_REG
 
     "170": COVER, # JA3_014M
+
+    "174": SENSOR, # GSB3_40SX_V2 
+    "175": SENSOR, # GSB3_60SX_V2
+    "176": SENSOR, # GSB3_90SX_V2 
+    "177": SENSOR, # MSB3_40
+    "178": SENSOR, # MSB3_60
+    "179": SENSOR, # MSB3_90
 
     "bits": SWITCH,
     "integers": NUMBER,
@@ -621,6 +653,17 @@ GSB3_DATA = { #same as upper one [GSB3-20SX, GSB3-40SX, GSB3-60SX]
     AIN: [8, 9],
 }
 
+GSB3_V2_DATA = {
+    SW: [0],
+    DIN: [1],
+    TEMP_IN: [2, 3],
+    LIGHT_IN: [4, 5, 6, 7],
+    AIN: [8, 9],
+    HUMIDITY: [10, 11],
+    DEW_POINT: [12, 13],
+}
+
+
 GSP3_100_DATA = {
     GSP3_100: [0, 1],
     TEMP_IN: [2, 3],
@@ -806,10 +849,26 @@ SA3_AMOUNTS = {
 }
 
 DA3_AMOUNTS = {DA3_22M: 2, DA3_66M: 6}
-GSB3_AMOUNTS = {GSB3_20SX: 2, GSB3_40SX: 4, GSB3_60SX: 6, GSB3_90SX: 9, GBP3_60: 6}
 IM3_AMOUNTS = {IM3_20B: 2, IM3_40B: 4, IM3_80B: 8, IM3_140M: 14}
 TI3_AMOUNTS = {TI3_10B: 1, TI3_40B: 4, TI3_60M: 6}
 WSB3_AMOUNTS = {WSB3_20: 2, WSB3_20H: 2, WSB3_40: 4, WSB3_40H: 4}
+
+GSB3_AMOUNTS = {
+    GSB3_20SX: 2,
+    GSB3_40SX: 4,
+    GSB3_60SX: 6,
+    GSB3_90SX: 9,
+    GBP3_60: 6,
+    GSB3_40_V2: 4,
+    GSB3_60_V2: 6,
+    GSB3_90_V2: 9,
+    GSB3_40SX_V2: 4,
+    GSB3_60SX_V2: 6,
+    GSB3_90SX_V2: 9,
+    MSB3_40: 4,
+    MSB3_60: 6,
+    MSB3_90: 9,
+}
 
 VIRT_CONT_STATUS_TABLE = {
     0 : "User control",

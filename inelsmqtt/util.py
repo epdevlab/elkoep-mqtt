@@ -169,6 +169,7 @@ from .const import (
     WSB3_240HUM_DATA,
     DMD3_1_DATA,
     GSB3_DATA,
+    GSB3_V2_DATA,
     RC3_610DALI_DATA,
     FA3_612M_DATA,
 
@@ -207,6 +208,16 @@ from .const import (
     Shutter_state,
     Climate_action,
     Climate_modes,
+
+    MSB3_40,
+    MSB3_60,
+    MSB3_90,
+    GSB3_40_V2,
+    GSB3_60_V2,
+    GSB3_90_V2,
+    GSB3_40SX_V2,
+    GSB3_60SX_V2,
+    GSB3_90SX_V2,
 
     BITS,
     INTEGERS,
@@ -579,7 +590,7 @@ class DeviceValue(object):
                         overflows.append(alerts[15-i] == "1")
                     
                     digital_inputs = self.__trim_inels_status_values(
-                        SA3_012M_DATA, SA3_012M, "")
+                        SA3_022M_DATA, SW, "")
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>16b}"
                     
@@ -646,7 +657,7 @@ class DeviceValue(object):
                     for relay in self.__trim_inels_status_bytes(IOU3_108M_DATA, RELAY):
                         re.append((int(relay, 16) & 1) != 0)
                     
-                    temps = self.__trim_inels_status_values(IOU3_108M_DATA, TEMP_IN)
+                    temps = self.__trim_inels_status_values(IOU3_108M_DATA, TEMP_IN, "")
                     temps = [temps[0:4], temps[4:8]]
                     
                     digital_inputs = self.__trim_inels_status_values(
@@ -1224,7 +1235,53 @@ class DeviceValue(object):
                         temp_in=temp_in,
                         temp_out=temp_out,
                     )
-            elif self.__device_type is LIGHT:  # dimmer
+                elif self.__inels_type in [GSB3_40_V2, GSB3_60_V2, GSB3_90_V2, GSB3_40SX_V2, GSB3_60SX_V2, GSB3_90SX_V2, MSB3_40, MSB3_60, MSB3_90]:
+                    switches = self.__trim_inels_status_values(GSB3_V2_DATA, SW, "")
+                    switches = f"0x{switches}"
+                    switches = f"{int(switches, 16):0>8b}"
+
+                    digital_inputs = self.__trim_inels_status_values(GSB3_V2_DATA, DIN, "")
+                    digital_inputs = f"0x{digital_inputs}"
+                    digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+
+                    interface=[]
+
+                    # Determine the number of buttons to process based on INTERFACE_BUTTON_COUNT
+                    gsb3_amount = GSB3_AMOUNTS[self.__inels_type]
+                    num_buttons = gsb3_amount if gsb3_amount < 8 else gsb3_amount - 1
+
+                    # Append states from 'switches' based on the number of buttons
+                    for i in range(num_buttons):
+                        interface.append(switches[7 - i] == "1")
+
+                    # If there are 8 or more buttons, use the last digital input for the button
+                    if gsb3_amount >= 8:
+                        interface.append(digital_inputs[7] == "1")
+
+                    din=[digital_inputs[6] == "1"]
+                    prox=digital_inputs[4] == "1"
+
+                    temp_in = self.__trim_inels_status_values(GSB3_V2_DATA, TEMP_IN, "")
+
+                    light_in = self.__trim_inels_status_values(GSB3_V2_DATA, LIGHT_IN, "")
+
+                    ain = self.__trim_inels_status_values(GSB3_V2_DATA, AIN, "")
+
+                    humidity = self.__trim_inels_status_values(GSB3_V2_DATA, HUMIDITY, "")
+
+                    dewpoint = self.__trim_inels_status_values(GSB3_V2_DATA, DEW_POINT, "")
+
+                    self.__ha_value = new_object(
+                        interface=interface,
+                        din=din,
+                        prox=prox,
+                        temp_in=temp_in,
+                        light_in=light_in,
+                        ain=ain,
+                        humidity=humidity,
+                        dewpoint=dewpoint,
+                    )
+            elif self.__device_type == LIGHT:  # dimmer
                 if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was None for RFDAC")
@@ -1418,8 +1475,8 @@ class DeviceValue(object):
                     aout_val=[]
                     aouts = self.__trim_inels_status_bytes(DCDA_33M_DATA, OUT)
                     for i in range(len(aouts)):
-                        brightness = int(i, 16)
-                        brightness = brightness if brightness > 100 else 100
+                        brightness = int(aouts[i], 16)
+                        brightness = brightness if brightness < 100 else 100
                         aout_val.append(brightness)
 
                     aout=[]
@@ -2133,11 +2190,12 @@ class DeviceValue(object):
                     switches = f"{int(switches, 16):0>8b}"
                     
                     digital_inputs = self.__trim_inels_status_values(
-                        GLASS_CONTROLLER_DATA, SW, "")
+                        GLASS_CONTROLLER_DATA, DIN, "")
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>8b}"
 
                     interface = []
+                    din = []
                     for i in range(3):
                         interface.append(switches[6-2*i]=="1")
                     for i in range(2):
@@ -2316,7 +2374,7 @@ class DeviceValue(object):
                     elif self.__inels_type in DCDA_33M:
                         set_val = "00\n"*4
                         for i in range(4):
-                            aout = self.__ha_value.out[i].brightness
+                            aout = self.__ha_value.aout[i].brightness
                             set_val += f"{aout:02X}\n"
                         self.__inels_set_value = set_val
                     elif self.__inels_type is DA3_66M:
@@ -2370,7 +2428,7 @@ class DeviceValue(object):
                         self.__inels_set_value = f"{''.join([SIMPLE_SHUTTER_STATE_SET[x.state] for x in self.__ha_value.simple_shutters])}"
                 elif self.__device_type is CLIMATE:
                     if self.__inels_type is RF_WIRELESS_THERMOVALVE:
-                        required_temp = int(round(self.__ha_value.climate.required * 2, 0))
+                        required_temp = int(round(self.__ha_value.thermovalve.required * 2, 0))
                         self.__inels_set_value = f"00\n{required_temp:02X}\n00\n"
                     elif self.__inels_type is VIRT_CONTR:
                         cc = self.ha_value.climate_controller
