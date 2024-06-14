@@ -98,6 +98,15 @@ class Device(object):
         return self.__mqtt.is_subscribed(self.__state_topic)
 
     @property
+    def device_class(self) -> str:
+        """Get device class of the device
+
+        Returns:
+            str: Device class
+        """
+        return self.__device_class
+
+    @property
     def inels_type(self) -> str:
         """Get inels type of the device
 
@@ -140,12 +149,12 @@ class Device(object):
         Returns:
             bool: True/False
         """
-        gw = self.__mqtt.messages().get(self._Device__gw_connected_topic)
+        gw = self.__mqtt.messages().get(self.gw_connected_topic)
         if gw is not None:
             if not GW_CONNECTED.get(gw):
                 return False
 
-        val = self.__mqtt.messages().get(self._Device__connected_topic)
+        val = self.__mqtt.messages().get(self.connected_topic)
         if isinstance(val, (bytes, bytearray)):
             val = val.decode()
 
@@ -182,6 +191,24 @@ class Device(object):
             str: Name of the domain
         """
         return self.__domain
+    
+    @property
+    def connected_topic(self) -> str:
+        """Connected topic
+
+        Returns:
+            str: string of the connected topic
+        """
+        return self.__connected_topic
+
+    @property
+    def gw_connected_topic(self) -> str:
+        """Gateway connected topic
+
+        Returns:
+            str: string of the gateway connected topic
+        """
+        return self.__gw_connected_topic
 
     @property
     def state(self) -> Any:

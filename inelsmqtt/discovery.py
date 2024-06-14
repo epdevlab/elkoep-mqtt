@@ -16,17 +16,6 @@ class InelsDiscovery(object):
         """Initialize inels mqtt discovery"""
         self.__mqtt = mqtt
         self.__devices: list[Device] = []
-        self.__coordinators: list[str] = []
-        self.__coordinators_with_devices: dict[str, list[Device]] = {}
-
-    @property
-    def coordinators(self) -> list[str]:
-        """Coordinators list
-
-        Returns:
-            _type_: list of coordinator serial numbers
-        """
-        return self.__coordinators
 
     @property
     def devices(self) -> list[Device]:
@@ -72,12 +61,6 @@ class InelsDiscovery(object):
         devs = sanitized_devs
 
         self.__devices = [Device(self.__mqtt, "inels/status/" + item) for item in devs]
-        # for item in self.__devices:
-        #     if item.parent_id not in self.__coordinators:
-        #         self.__coordinators.append(item.parent_id)
-        #         self.__coordinators_with_devices[item.parent_id] = []
-
-        #     self.__coordinators_with_devices[item.parent_id].append(item)
 
         _LOGGER.info("Discovered %s devices", len(self.__devices))
 

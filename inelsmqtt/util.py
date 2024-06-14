@@ -362,7 +362,7 @@ class DeviceValue(object):
         # inels status values are what comes from the broker
         try:            
             if self.__device_type is SWITCH:  # outlet switch
-                if self.__inels_type is RF_SINGLE_SWITCH:
+                if self.__inels_type == RF_SINGLE_SWITCH:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was 'None' for %s", RF_SWITCHING_UNIT)
                         self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
@@ -380,7 +380,7 @@ class DeviceValue(object):
                         )
 
                         self.__inels_set_value = f"{(2 - (self.__ha_value.simple_relay[0].is_on)):02X}\n00\n"
-                elif self.__inels_type is RF_SWITCHING_UNIT:
+                elif self.__inels_type == RF_SWITCHING_UNIT:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was 'None' for %s", RF_SWITCHING_UNIT)
                         self.__inels_set_value = DEVICE_TYPE_02_COMM_TEST
@@ -398,7 +398,7 @@ class DeviceValue(object):
                         )
 
                         self.__inels_set_value = f"{(2 - (self.__ha_value.simple_relay[0].is_on * 1)):02X}\n00\n00\n"
-                elif self.__inels_type is RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
+                elif self.__inels_type == RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was 'None' for %s", RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR)
                         self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
@@ -418,7 +418,7 @@ class DeviceValue(object):
                         )
 
                         self.__inels_set_value = SWITCH_WITH_TEMP_SET[self.__ha_value.simple_relay[0].is_on]            
-                elif self.__inels_type is SA3_01B:
+                elif self.__inels_type == SA3_01B:
                     re = []
                     re.append(int(self.__trim_inels_status_values(SA3_01B_DATA, RELAY, ""), 16) & 1 != 0) 
                     
@@ -444,7 +444,7 @@ class DeviceValue(object):
                         relay=relay
                     )
                     self.__inels_set_value = RELAY_SET[self.__ha_value.relay[0].is_on]
-                elif self.__inels_type is SA3_02B:
+                elif self.__inels_type == SA3_02B:
                     simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_02B_DATA, RELAY):
                         simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
@@ -459,7 +459,7 @@ class DeviceValue(object):
                     for r in simple_relay:
                         set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
-                elif self.__inels_type is SA3_02M: #TODO: generalize SA3_02M/04M/06M
+                elif self.__inels_type == SA3_02M: #TODO: generalize SA3_02M/04M/06M
                     simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_02M_DATA, RELAY):
                         simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
@@ -481,7 +481,7 @@ class DeviceValue(object):
                     for r in simple_relay:
                         set_val += "07\n" if r else "06\n"
                     self.__inels_set_value=set_val
-                elif self.__inels_type is SA3_04M:
+                elif self.__inels_type == SA3_04M:
                     simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_04M_DATA, RELAY):
                         simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
@@ -503,7 +503,7 @@ class DeviceValue(object):
                     for r in simple_relay:
                         set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
-                elif self.__inels_type is SA3_06M:
+                elif self.__inels_type == SA3_06M:
                     simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_06M_DATA, RELAY):
                         simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
@@ -525,7 +525,7 @@ class DeviceValue(object):
                     for r in simple_relay:
                         set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
-                elif self.__inels_type is SA3_012M:
+                elif self.__inels_type == SA3_012M:
                     simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_012M_DATA, RELAY):
                         simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
@@ -549,7 +549,7 @@ class DeviceValue(object):
                     for r in simple_relay:
                         set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value=set_val
-                elif self.__inels_type is SA3_014M:
+                elif self.__inels_type == SA3_014M:
                     simple_relay: list[SimpleRelay] = []
                     for relay in self.__trim_inels_status_bytes(SA3_014M_DATA, RELAY):
                         simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
@@ -563,7 +563,7 @@ class DeviceValue(object):
                     for i in range(8):
                         sw.append(digital_inputs[7 - i] == "1")
                     for i in range(6):
-                        sw.append(digital_inputs[13 - i] == "1")
+                        sw.append(digital_inputs[15 - i] == "1")
 
                     self.__ha_value = new_object(
                         simple_relay=simple_relay,
@@ -573,7 +573,7 @@ class DeviceValue(object):
                     for r in simple_relay:
                         set_val += "07\n" if r.is_on else "06\n"
                     self.__inels_set_value = set_val
-                elif self.__inels_type is SA3_022M:
+                elif self.__inels_type == SA3_022M:
                     re=[]
                     for relay in self.__trim_inels_status_bytes(SA3_022M_DATA, RELAY):
                         re.append((int(relay, 16) & 1) != 0)
@@ -652,13 +652,13 @@ class DeviceValue(object):
                         set_val += RELAY_SET[v]
 
                     self.__inels_set_value = set_val
-                elif self.__inels_type is IOU3_108M:
+                elif self.__inels_type == IOU3_108M:
                     re=[]
                     for relay in self.__trim_inels_status_bytes(IOU3_108M_DATA, RELAY):
                         re.append((int(relay, 16) & 1) != 0)
                     
                     temps = self.__trim_inels_status_values(IOU3_108M_DATA, TEMP_IN, "")
-                    temps = [temps[0:4], temps[4:8]]
+                    temps = [temps[0:8], temps[8:16]]
                     
                     digital_inputs = self.__trim_inels_status_values(
                         IOU3_108M_DATA, DIN, "")
@@ -694,7 +694,7 @@ class DeviceValue(object):
                         din=din,
                         #relay_overflow=relay_overflow,
                     )
-                elif self.__inels_type is RC3_610DALI: 
+                elif self.__inels_type == RC3_610DALI:
                     #aout
                     aout_brightness=[]
                     for a in self.__trim_inels_status_bytes(RC3_610DALI_DATA, AOUT):
@@ -785,7 +785,7 @@ class DeviceValue(object):
                         aout=aout,
                         dali=dali,
                     )
-                elif self.__inels_type is FA3_612M:
+                elif self.__inels_type == FA3_612M:
                     inputs = self.__trim_inels_status_values(FA3_612M_DATA, FA3_612M, "")
                     inputs = f"0x{inputs}"
                     inputs = f"{int(inputs, 16):0>24b}"
@@ -894,7 +894,7 @@ class DeviceValue(object):
                         card_present=card_present,
                         card_id=card_id,
                     )
-                elif self.__inels_type is BITS:
+                elif self.__inels_type == BITS:
                     bit: list[Bit] = []
                     for addr, val in parse_formated_json(self.__inels_status_value):
                         bit.append(
@@ -912,7 +912,7 @@ class DeviceValue(object):
                         set_val[bit.addr] = bit.is_on
 
                     self.__inels_set_value = json.dumps({"cmd": set_val})
-            elif self.__device_type is NUMBER:
+            elif self.__device_type == NUMBER:
                 number: list[Number] = []
                 for addr, val in parse_formated_json(self.__inels_status_value):
                     number.append(
@@ -931,7 +931,7 @@ class DeviceValue(object):
 
                 self.__inels_set_value = json.dumps({"cmd": set_val})
             elif self.__device_type is SENSOR:  # temperature sensor
-                if self.__inels_type is RF_TEMPERATURE_INPUT:
+                if self.__inels_type == RF_TEMPERATURE_INPUT:
                     battery = int(self.__trim_inels_status_values(DEVICE_TYPE_10_DATA, BATTERY, ""), 16)
                     temp_in = self.__trim_inels_status_values(DEVICE_TYPE_10_DATA, TEMP_IN, "")
                     temp_out = self.__trim_inels_status_values(DEVICE_TYPE_10_DATA, TEMP_OUT, "")
@@ -950,7 +950,7 @@ class DeviceValue(object):
                         low_battery=(battery == 0x81),
                         temp_in=temp_in,
                     )
-                elif self.__inels_type is RF_FLOOD_DETECTOR:
+                elif self.__inels_type == RF_FLOOD_DETECTOR:
                     state = self.__trim_inels_status_values(DEVICE_TYPE_15_DATA, STATE, "")
                     state = f"0x{state}"
                     state = f"{int(state, 16):0>8b}"
@@ -966,7 +966,7 @@ class DeviceValue(object):
                         flooded=flooded,
                         ains=ains,
                     )
-                elif self.__inels_type is RF_DETECTOR:
+                elif self.__inels_type == RF_DETECTOR:
                     state = self.__trim_inels_status_values(
                         DEVICE_TYPE_16_DATA, STATE, "")
                     state = f"0x{state}"
@@ -982,7 +982,7 @@ class DeviceValue(object):
                         detected=detected,
                         tamper=tamper,
                     )
-                elif self.__inels_type is RF_MOTION_DETECTOR:
+                elif self.__inels_type == RF_MOTION_DETECTOR:
                     state = self.__trim_inels_status_values(
                         DEVICE_TYPE_16_DATA, STATE, "")
                     state = f"0x{state}"
@@ -997,7 +997,7 @@ class DeviceValue(object):
                         motion=motion,
                         tamper=tamper,
                     )
-                elif self.__inels_type is RF_TEMPERATURE_HUMIDITY_SENSOR:
+                elif self.__inels_type == RF_TEMPERATURE_HUMIDITY_SENSOR:
                     battery = int(self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, BATTERY, ""), 16)
                     temp_in = self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, TEMP_IN, "")
                     humidity = int(self.__trim_inels_status_values(DEVICE_TYPE_29_DATA, HUMIDITY, ""), 16)
@@ -1007,7 +1007,7 @@ class DeviceValue(object):
                         temp_in=temp_in,
                         humidity=humidity,
                     )
-                elif self.__inels_type is GRT3_50:
+                elif self.__inels_type == GRT3_50:
                     digital_inputs = self.__trim_inels_status_values(
                         GRT3_50_DATA, GRT3_50, "")
                     digital_inputs_hex_str = f"0x{digital_inputs}"
@@ -1137,7 +1137,7 @@ class DeviceValue(object):
                         input=binary_input,
                         temp_in=temp,
                     )
-                elif self.__inels_type is IM3_80B:
+                elif self.__inels_type == IM3_80B:
                     binary_input = []
                     binary_input2 = []
                     inputs = self.__trim_inels_status_values(IM3_80B_DATA, IN, "")
@@ -1153,7 +1153,7 @@ class DeviceValue(object):
                         input=binary_input,
                         temp=temp,
                     )
-                elif self.__inels_type is IM3_140M:
+                elif self.__inels_type == IM3_140M:
                     binary_input = []
                     binary_input2 = []
                     binary_input3 = []
@@ -1174,7 +1174,7 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         input=binary_input
                     )
-                elif self.__inels_type is DMD3_1:
+                elif self.__inels_type == DMD3_1:
                     light_in = self.__trim_inels_status_values(DMD3_1_DATA, LIGHT_IN, "")
                     temp_in = self.__trim_inels_status_values(DMD3_1_DATA, TEMP_IN, "")    
                     humidity = self.__trim_inels_status_values(DMD3_1_DATA, HUMIDITY, "")
@@ -1191,7 +1191,7 @@ class DeviceValue(object):
                         humidity=humidity,
                         motion=motion,
                     )
-                elif self.__inels_type is ADC3_60M:
+                elif self.__inels_type == ADC3_60M:
                     ains=[]
                     ain_bytes = self.__trim_inels_status_bytes(
                         ADC3_60M_DATA, AIN,
@@ -1215,7 +1215,7 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         temps=temps
                     )
-                elif self.__inels_type in IDRT3_1:
+                elif self.__inels_type == IDRT3_1:
                     inputs = self.__trim_inels_status_values(IDRT3_1_DATA, SW, "")
                     inputs = f"0x{inputs}"
                     inputs = f"{int(inputs, 16):0>8b}"
@@ -1297,7 +1297,7 @@ class DeviceValue(object):
                             SimpleLight(brightness=brightness)
                         )
                         self.__ha_value = new_object(simple_light=simple_light)
-                elif self.__inels_type is RF_DIMMER_RGB:
+                elif self.__inels_type == RF_DIMMER_RGB:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was None for %s", RF_DIMMER_RGB)
                         self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
@@ -1321,7 +1321,7 @@ class DeviceValue(object):
                         self.__ha_value=new_object(
                             rgb=rgb
                         )
-                elif self.__inels_type is RF_LIGHT_BULB:
+                elif self.__inels_type == RF_LIGHT_BULB:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was None for %s", RF_LIGHT_BULB)
                         self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
@@ -1340,7 +1340,7 @@ class DeviceValue(object):
                             )
 
                         self.__ha_value=new_object(warm_light=warm_light)
-                elif self.__inels_type is DA3_22M:
+                elif self.__inels_type == DA3_22M:
                     temp = self.__trim_inels_status_values(DA3_22M_DATA, TEMP_IN, "")
 
                     state = self.__trim_inels_status_values(
@@ -1401,7 +1401,7 @@ class DeviceValue(object):
                     for i in range(len(self.__ha_value.light_coa_toa)):
                         set_val +=  f"{self.__ha_value.light_coa_toa[i].brightness:02X}\n"
                     self.__inels_set_value = set_val
-                elif self.__inels_type is DAC3_04B:
+                elif self.__inels_type == DAC3_04B:
                     temp_out = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_OUT, "")
                     
                     aout_alert = int(self.__trim_inels_status_values(DAC3_04_DATA, ALERT, ""), 16) != 0
@@ -1426,7 +1426,7 @@ class DeviceValue(object):
                     set_val = "00\n" * 4
                     for d in aout:
                         set_val += f"{d.brightness:02X}\n"
-                elif self.__inels_type is DAC3_04M:
+                elif self.__inels_type == DAC3_04M:
                     temp_out = self.__trim_inels_status_values(DAC3_04_DATA, TEMP_OUT, "")
 
                     aout_alert = self.__trim_inels_status_values(DAC3_04_DATA, ALERT, "")
@@ -1459,7 +1459,7 @@ class DeviceValue(object):
                     set_val = "00\n" * 4
                     for d in aout:
                         set_val += f"{d.brightness:02X}\n"
-                elif self.__inels_type in DCDA_33M:
+                elif self.__inels_type == DCDA_33M:
                     digital_inputs = self.__trim_inels_status_values(DCDA_33M_DATA, ALERT, "")
                     digital_inputs = f"0x{digital_inputs}"
                     digital_inputs = f"{int(digital_inputs, 16):0>8b}"
@@ -1498,7 +1498,7 @@ class DeviceValue(object):
                         aout_val = aout[i].brightness
                         set_val += f"{aout_val:02X}\n"
                     self.__inels_set_value = set_val
-                elif self.__inels_type is DA3_66M:
+                elif self.__inels_type == DA3_66M:
                     state = self.__trim_inels_status_values(
                         DA3_66M_DATA, ALERT, ""
                     )
@@ -1564,7 +1564,7 @@ class DeviceValue(object):
                         set_val += f"{self.__ha_value.light_coa_toa[i].brightness:02X}\n"
                     set_val += "00\n"*12
                     self.__inels_set_value = set_val
-                elif self.__inels_type is DALI_DMX_UNIT:
+                elif self.__inels_type == DALI_DMX_UNIT:
                     outs = self.__trim_inels_status_bytes(DALI_DMX_UNIT_DATA, OUT)
                     simple_light = []
                     for o in outs:
@@ -1579,7 +1579,7 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         simple_light=simple_light,
                     )
-                elif self.__inels_type is DALI_DMX_UNIT_2:
+                elif self.__inels_type == DALI_DMX_UNIT_2:
                     outs = self.__trim_inels_status_bytes(DALI_DMX_UNIT_DATA, OUT)
                     warm_light = []
                     lights = list(zip(outs[::2], outs[1::2]))
@@ -1615,7 +1615,7 @@ class DeviceValue(object):
                         shutters.append(
                             Shutter(
                                 state=shutter_val,
-                                is_closed=(shutter_val is Shutter_state.Closed)
+                                is_closed=(shutter_val == Shutter_state.Closed)
                             )
                         )
 
@@ -1623,8 +1623,8 @@ class DeviceValue(object):
                             shutters=shutters,
                         )
 
-                        self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters[0].state]}\n00\n00\n"
-                elif self.__inels_type is RF_SHUTTER_UNIT:
+                        self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters[0].state]}00\n00\n"
+                elif self.__inels_type == RF_SHUTTER_UNIT:
                     if self.inels_status_value is None:
                         _LOGGER.info("inels_status_value was 'None' for %s", RF_SHUTTER_UNIT)
                         self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
@@ -1656,8 +1656,8 @@ class DeviceValue(object):
                         self.__ha_value = new_object(
                             shutters_with_pos=shutters_with_pos,
                         )
-                        self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters_with_pos[0].state]}\n00\n00\n"
-                elif self.__inels_type is JA3_018M:
+                        self.__inels_set_value = f"{RF_SHUTTER_STATE_SET[shutters_with_pos[0].state]}00\n00\n"
+                elif self.__inels_type == JA3_018M:
                     shutter_relays=[]
                     for r in self.__trim_inels_status_bytes(JA3_018M_DATA, SHUTTER):
                         shutter_relays.append((int(r, 16) & 1) != 0)
@@ -1725,7 +1725,7 @@ class DeviceValue(object):
                     )
 
                     self.__inels_set_value = f"{''.join([SIMPLE_SHUTTER_STATE_SET[x.state] for x in simple_shutters])}"
-                elif self.__inels_type is JA3_014M:
+                elif self.__inels_type == JA3_014M:
                     shutter_relays = []
                     for r in self.__trim_inels_status_bytes(JA3_014M_DATA, SHUTTER):
                         shutter_relays.append((int(r, 16) & 1) != 0)
@@ -1797,7 +1797,7 @@ class DeviceValue(object):
 
                     self.__inels_set_value = f"{''.join([SIMPLE_SHUTTER_STATE_SET[x.state] for x in simple_shutters])}"
             elif self.__device_type is CLIMATE:  # thermovalve
-                if self.__inels_type is RF_WIRELESS_THERMOVALVE:
+                if self.__inels_type == RF_WIRELESS_THERMOVALVE:
                     # fetches all the status values and compacts them into a new object
                     temp_current_hex = self.__trim_inels_status_values(
                         DEVICE_TYPE_09_DATA, CURRENT_TEMP, ""
@@ -1827,11 +1827,10 @@ class DeviceValue(object):
                             current=temp_current,
                             required=temp_required,
                             climate_mode=climate_mode,
-                            current_action=current_action,
                             open_in_percentage=open_to_percentage,
                         )
                     )             
-                elif self.__inels_type is VIRT_CONTR:
+                elif self.__inels_type == VIRT_CONTR:
                     temp_current = int(self.__trim_inels_status_values(
                         DEVICE_TYPE_166_DATA, CURRENT_TEMP, ""
                     ), 16)
@@ -1950,7 +1949,7 @@ class DeviceValue(object):
                             current_preset=preset,
                         ),
                     )
-                elif self.__inels_type is VIRT_HEAT_REG:
+                elif self.__inels_type == VIRT_HEAT_REG:
                     state=int(self.__trim_inels_status_values(
                         VIRT_REG_DATA, STATE, ""
                     ), 16)
@@ -1966,7 +1965,7 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         heating_out = heat_reg
                     )
-                elif self.__inels_type is VIRT_COOL_REG:
+                elif self.__inels_type == VIRT_COOL_REG:
                     state=int(self.__trim_inels_status_values(
                         VIRT_REG_DATA, STATE, ""
                     ), 16)
@@ -1982,8 +1981,8 @@ class DeviceValue(object):
                     self.__ha_value = new_object(
                         cooling_out=cool_reg,
                     )
-            elif self.__device_type is BUTTON:
-                if self.__inels_type is RF_CONTROLLER:
+            elif self.__device_type == BUTTON:
+                if self.__inels_type == RF_CONTROLLER:
                     if self.__inels_status_value is None:
                         #No connection can be made, so just communicate low battery
                         self.__ha_value = new_object(
@@ -2024,7 +2023,7 @@ class DeviceValue(object):
                             low_battery=low_battery,
                             btn=btn
                         )
-                elif self.__inels_type is RF_2_BUTTON_CONTROLLER:
+                elif self.__inels_type == RF_2_BUTTON_CONTROLLER:
                     if self.__inels_status_value is None:
                         self.__ha_value = new_object(
                             low_battery=True,
@@ -2154,7 +2153,7 @@ class DeviceValue(object):
                         # AIN
                         ain=ain,
                     )
-                elif self.__inels_type is GSP3_100:
+                elif self.__inels_type == GSP3_100:
                     switches = self.__trim_inels_status_values(
                         GLASS_CONTROLLER_DATA, SW, "")
                     switches = f"0x{switches}"
@@ -2183,7 +2182,7 @@ class DeviceValue(object):
                         light_in=light_in,
                         ain=ain,
                     )
-                elif self.__inels_type is GDB3_10:
+                elif self.__inels_type == GDB3_10:
                     switches = self.__trim_inels_status_values(
                         GLASS_CONTROLLER_DATA, SW, "")
                     switches = f"0x{switches}"
@@ -2239,17 +2238,17 @@ class DeviceValue(object):
         if self.__ha_value is not dummy_val:
             try:
                 if self.__device_type is SWITCH:
-                    if self.__inels_type is RF_SINGLE_SWITCH:
+                    if self.__inels_type == RF_SINGLE_SWITCH:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                         else:
                             self.__inels_set_value = f"{(2 - (self.__ha_value.simple_relay[0].is_on)):02X}\n00\n"
-                    elif self.__inels_type is RF_SWITCHING_UNIT:
+                    elif self.__inels_type == RF_SWITCHING_UNIT:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_02_COMM_TEST
                         else:
                             self.__inels_set_value = f"{(2 - (self.__ha_value.simple_relay[0].is_on)):02X}\n00\n00\n"
-                    elif self.__inels_type is RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
+                    elif self.__inels_type == RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_07_COMM_TEST
                         else:
@@ -2264,7 +2263,7 @@ class DeviceValue(object):
                             for re in self.__ha_value.relay:
                                 value += RELAY_SET[re.is_on]
                             self.__inels_set_value = value
-                    elif self.__inels_type is SA3_022M:
+                    elif self.__inels_type == SA3_022M:
                         value = ""
                         for r in self.__ha_value.relay:
                             value += RELAY_SET[r.is_on]
@@ -2278,7 +2277,7 @@ class DeviceValue(object):
                         for r in self.__ha_value.relay:
                             set_val += RELAY_SET[r.is_on]
                         self.__inels_set_value = set_val
-                    elif self.__inels_type is RC3_610DALI:
+                    elif self.__inels_type == RC3_610DALI:
                         set_val = "00\n" * 4 #4 bytes
                         for a in self.__ha_value.aout:
                             set_val += f"{a.brightness:02X}\n"
@@ -2299,7 +2298,7 @@ class DeviceValue(object):
                             set_val += f"{self.__ha_value.dali[i].brightness:02X}\n"
                             
                         self.__inels_set_value = set_val
-                    elif self.__inels_type is FA3_612M:
+                    elif self.__inels_type == FA3_612M:
                         original_status = self.ha_value.last_status_val.split("\n")
                         
                         set_val = "00\n" * 4
@@ -2318,19 +2317,19 @@ class DeviceValue(object):
                         set_val = "04\n" if self.ha_value.simple_relay[0].is_on else "00\n"
                         set_val += "00\n" * 9
                         self.__inels_set_value = set_val
-                    elif self.__inels_type is BITS:
+                    elif self.__inels_type == BITS:
                         set_val = {}
                         for bit in self.ha_value.bit:
                             set_val[bit.addr] = int(bit.is_on)
 
                         self.__inels_set_value = json.dumps({"cmd": set_val})
-                elif self.__device_type is NUMBER:
+                elif self.__device_type == NUMBER:
                     set_val = {}
                     for number in self.ha_value.number:
                         set_val[number.addr] = int(number.value)
 
                     self.__inels_set_value = json.dumps({"cmd": set_val})
-                elif self.__device_type is LIGHT:
+                elif self.__device_type == LIGHT:
                     if self.__inels_type in [RF_SINGLE_DIMMER, RF_DIMMER]:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_05_COMM_TEST
@@ -2342,18 +2341,18 @@ class DeviceValue(object):
                             b = 0xFFFF - ((int(out/5)*1000) + 10000)
                             b_str = f"{b:04X}"
                             self.__inels_set_value = f"01\n{b_str[0]}{b_str[1]}\n{b_str[2]}{b_str[3]}\n"
-                    elif self.__inels_type is RF_DIMMER_RGB:
+                    elif self.__inels_type == RF_DIMMER_RGB:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         else:
                             rgb = self.__ha_value.rgb[0]
                             self.__inels_set_value = f"01\n{rgb.r:02X}\n{rgb.g:02X}\n{rgb.b:02X}\n{int(rgb.brightness*2.55):02X}\n00\n"
-                    elif self.__inels_type is RF_LIGHT_BULB:
+                    elif self.__inels_type == RF_LIGHT_BULB:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_13_COMM_TEST
                         else:
                             self.__inels_set_value = f"0F\n00\n00\n00\n{round(self.ha_value.warm_light[0].brightness*2.55):02X}\n{round(self.ha_value.warm_light[0].relative_ct*2.55):02X}\n"
-                    elif self.__inels_type is DA3_22M:
+                    elif self.__inels_type == DA3_22M:
                         # correct the values
                         out1 = round(self.__ha_value.light_coa_toa[0].brightness, -1)
                         out1 = out1 if out1 < 100 else 100
@@ -2377,7 +2376,7 @@ class DeviceValue(object):
                             aout = self.__ha_value.aout[i].brightness
                             set_val += f"{aout:02X}\n"
                         self.__inels_set_value = set_val
-                    elif self.__inels_type is DA3_66M:
+                    elif self.__inels_type == DA3_66M:
                         set_val = "00\n"*4
                         for i in range(4):
                             out = self.__ha_value.light_coa_toa[i].brightness
@@ -2390,14 +2389,14 @@ class DeviceValue(object):
                             set_val += f"{out:02X}\n"
                         set_val += "00\n"*12
                         self.__inels_set_value = set_val
-                    elif self.__inels_type is DALI_DMX_UNIT:
+                    elif self.__inels_type == DALI_DMX_UNIT:
                         set_val = "00\n"*4
                         for i in range(4):
                             out = self.__ha_value.simple_light[i].brightness
                             out = out if out <= 100 else 100
                             set_val += f"{out:02X}\n"
                         self.__inels_set_value = set_val
-                    elif self.__inels_type is DALI_DMX_UNIT_2:
+                    elif self.__inels_type == DALI_DMX_UNIT_2:
                         set_val = "00\n"*4
                         for i in range(2):
                             out = self.__ha_value.warm_light[i].brightness
@@ -2415,7 +2414,7 @@ class DeviceValue(object):
                         else:
                             shutter_set = RF_SHUTTER_STATE_SET[self.__ha_value.shutters[0].state]
                             self.__inels_set_value = shutter_set + "00\n00\n"
-                    elif self.__inels_type is RF_SHUTTER_UNIT:
+                    elif self.__inels_type == RF_SHUTTER_UNIT:
                         if self.__ha_value is None:
                             self.__inels_set_value = DEVICE_TYPE_03_COMM_TEST
                         else:
@@ -2427,10 +2426,10 @@ class DeviceValue(object):
                     elif self.__inels_type in [JA3_018M, JA3_014M]:
                         self.__inels_set_value = f"{''.join([SIMPLE_SHUTTER_STATE_SET[x.state] for x in self.__ha_value.simple_shutters])}"
                 elif self.__device_type is CLIMATE:
-                    if self.__inels_type is RF_WIRELESS_THERMOVALVE:
+                    if self.__inels_type == RF_WIRELESS_THERMOVALVE:
                         required_temp = int(round(self.__ha_value.thermovalve.required * 2, 0))
                         self.__inels_set_value = f"00\n{required_temp:02X}\n00\n"
-                    elif self.__inels_type is VIRT_CONTR:
+                    elif self.__inels_type == VIRT_CONTR:
                         cc = self.ha_value.climate_controller
 
                         current_temp = f"{int(cc.current * 100):08X}"

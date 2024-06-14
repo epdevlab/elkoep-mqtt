@@ -244,7 +244,7 @@ DEVICE_TYPE_DICT = {
     "111": SWITCH, # FA3_612M,
     "112": SWITCH, # IOU3_108M,
     
-    "114" : SWITCH, # RC3_610DALI,
+    "114": SWITCH, # RC3_610DALI,
     "115": SENSOR, # IM3_20B,
     "116": SENSOR, # IM3_40B,
     "117": SENSOR, # IM3_80B
@@ -258,7 +258,7 @@ DEVICE_TYPE_DICT = {
     "128": SWITCH, # GCR3_11,
     "129": SWITCH, # GCH3_31,
     
-    "136": SENSOR, # GSP3_100,
+    "136": BUTTON, # GSP3_100,
     "137": BUTTON, # GDB3_10,
     "138": BUTTON, # GSB3_40SX,
     "139": BUTTON, # GSB3_60SX
