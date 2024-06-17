@@ -1,7 +1,9 @@
 """Constances of inels-mqtt."""
+
 from __future__ import annotations
-from typing import Final
+
 from enum import IntEnum
+from typing import Final
 
 DISCOVERY_TIMEOUT_IN_SEC = 5
 
@@ -18,28 +20,26 @@ NUMBER = "number"
 
 # RF
 RF_SINGLE_SWITCH = "Single switching unit"  # 01
-RF_SWITCHING_UNIT = "Switching unit" #02
-RF_SHUTTERS = "Shutters" #3
+RF_SWITCHING_UNIT = "Switching unit"  # 02
+RF_SHUTTERS = "Shutters"  # 3
 RF_SINGLE_DIMMER = "Single dimmer"  # 04
-RF_DIMMER = "Dimmer" #05
+RF_DIMMER = "Dimmer"  # 05
 RF_DIMMER_RGB = "RGB dimmer"  # 06
-RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR = (
-    "Switching unit with external temperature sensor" #07
-)
+RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR = "Switching unit with external temperature sensor"  # 07
 # RF_SWITCHING_UNIT_WITH_TEMPERATURE_SENSORS = (
 #     "Switching unit with temperature sensors"  # 08
 # )
-RF_WIRELESS_THERMOVALVE = "Wireless Thermovalve" #9
-RF_TEMPERATURE_INPUT = "Temperature input" #10
-RF_THERMOSTAT = "Thermostat" #12
-RF_LIGHT_BULB = "Light bulb" #13
+RF_WIRELESS_THERMOVALVE = "Wireless Thermovalve"  # 9
+RF_TEMPERATURE_INPUT = "Temperature input"  # 10
+RF_THERMOSTAT = "Thermostat"  # 12
+RF_LIGHT_BULB = "Light bulb"  # 13
 RF_FLOOD_DETECTOR = "Flood detector"  # 15
 RF_DETECTOR = "Detector"  # 16
 RF_MOTION_DETECTOR = "Motion detector"  # 17
 RF_2_BUTTON_CONTROLLER = "Two button controller"  # 18
-RF_CONTROLLER = "Controller" #19
+RF_CONTROLLER = "Controller"  # 19
 RF_PULSE_CONVERTER = "Pulse converter"  # 20
-RF_SHUTTER_UNIT = "Shutter unit" #21
+RF_SHUTTER_UNIT = "Shutter unit"  # 21
 RF_TEMPERATURE_HUMIDITY_SENSOR = "Temperature and humidity sensor"  # 29
 SYSTEM_BITS = "Virtual system bits"
 SYSTEM_INTEGERS = "Virtual system integers"
@@ -101,14 +101,14 @@ GSB3_90SX_V2 = "GSB3-90SX-V2"
 INTEGERS = "INTEGERS"
 BITS = "BITS"
 
-#Virtual bus
+# Virtual bus
 VIRT_CONTR = "Virtual controller"
 VIRT_HEAT_REG = "Heat virtual regulator"
 VIRT_COOL_REG = "Cool virtual regulator"
 
 
 INELS_DEVICE_TYPE_DICT = {
-    #RF
+    # RF
     "01": RF_SINGLE_SWITCH,
     "02": RF_SWITCHING_UNIT,
     "03": RF_SHUTTERS,
@@ -118,21 +118,16 @@ INELS_DEVICE_TYPE_DICT = {
     "07": RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR,
     "09": RF_WIRELESS_THERMOVALVE,
     "10": RF_TEMPERATURE_INPUT,
-    
     "12": RF_THERMOSTAT,
-    
     "13": RF_LIGHT_BULB,
-    
     "15": RF_FLOOD_DETECTOR,
     "16": RF_DETECTOR,
     "17": RF_MOTION_DETECTOR,
     "18": RF_2_BUTTON_CONTROLLER,
     "19": RF_CONTROLLER,
-    
     "21": RF_SHUTTER_UNIT,
-    
     "30": RF_TEMPERATURE_HUMIDITY_SENSOR,
-    #BUS
+    # BUS
     "100": SA3_01B,
     "101": DA3_22M,
     "102": GRT3_50,
@@ -144,158 +139,134 @@ INELS_DEVICE_TYPE_DICT = {
     "108": SA3_012M,
     "169": SA3_014M,
     "109": SA3_022M,
-
     "111": FA3_612M,
     "112": IOU3_108M,
-    
     "114": RC3_610DALI,
     "115": IM3_20B,
     "116": IM3_40B,
     "117": IM3_80B,
-    
     "120": DMD3_1,
     "121": IM3_140M,
     "122": WSB3_20,
     "123": WSB3_40,
     "124": WSB3_20H,
     "125": WSB3_40H,
-    
     "128": GCR3_11,
     "129": GCH3_31,
-    
     "136": GSP3_100,
     "137": GDB3_10,
     "138": GSB3_40SX,
     "139": GSB3_60SX,
     "140": GSB3_20SX,
     "141": GBP3_60,
-
     "143": GSB3_40_V2,
     "144": GSB3_60_V2,
     "146": GSB3_90_V2,
-
     "147": DAC3_04B,
     "148": DAC3_04M,
-    
     "150": DCDA_33M,
     "151": DA3_66M,
-    
     "156": ADC3_60M,
     "157": TI3_10B,
     "158": TI3_40B,
     "159": TI3_60M,
     "160": IDRT3_1,
-    
     "163": JA3_018M,
     "164": DALI_DMX_UNIT,
     "165": DALI_DMX_UNIT_2,
     "166": VIRT_CONTR,
     "167": VIRT_HEAT_REG,
     "168": VIRT_COOL_REG,
-
     "170": JA3_014M,
-
     "174": GSB3_40SX_V2,
     "175": GSB3_60SX_V2,
     "176": GSB3_90SX_V2,
     "177": MSB3_40,
     "178": MSB3_60,
     "179": MSB3_90,
-
     "bits": BITS,
     "integers": INTEGERS,
 }
 
-#TODO retire this system
+# TODO retire this system
 # device types
 DEVICE_TYPE_DICT = {
     # RF
-    "01": SWITCH, # RF_SINGLE_SWITCH
-    "02": SWITCH, # RF_SWITCHING_UNIT
-    "03": COVER, # RF_SHUTTERS
-    "04": LIGHT, # RF_SINGLE_DIMMER
-    "05": LIGHT, # RF_DIMMER
-    "06": LIGHT, # RF_DIMMER_RGB
-    "07": SWITCH, # RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR
-    "09": CLIMATE, # RF_WIRELESS_THERMOVALVE
-    "10": SENSOR, # RF_TEMPERATURE_INPUT
-    "12": SENSOR, # RF_THERMOSTAT
-    "13": LIGHT, # RF_LIGHT_BULB
-    "15": SENSOR, # RF_LEVEL_DETECTOR
-    "16": SENSOR, # RF_DETECTOR
-    "17": SENSOR, # RF_MOTION_DETECTOR
-    "18": BUTTON, # RF_2_BUTTON_CONTROLLER
-    "19": BUTTON, # RFGB_40
-    "21": COVER, # RF_SHUTTER_UNIT
-    "30": SENSOR, # RF_TEMPERATURE_HUMIDITY_SENSOR
+    "01": SWITCH,  # RF_SINGLE_SWITCH
+    "02": SWITCH,  # RF_SWITCHING_UNIT
+    "03": COVER,  # RF_SHUTTERS
+    "04": LIGHT,  # RF_SINGLE_DIMMER
+    "05": LIGHT,  # RF_DIMMER
+    "06": LIGHT,  # RF_DIMMER_RGB
+    "07": SWITCH,  # RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR
+    "09": CLIMATE,  # RF_WIRELESS_THERMOVALVE
+    "10": SENSOR,  # RF_TEMPERATURE_INPUT
+    "12": SENSOR,  # RF_THERMOSTAT
+    "13": LIGHT,  # RF_LIGHT_BULB
+    "15": SENSOR,  # RF_LEVEL_DETECTOR
+    "16": SENSOR,  # RF_DETECTOR
+    "17": SENSOR,  # RF_MOTION_DETECTOR
+    "18": BUTTON,  # RF_2_BUTTON_CONTROLLER
+    "19": BUTTON,  # RFGB_40
+    "21": COVER,  # RF_SHUTTER_UNIT
+    "30": SENSOR,  # RF_TEMPERATURE_HUMIDITY_SENSOR
     # BUS
-    "100": SWITCH, # SA3_01B
-    "101": LIGHT, # DA3-22M
-    "102": SENSOR, # GTR3_50
-    "103": BUTTON, # GSB3_90SX
-    "104": SWITCH, # SA3_02B,
-    "105": SWITCH, # SA3_02M
-    "106": SWITCH, # SA3_04M
-    "107": SWITCH, # SA3_06M,
-    "108": SWITCH, # SA3_012M,
-    "169": SWITCH, # SA3_014M,
-    "109": SWITCH, # SA3_022M,
-
-    "111": SWITCH, # FA3_612M,
-    "112": SWITCH, # IOU3_108M,
-    
-    "114": SWITCH, # RC3_610DALI,
-    "115": SENSOR, # IM3_20B,
-    "116": SENSOR, # IM3_40B,
-    "117": SENSOR, # IM3_80B
-    
-    "120": SENSOR, # DMD3_1,
-    "121": SENSOR, # IM3_140M
-    "122": SENSOR, # WSB3_20,
-    "123": SENSOR, # WSB3_40,
-    "124": SENSOR, # WSB3_20HUM / H
-    "125": SENSOR, # WSB3_40HUM,
-    "128": SWITCH, # GCR3_11,
-    "129": SWITCH, # GCH3_31,
-    
-    "136": BUTTON, # GSP3_100,
-    "137": BUTTON, # GDB3_10,
-    "138": BUTTON, # GSB3_40SX,
-    "139": BUTTON, # GSB3_60SX
-    "140": BUTTON, # GSB3_20SX,
-    "141": BUTTON, # GBP3_60,
-
-    "143": SENSOR, # GSB3_40_V2
-    "144": SENSOR, # GSB3_60_V2
-    "146": SENSOR, # GSB3_90_V2
-
-    "147": LIGHT, # DAC3_04B,
-    "148": LIGHT, # DAC3_04M,
-    "150": LIGHT, # DCDA_33M,
-    "151": LIGHT, # DA3_66M,
-
-    "156": SENSOR, # ADC3_60M,
-    "157": SENSOR, # TI3_10B,
-    "158": SENSOR, # TI3_40B,
-    "159": SENSOR, # TI3_60M,
-    "160": SENSOR, # IDRT3_1
-    
-    "163": COVER, # JA3_018M
-    "164": LIGHT, # DALI_DMX_UNIT
-    "165": LIGHT, # DALI_DMX_UNIT_2
-    "166": CLIMATE, # VIRT_CONTR
-    "167": CLIMATE, # VIRT_HEAT_REG
-    "168": CLIMATE, # VIRT_COOL_REG
-
-    "170": COVER, # JA3_014M
-
-    "174": SENSOR, # GSB3_40SX_V2 
-    "175": SENSOR, # GSB3_60SX_V2
-    "176": SENSOR, # GSB3_90SX_V2 
-    "177": SENSOR, # MSB3_40
-    "178": SENSOR, # MSB3_60
-    "179": SENSOR, # MSB3_90
-
+    "100": SWITCH,  # SA3_01B
+    "101": LIGHT,  # DA3-22M
+    "102": SENSOR,  # GTR3_50
+    "103": BUTTON,  # GSB3_90SX
+    "104": SWITCH,  # SA3_02B,
+    "105": SWITCH,  # SA3_02M
+    "106": SWITCH,  # SA3_04M
+    "107": SWITCH,  # SA3_06M,
+    "108": SWITCH,  # SA3_012M,
+    "169": SWITCH,  # SA3_014M,
+    "109": SWITCH,  # SA3_022M,
+    "111": SWITCH,  # FA3_612M,
+    "112": SWITCH,  # IOU3_108M,
+    "114": SWITCH,  # RC3_610DALI,
+    "115": SENSOR,  # IM3_20B,
+    "116": SENSOR,  # IM3_40B,
+    "117": SENSOR,  # IM3_80B
+    "120": SENSOR,  # DMD3_1,
+    "121": SENSOR,  # IM3_140M
+    "122": SENSOR,  # WSB3_20,
+    "123": SENSOR,  # WSB3_40,
+    "124": SENSOR,  # WSB3_20HUM / H
+    "125": SENSOR,  # WSB3_40HUM,
+    "128": SWITCH,  # GCR3_11,
+    "129": SWITCH,  # GCH3_31,
+    "136": BUTTON,  # GSP3_100,
+    "137": BUTTON,  # GDB3_10,
+    "138": BUTTON,  # GSB3_40SX,
+    "139": BUTTON,  # GSB3_60SX
+    "140": BUTTON,  # GSB3_20SX,
+    "141": BUTTON,  # GBP3_60,
+    "143": SENSOR,  # GSB3_40_V2
+    "144": SENSOR,  # GSB3_60_V2
+    "146": SENSOR,  # GSB3_90_V2
+    "147": LIGHT,  # DAC3_04B,
+    "148": LIGHT,  # DAC3_04M,
+    "150": LIGHT,  # DCDA_33M,
+    "151": LIGHT,  # DA3_66M,
+    "156": SENSOR,  # ADC3_60M,
+    "157": SENSOR,  # TI3_10B,
+    "158": SENSOR,  # TI3_40B,
+    "159": SENSOR,  # TI3_60M,
+    "160": SENSOR,  # IDRT3_1
+    "163": COVER,  # JA3_018M
+    "164": LIGHT,  # DALI_DMX_UNIT
+    "165": LIGHT,  # DALI_DMX_UNIT_2
+    "166": CLIMATE,  # VIRT_CONTR
+    "167": CLIMATE,  # VIRT_HEAT_REG
+    "168": CLIMATE,  # VIRT_COOL_REG
+    "170": COVER,  # JA3_014M
+    "174": SENSOR,  # GSB3_40SX_V2
+    "175": SENSOR,  # GSB3_60SX_V2
+    "176": SENSOR,  # GSB3_90SX_V2
+    "177": SENSOR,  # MSB3_40
+    "178": SENSOR,  # MSB3_60
+    "179": SENSOR,  # MSB3_90
     "bits": SWITCH,
     "integers": NUMBER,
 }
@@ -386,12 +357,14 @@ COVER_SET_BYTES = {
 
 COVER_TIME_SET_CONSTANT = 0.06577
 
+
 # SHUTTER CONSTANTS
 class Shutter_state(IntEnum):
     Open = 0
     Closed = 1
     Stop_up = 2
     Stop_down = 3
+
 
 RF_SHUTTER_STATE_SET = {
     Shutter_state.Open: "01\n",
@@ -407,10 +380,12 @@ SIMPLE_SHUTTER_STATE_SET = {
     Shutter_state.Stop_down: "06\n06\n",
 }
 
+
 class Card_read_state(IntEnum):
     No_card = 0
     Success = 1
     Failure = 2
+
 
 class Climate_modes(IntEnum):
     Off = 0
@@ -419,11 +394,13 @@ class Climate_modes(IntEnum):
     Heat_cool = 3
     Auto = 4
 
+
 class Climate_action(IntEnum):
     Off = 0
     Idle = 1
     Heating = 2
     Cooling = 3
+
 
 class Climate_presets(IntEnum):
     Regular = 0
@@ -491,11 +468,7 @@ DEVICE_TYPE_19_DATA = {STATE: [0], IDENTITY: [1]}
 DEVICE_TYPE_21_DATA = {SHUTTER: [1], POSITION: [2]}
 DEVICE_TYPE_29_DATA = {BATTERY: [0], TEMP_IN: [2, 1], HUMIDITY: [3]}
 #   BUS
-SA3_01B_DATA = {
-    RELAY: [0],
-    TEMP_IN: [2, 3],
-    RELAY_OVERFLOW: [4]
-}
+SA3_01B_DATA = {RELAY: [0], TEMP_IN: [2, 3], RELAY_OVERFLOW: [4]}
 DA3_22M_DATA = {
     TEMP_IN: [0, 1],
     DA3_22M: [2],
@@ -522,18 +495,18 @@ GSB3_90SX_DATA = {
 }
 
 SA3_04M_DATA = {
-    RELAY: [0, 1, 2, 3], #relays
-    SA3_04M: [4], #switch inputs
+    RELAY: [0, 1, 2, 3],  # relays
+    SA3_04M: [4],  # switch inputs
 }
 
 SA3_012M_DATA = {
-    RELAY: list(range(12)), #relays
-    SA3_012M: [12, 13], #switch inputs
+    RELAY: list(range(12)),  # relays
+    SA3_012M: [12, 13],  # switch inputs
 }
 
 SA3_014M_DATA = {
-    RELAY: list(range(14)), #relays
-    SA3_014M: [17, 18], #switch inputs
+    RELAY: list(range(14)),  # relays
+    SA3_014M: [17, 18],  # switch inputs
 }
 
 IM3_80B_DATA = {
@@ -541,9 +514,7 @@ IM3_80B_DATA = {
     TEMP_IN: [2, 3],
 }
 
-IM3_140M_DATA = {
-    IN: [0, 1, 2, 3]
-}
+IM3_140M_DATA = {IN: [0, 1, 2, 3]}
 
 DEVICE_TYPE_124_DATA = {
     WSB3_20H: [0, 1],
@@ -576,8 +547,8 @@ DA3_66M_DATA = {
     SW: [3],
     OUT: [4, 5, 6, 7, 12, 13],
     DIN: [8],
-    #MIN_BRIGHTNESS: list(range(14, 20, 2)), #[2*i+14 for i in range(6)],
-    #CHAN_TYPE: list(range(15, 21, 2)), #[2*i+15 for i in range(6)],
+    # MIN_BRIGHTNESS: list(range(14, 20, 2)), #[2*i+14 for i in range(6)],
+    # CHAN_TYPE: list(range(15, 21, 2)), #[2*i+15 for i in range(6)],
 }
 
 DAC3_04_DATA = {
@@ -614,9 +585,9 @@ GBP3_60_DATA = {
     AIN: [8, 9],
 }
 
-CARD_DATA = { #Card holder/reader
+CARD_DATA = {  # Card holder/reader
     STATE: [0, 1],
-    CARD_ID: list(range (4, 12)),
+    CARD_ID: list(range(4, 12)),
     LIGHT_IN: [12, 13, 14, 15],
     TEMP_IN: [16, 17],
 }
@@ -637,7 +608,7 @@ GSP3_100_DATA = {
     AIN: [8, 9],
 }
 
-GDB3_10_DATA = { #generalize with GBP3_60
+GDB3_10_DATA = {  # generalize with GBP3_60
     SW: [0],
     DIN: [1],
     TEMP_IN: [2, 3],
@@ -645,7 +616,7 @@ GDB3_10_DATA = { #generalize with GBP3_60
     AIN: [8, 9],
 }
 
-GSB3_DATA = { #same as upper one [GSB3-20SX, GSB3-40SX, GSB3-60SX]
+GSB3_DATA = {  # same as upper one [GSB3-20SX, GSB3-40SX, GSB3-60SX]
     SW: [0],
     DIN: [1],
     TEMP_IN: [2, 3],
@@ -689,10 +660,7 @@ SA3_02B_DATA = {
     TEMP_IN: [2, 3],
 }
 
-SA3_02M_DATA = {
-    RELAY: [0, 1],
-    SW: [2]
-}
+SA3_02M_DATA = {RELAY: [0, 1], SW: [2]}
 
 SA3_04M_DATA = {
     RELAY: [0, 1, 2, 3],
@@ -706,25 +674,19 @@ SA3_06M_DATA = {
 
 SA3_022M_DATA = {
     RELAY: list(range(16)),
-    SHUTTER : [16, 17],
+    SHUTTER: [16, 17],
     VALVE: [18, 19, 20, 21],
     SW: [22, 23],
     ALERT: [24, 25],
     RELAY_OVERFLOW: [26, 27],
-    SA3_022M: [28]
+    SA3_022M: [28],
 }
 
-TI3_10B_DATA = {
-    TEMP_IN: [0, 1]
-}
+TI3_10B_DATA = {TEMP_IN: [0, 1]}
 
-TI3_40B_DATA = {
-    TEMP_IN: list(range(8))
-}
+TI3_40B_DATA = {TEMP_IN: list(range(8))}
 
-TI3_60M_DATA = {
-    TEMP_IN: list(range(12))
-}
+TI3_60M_DATA = {TEMP_IN: list(range(12))}
 
 WSB3_240_DATA = {
     SW: [0],
@@ -788,22 +750,21 @@ VIRT_REG_DATA = {
     VIRT_HEAT_REG: [1],
 }
 
-#TODO update table
+# TODO update table
 INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
-    #RF
-    RF_SWITCHING_UNIT : DEVICE_TYPE_02_DATA,
-    RF_SHUTTERS : DEVICE_TYPE_03_DATA,
-    RF_DIMMER : DEVICE_TYPE_05_DATA,
-    RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR : DEVICE_TYPE_07_DATA,
-    RF_WIRELESS_THERMOVALVE : DEVICE_TYPE_09_DATA,
-    RF_TEMPERATURE_INPUT : DEVICE_TYPE_10_DATA,
-    RF_CONTROLLER : DEVICE_TYPE_19_DATA,
-    #BUS
+    # RF
+    RF_SWITCHING_UNIT: DEVICE_TYPE_02_DATA,
+    RF_SHUTTERS: DEVICE_TYPE_03_DATA,
+    RF_DIMMER: DEVICE_TYPE_05_DATA,
+    RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR: DEVICE_TYPE_07_DATA,
+    RF_WIRELESS_THERMOVALVE: DEVICE_TYPE_09_DATA,
+    RF_TEMPERATURE_INPUT: DEVICE_TYPE_10_DATA,
+    RF_CONTROLLER: DEVICE_TYPE_19_DATA,
+    # BUS
     SA3_01B: SA3_01B_DATA,
     DA3_22M: DA3_22M_DATA,
     GRT3_50: GRT3_50_DATA,
     GSB3_90SX: GSB3_DATA,
-    
     SA3_04M: SA3_04M_DATA,
     SA3_012M: SA3_012M_DATA,
     SA3_014M: SA3_014M_DATA,
@@ -814,7 +775,6 @@ INELS_DEVICE_TYPE_DATA_STRUCT_DATA = {
     VIRT_CONTR: DEVICE_TYPE_166_DATA,
     VIRT_HEAT_REG: VIRT_REG_DATA,
     VIRT_COOL_REG: VIRT_REG_DATA,
-    
     TI3_10B: TI3_10B_DATA,
     TI3_40B: TI3_40B_DATA,
     TI3_60M: TI3_60M_DATA,
@@ -871,20 +831,19 @@ GSB3_AMOUNTS = {
 }
 
 VIRT_CONT_STATUS_TABLE = {
-    0 : "User control",
-    1 : "Two temperature autonomous",
-    2 : "Single temperature autonomous",
+    0: "User control",
+    1: "Two temperature autonomous",
+    2: "Single temperature autonomous",
 }
 
 VIRT_REG_STATUS_TABLE = {
-    1 : "Enabled",
-    2 : "Error actual temperature",
-    4 : "Error required temperature",
-    8 : "Disabled",
-    16 : "Error critical temperature",
-    32 : "Error anti-freeze temperature",
+    1: "Enabled",
+    2: "Error actual temperature",
+    4: "Error required temperature",
+    8: "Disabled",
+    16: "Error critical temperature",
+    32: "Error anti-freeze temperature",
 }
-
 
 
 # FRAGMENT/MQTT CONSTANTS
@@ -912,15 +871,15 @@ TOPIC_FRAGMENTS = {
 }
 
 GW_CONNECTED = {
-    b"{\"status\": true}": True,
-    b"{\"status\": false}": False,
+    b'{"status": true}': True,
+    b'{"status": false}': False,
 }
 
 DEVICE_CONNECTED = {
     "on\n": True,
     "off\n": False,
-    "{\"status\": true}": True,
-    "{\"status\": false}": False,
+    '{"status": true}': True,
+    '{"status": false}': False,
 }
 
 # SWITCH CONSTANTS
@@ -954,22 +913,22 @@ DEVICE_TYPE_05_COMM_TEST = "07\n00\n00\n"
 DEVICE_TYPE_07_COMM_TEST = "08\n00\n"
 DEVICE_TYPE_13_COMM_TEST = "07\n00\n00\n00\n00\n00\n"
 
-#devices that support having no state topic at setup time
-INELS_ASSUMED_STATE_DEVICES = [ 
+# devices that support having no state topic at setup time
+INELS_ASSUMED_STATE_DEVICES = [
     RF_2_BUTTON_CONTROLLER,
     RF_CONTROLLER,
 ]
 
 INELS_COMM_TEST_DICT = {
-    "01": DEVICE_TYPE_07_COMM_TEST, # same as 07
+    "01": DEVICE_TYPE_07_COMM_TEST,  # same as 07
     "02": DEVICE_TYPE_02_COMM_TEST,
     "03": DEVICE_TYPE_03_COMM_TEST,
-    "04": DEVICE_TYPE_05_COMM_TEST, # same as 05
+    "04": DEVICE_TYPE_05_COMM_TEST,  # same as 05
     "05": DEVICE_TYPE_05_COMM_TEST,
-    "06": DEVICE_TYPE_13_COMM_TEST, #same as 13
+    "06": DEVICE_TYPE_13_COMM_TEST,  # same as 13
     "07": DEVICE_TYPE_07_COMM_TEST,
     "13": DEVICE_TYPE_13_COMM_TEST,
-    "21": DEVICE_TYPE_03_COMM_TEST, # same as 03
+    "21": DEVICE_TYPE_03_COMM_TEST,  # same as 03
 }
 
 # RELAY (100)
@@ -1040,7 +999,7 @@ BUS_SENSOR_MEASURE = "Sensor error: measurement error"
 BUS_SENSOR_NO_SENSOR = "Sensor error: no sensor"
 BUS_SENSOR_NOT_COMMUNICATING = "Sensor error: no internal communication"
 BUS_SENSOR_ERRORS = {
-    0X9: BUS_SENSOR_NOT_COMMUNICATING,
+    0x9: BUS_SENSOR_NOT_COMMUNICATING,
     0xA: BUS_SENSOR_NOT_CALIBRATED,
     0xB: BUS_SENSOR_NO_VALUE,
     0xC: BUS_SENSOR_NOT_CONFIGURED,

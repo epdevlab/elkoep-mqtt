@@ -1,8 +1,17 @@
 import pytest
 
-from inelsmqtt.utils.core import DeviceValue, ProtocolHandlerMapper
-from inelsmqtt.utils.common import SimpleRelay, SimpleLight, RGBLight, Shutter, WarmLight, Shutter_pos, LightCoaToa, Relay
 from inelsmqtt.const import Shutter_state
+from inelsmqtt.utils.common import (
+    LightCoaToa,
+    Relay,
+    RGBLight,
+    Shutter,
+    Shutter_pos,
+    SimpleLight,
+    SimpleRelay,
+    WarmLight,
+)
+from inelsmqtt.utils.core import DeviceValue, ProtocolHandlerMapper
 
 
 class BaseDeviceTestClass:
@@ -19,7 +28,7 @@ class BaseDeviceTestClass:
             device_class=cls.TYPE_ID,
             inels_value=inels_value,
             ha_value=ha_value,
-            last_value=last_value
+            last_value=last_value,
         )
 
 
@@ -29,16 +38,12 @@ class Test_RF_DEVICE_TYPE_01(BaseDeviceTestClass):
     @pytest.fixture
     def device_value_on(self):
         """Fixture to provide a device value with the relay ON."""
-        return self.create_device_value(
-            inels_value="02\n01\n"
-        )
+        return self.create_device_value(inels_value="02\n01\n")
 
     @pytest.fixture
     def device_value_off(self):
         """Fixture to provide a device value with the relay OFF."""
-        return self.create_device_value(
-            inels_value="02\n00\n"
-        )
+        return self.create_device_value(inels_value="02\n00\n")
 
     def test_create_ha_value_object(self, device_value_on):
         """Test creation of HA value object."""
@@ -64,10 +69,10 @@ class Test_RF_DEVICE_TYPE_01(BaseDeviceTestClass):
         device_value = self.create_device_value()
 
         # If the device does not have an inels_value set, then comm_test must be set
-        assert device_value.inels_set_value == '08\n00\n'
+        assert device_value.inels_set_value == "08\n00\n"
 
         # If inels_value is not set, then the ha_value object cannot exist
-        assert device_value.ha_value == None
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_02(BaseDeviceTestClass):
@@ -76,16 +81,12 @@ class Test_RF_DEVICE_TYPE_02(BaseDeviceTestClass):
     @pytest.fixture
     def device_value_on(self):
         """Fixture to provide a device value with the relay ON."""
-        return self.create_device_value(
-            inels_value="02\n01\n"
-        )
+        return self.create_device_value(inels_value="02\n01\n")
 
     @pytest.fixture
     def device_value_off(self):
         """Fixture to provide a device value with the relay OFF."""
-        return self.create_device_value(
-            inels_value="02\n00\n"
-        )
+        return self.create_device_value(inels_value="02\n00\n")
 
     def test_create_ha_value_object(self, device_value_on):
         """Test creation of HA value object."""
@@ -111,10 +112,10 @@ class Test_RF_DEVICE_TYPE_02(BaseDeviceTestClass):
         device_value = self.create_device_value()
 
         # If the device does not have an inels_value set, then comm_test must be set
-        assert device_value.inels_set_value == '08\n00\n00\n'
+        assert device_value.inels_set_value == "08\n00\n00\n"
 
         # If inels_value is not set, then the ha_value object cannot exist
-        assert device_value.ha_value == None
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_03(BaseDeviceTestClass):
@@ -122,15 +123,11 @@ class Test_RF_DEVICE_TYPE_03(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_open(self):
-        return self.create_device_value(
-            inels_value="03\n00\n"
-        )
+        return self.create_device_value(inels_value="03\n00\n")
 
     @pytest.fixture
     def device_value_closed(self):
-        return self.create_device_value(
-            inels_value="03\n01\n"
-        )
+        return self.create_device_value(inels_value="03\n01\n")
 
     def test_create_ha_value_object_open(self, device_value_open):
         assert isinstance(device_value_open.ha_value.shutters[0], Shutter)
@@ -143,14 +140,13 @@ class Test_RF_DEVICE_TYPE_03(BaseDeviceTestClass):
     def test_format_inels_set_value_open(self, device_value_open):
         assert device_value_open.inels_set_value == "01\n00\n00\n"
 
-
     def test_format_inels_set_value_closed(self, device_value_closed):
         assert device_value_closed.inels_set_value == "02\n00\n00\n"
 
     def test_comm_test(self):
         device_value = self.create_device_value()
-        assert device_value.inels_set_value == '09\n00\n00\n'
-        assert device_value.ha_value == None
+        assert device_value.inels_set_value == "09\n00\n00\n"
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_04(BaseDeviceTestClass):
@@ -159,16 +155,12 @@ class Test_RF_DEVICE_TYPE_04(BaseDeviceTestClass):
     @pytest.fixture
     def device_value_low_brightness(self):
         """Fixture to provide a device value with lowest brightness."""
-        return self.create_device_value(
-            inels_value="D8\nEF\n"
-        )
+        return self.create_device_value(inels_value="D8\nEF\n")
 
     @pytest.fixture
     def device_value_high_brightness(self):
         """Fixture to provide a device value with highest brightness."""
-        return self.create_device_value(
-            inels_value="8A\nCF\n"
-        )
+        return self.create_device_value(inels_value="8A\nCF\n")
 
     def test_create_ha_value_object(self, device_value_low_brightness):
         """Test creation of HA value object."""
@@ -200,10 +192,10 @@ class Test_RF_DEVICE_TYPE_04(BaseDeviceTestClass):
         device_value = self.create_device_value()
 
         # If the device does not have an inels_value set, then comm_test must be set
-        assert device_value.inels_set_value == '07\n00\n00\n'
+        assert device_value.inels_set_value == "07\n00\n00\n"
 
         # If inels_value is not set, then the ha_value object cannot exist
-        assert device_value.ha_value == None
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_05(BaseDeviceTestClass):
@@ -212,16 +204,12 @@ class Test_RF_DEVICE_TYPE_05(BaseDeviceTestClass):
     @pytest.fixture
     def device_value_low_brightness(self):
         """Fixture to provide a device value with lowest brightness."""
-        return self.create_device_value(
-            inels_value="D8\nEF\n"
-        )
+        return self.create_device_value(inels_value="D8\nEF\n")
 
     @pytest.fixture
     def device_value_high_brightness(self):
         """Fixture to provide a device value with highest brightness."""
-        return self.create_device_value(
-            inels_value="8A\nCF\n"
-        )
+        return self.create_device_value(inels_value="8A\nCF\n")
 
     def test_create_ha_value_object(self, device_value_low_brightness):
         """Test creation of HA value object."""
@@ -253,10 +241,10 @@ class Test_RF_DEVICE_TYPE_05(BaseDeviceTestClass):
         device_value = self.create_device_value()
 
         # If the device does not have an inels_value set, then comm_test must be set
-        assert device_value.inels_set_value == '07\n00\n00\n'
+        assert device_value.inels_set_value == "07\n00\n00\n"
 
         # If inels_value is not set, then the ha_value object cannot exist
-        assert device_value.ha_value == None
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_06(BaseDeviceTestClass):
@@ -265,17 +253,13 @@ class Test_RF_DEVICE_TYPE_06(BaseDeviceTestClass):
     @pytest.fixture
     def device_value_rgba_all_min(self):
         """Fixture for creating a device value with RGB settings."""
-        device_value = self.create_device_value(
-            inels_value="01\n00\n00\n00\n00\n00\n"
-        )
+        device_value = self.create_device_value(inels_value="01\n00\n00\n00\n00\n00\n")
         return device_value
 
     @pytest.fixture
     def device_value_rgba_all_max(self):
         """Fixture for creating a device value with RGB settings."""
-        device_value = self.create_device_value(
-            inels_value="01\nFF\nFF\nFF\nFF\n00\n"
-        )
+        device_value = self.create_device_value(inels_value="01\nFF\nFF\nFF\nFF\n00\n")
         return device_value
 
     def test_create_ha_value_object(self, device_value_rgba_all_max):
@@ -316,21 +300,17 @@ class Test_RF_DEVICE_TYPE_07(BaseDeviceTestClass):
     @pytest.fixture
     def device_value_on(self):
         """Fixture to provide a device value with the relay ON."""
-        return self.create_device_value(
-            inels_value="07\n01\n92\n09\n"
-        )
+        return self.create_device_value(inels_value="07\n01\n92\n09\n")
 
     @pytest.fixture
     def device_value_off(self):
         """Fixture to provide a device value with the relay OFF."""
-        return self.create_device_value(
-            inels_value="07\n00\n92\n09\n"
-        )
+        return self.create_device_value(inels_value="07\n00\n92\n09\n")
 
     def test_create_ha_value_object(self, device_value_on):
         """Test creation of HA value object."""
         assert isinstance(device_value_on.ha_value.simple_relay[0], SimpleRelay)
-        assert device_value_on.ha_value.temp_out == '0992'
+        assert device_value_on.ha_value.temp_out == "0992"
 
     def test_create_ha_value_object_on(self, device_value_on):
         """Test HA value object creation with relay ON."""
@@ -352,10 +332,10 @@ class Test_RF_DEVICE_TYPE_07(BaseDeviceTestClass):
         device_value = self.create_device_value()
 
         # If the device does not have an inels_value set, then comm_test must be set
-        assert device_value.inels_set_value == '08\n00\n'
+        assert device_value.inels_set_value == "08\n00\n"
 
         # If inels_value is not set, then the ha_value object cannot exist
-        assert device_value.ha_value == None
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_09(BaseDeviceTestClass):
@@ -363,9 +343,7 @@ class Test_RF_DEVICE_TYPE_09(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="64\n3C\n08\n40\n00\n"
-        )
+        return self.create_device_value(inels_value="64\n3C\n08\n40\n00\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
@@ -387,9 +365,7 @@ class Test_RF_DEVICE_TYPE_10(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="00\nEC\n09\n46\n0A\n"
-        )
+        return self.create_device_value(inels_value="00\nEC\n09\n46\n0A\n")
 
     def test_create_ha_value_object(self, device_value):
         # TODO: add two complement and remove value calc from HA side
@@ -403,9 +379,7 @@ class Test_RF_DEVICE_TYPE_12(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="30\n00\n81\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="30\n00\n81\n00\n00\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
@@ -417,15 +391,11 @@ class Test_RF_DEVICE_TYPE_13(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_lowest_brightness_highest_white(self):
-        return self.create_device_value(
-            inels_value="07\n00\n00\n00\n00\nFF\n"
-        )
+        return self.create_device_value(inels_value="07\n00\n00\n00\n00\nFF\n")
 
     @pytest.fixture
     def device_value_highest_brightness_lowest_white(self):
-        return self.create_device_value(
-            inels_value="07\n00\n00\n00\nFF\n00\n"
-        )
+        return self.create_device_value(inels_value="07\n00\n00\n00\nFF\n00\n")
 
     def test_create_ha_value_object_lowest_brightness_highest_white(self, device_value_lowest_brightness_highest_white):
         assert isinstance(device_value_lowest_brightness_highest_white.ha_value.warm_light[0], WarmLight)
@@ -453,10 +423,10 @@ class Test_RF_DEVICE_TYPE_13(BaseDeviceTestClass):
         device_value = self.create_device_value()
 
         # If the device does not have an inels_value set, then comm_test must be set
-        assert device_value.inels_set_value == '07\n00\n00\n00\n00\n00\n'
+        assert device_value.inels_set_value == "07\n00\n00\n00\n00\n00\n"
 
         # If inels_value is not set, then the ha_value object cannot exist
-        assert device_value.ha_value == None
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_15(BaseDeviceTestClass):
@@ -464,9 +434,7 @@ class Test_RF_DEVICE_TYPE_15(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="81\nFF\n00\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="81\nFF\n00\n00\n00\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
@@ -479,9 +447,7 @@ class Test_RF_DEVICE_TYPE_16(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="79\n01\n62\nCC\nA1\n"
-        )
+        return self.create_device_value(inels_value="79\n01\n62\nCC\nA1\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
@@ -494,9 +460,7 @@ class Test_RF_DEVICE_TYPE_17(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="7A\n01\n62\nCC\nA1"
-        )
+        return self.create_device_value(inels_value="7A\n01\n62\nCC\nA1")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
@@ -509,9 +473,7 @@ class Test_RF_DEVICE_TYPE_18(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="1C\n02\n73\n59\nC8\n"
-        )
+        return self.create_device_value(inels_value="1C\n02\n73\n59\nC8\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
@@ -523,9 +485,7 @@ class Test_RF_DEVICE_TYPE_19(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="1C\n02\n32\nA7\n5A\n"
-        )
+        return self.create_device_value(inels_value="1C\n02\n32\nA7\n5A\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
@@ -537,15 +497,11 @@ class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_open(self):
-        return self.create_device_value(
-            inels_value="03\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="03\n00\n00\n")
 
     @pytest.fixture
     def device_value_closed(self):
-        return self.create_device_value(
-            inels_value="03\n02\n64\n"
-        )
+        return self.create_device_value(inels_value="03\n02\n64\n")
 
     def test_create_ha_value_object_open(self, device_value_open):
         assert isinstance(device_value_open.ha_value.shutters_with_pos[0], Shutter_pos)
@@ -553,7 +509,6 @@ class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
         assert not device_value_open.ha_value.shutters_with_pos[0].set_pos
         assert device_value_open.ha_value.shutters_with_pos[0].position == 100
         assert device_value_open.ha_value.shutters_with_pos[0].state == 0
-
 
     def test_create_ha_value_object_closed(self, device_value_closed):
         assert isinstance(device_value_closed.ha_value.shutters_with_pos[0], Shutter_pos)
@@ -564,7 +519,6 @@ class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
 
     def test_format_inels_set_value_open(self, device_value_open):
         assert device_value_open.inels_set_value == "01\n00\n00\n"
-
 
     def test_format_inels_set_value_closed(self, device_value_closed):
         assert device_value_closed.inels_set_value == "02\n00\n00\n"
@@ -579,8 +533,8 @@ class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
 
     def test_comm_test(self):
         device_value = self.create_device_value()
-        assert device_value.inels_set_value == '09\n00\n00\n'
-        assert device_value.ha_value == None
+        assert device_value.inels_set_value == "09\n00\n00\n"
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_30(BaseDeviceTestClass):
@@ -588,9 +542,7 @@ class Test_RF_DEVICE_TYPE_30(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="01\nD8\n09\n24\n00"
-        )
+        return self.create_device_value(inels_value="01\nD8\n09\n24\n00")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery
@@ -603,15 +555,11 @@ class Test_CU_DEVICE_TYPE_100(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_on(self):
-        return self.create_device_value(
-            inels_value="07\n00\n0A\n28\n01\n"
-        )
+        return self.create_device_value(inels_value="07\n00\n0A\n28\n01\n")
 
     @pytest.fixture
     def device_value_off(self):
-        return self.create_device_value(
-            inels_value="06\n00\n0A\n28\n00\n"
-        )
+        return self.create_device_value(inels_value="06\n00\n0A\n28\n00\n")
 
     def test_create_ha_value_object_on(self, device_value_on):
         assert isinstance(device_value_on.ha_value.relay[0], Relay)
@@ -643,23 +591,21 @@ class Test_CU_DEVICE_TYPE_101(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="7F\nFF\nFF\n03\n64\n64\n00\n1D\n00\n00"
-        )
+        return self.create_device_value(inels_value="7F\nFF\nFF\n03\n64\n64\n00\n1D\n00\n00")
 
     def test_create_ha_value_object(self, device_value):
         assert isinstance(device_value.ha_value.light_coa_toa[0], LightCoaToa)
         assert device_value.ha_value.temp_in == "7FFF"
         assert device_value.ha_value.din == [True, True]
         assert device_value.ha_value.sw == [True, True]
-        for l in device_value.ha_value.light_coa_toa:
-            assert l.brightness == 100
-            assert l.toa == True
-            assert l.coa == True
+        for i in device_value.ha_value.light_coa_toa:
+            assert i.brightness == 100
+            assert i.toa == True
+            assert i.coa == True
 
     def test_format_inels_set_value_all_max(self, device_value):
-        for l in device_value.ha_value.light_coa_toa:
-            l.brightness = 100
+        for i in device_value.ha_value.light_coa_toa:
+            i.brightness = 100
 
         device_value = self.create_device_value(
             ha_value=device_value.ha_value,
@@ -667,8 +613,8 @@ class Test_CU_DEVICE_TYPE_101(BaseDeviceTestClass):
         assert device_value.inels_set_value == "00\n00\n00\n00\n64\n64\n"
 
     def test_format_inels_set_value_all_min(self, device_value):
-        for l in device_value.ha_value.light_coa_toa:
-            l.brightness = 0
+        for i in device_value.ha_value.light_coa_toa:
+            i.brightness = 0
 
         device_value = self.create_device_value(
             ha_value=device_value.ha_value,
@@ -701,9 +647,7 @@ class Test_CU_DEVICE_TYPE_103(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="FF\n0F\n0A\n28\n00\n00\n00\n0F\n0A\n28\n16\n60\n06\n7B\n"
-        )
+        return self.create_device_value(inels_value="FF\n0F\n0A\n28\n00\n00\n00\n0F\n0A\n28\n16\n60\n06\n7B\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.din == [True, True]
@@ -723,15 +667,11 @@ class Test_CU_DEVICE_TYPE_104(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_all_on(self):
-        return self.create_device_value(
-            inels_value="07\n07\n0A\n28\n03\n"
-        )
+        return self.create_device_value(inels_value="07\n07\n0A\n28\n03\n")
 
     @pytest.fixture
     def device_value_all_off(self):
-        return self.create_device_value(
-            inels_value="06\n06\n0A\n28\n03\n"
-        )
+        return self.create_device_value(inels_value="06\n06\n0A\n28\n03\n")
 
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.simple_relay[0], SimpleRelay)
@@ -769,15 +709,11 @@ class Test_CU_DEVICE_TYPE_105(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_all_on(self):
-        return self.create_device_value(
-            inels_value="07\n07\n03\n00\n"
-        )
+        return self.create_device_value(inels_value="07\n07\n03\n00\n")
 
     @pytest.fixture
     def device_value_all_off(self):
-        return self.create_device_value(
-            inels_value="06\n06\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="06\n06\n00\n00\n")
 
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.simple_relay[0], SimpleRelay)
@@ -815,15 +751,11 @@ class Test_CU_DEVICE_TYPE_106(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_all_on(self):
-        return self.create_device_value(
-            inels_value="07\n07\n07\n07\n0F\n00\n"
-        )
+        return self.create_device_value(inels_value="07\n07\n07\n07\n0F\n00\n")
 
     @pytest.fixture
     def device_value_all_off(self):
-        return self.create_device_value(
-            inels_value="06\n06\n06\n06\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="06\n06\n06\n06\n00\n00\n")
 
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.simple_relay[0], SimpleRelay)
@@ -841,9 +773,7 @@ class Test_CU_DEVICE_TYPE_106(BaseDeviceTestClass):
         for r in device_value_all_off.ha_value.simple_relay:
             r.is_on = True
 
-        device_value = self.create_device_value(
-            ha_value=device_value_all_off.ha_value
-        )
+        device_value = self.create_device_value(ha_value=device_value_all_off.ha_value)
         assert device_value.inels_set_value == "07\n07\n07\n07\n"
 
     def test_format_inels_set_value_all_off(self, device_value_all_on):
@@ -861,15 +791,11 @@ class Test_CU_DEVICE_TYPE_107(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_all_on(self):
-        return self.create_device_value(
-            inels_value="07\n07\n07\n07\n07\n07\n3F\n00\n"
-        )
+        return self.create_device_value(inels_value="07\n07\n07\n07\n07\n07\n3F\n00\n")
 
     @pytest.fixture
     def device_value_all_off(self):
-        return self.create_device_value(
-            inels_value="06\n06\n06\n06\n06\n06\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="06\n06\n06\n06\n06\n06\n00\n00\n")
 
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.simple_relay[0], SimpleRelay)
@@ -883,14 +809,11 @@ class Test_CU_DEVICE_TYPE_107(BaseDeviceTestClass):
         for r in device_value_all_off.ha_value.simple_relay:
             assert not r.is_on
 
-
     def test_format_inels_set_value_all_on(self, device_value_all_off):
         for r in device_value_all_off.ha_value.simple_relay:
             r.is_on = True
 
-        device_value = self.create_device_value(
-            ha_value=device_value_all_off.ha_value
-        )
+        device_value = self.create_device_value(ha_value=device_value_all_off.ha_value)
         assert device_value.inels_set_value == "07\n07\n07\n07\n07\n07\n"
 
     def test_format_inels_set_value_all_off(self, device_value_all_on):
@@ -908,15 +831,11 @@ class Test_CU_DEVICE_TYPE_108(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_all_on(self):
-        return self.create_device_value(
-            inels_value="07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\nFF\n0F\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\nFF\n0F\n00\n00\n")
 
     @pytest.fixture
     def device_value_all_off(self):
-        return self.create_device_value(
-            inels_value="06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n00\n00\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n00\n00\n00\n00\n")
 
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.simple_relay[0], SimpleRelay)
@@ -934,9 +853,7 @@ class Test_CU_DEVICE_TYPE_108(BaseDeviceTestClass):
         for r in device_value_all_off.ha_value.simple_relay:
             r.is_on = True
 
-        device_value = self.create_device_value(
-            ha_value=device_value_all_off.ha_value
-        )
+        device_value = self.create_device_value(ha_value=device_value_all_off.ha_value)
         assert device_value.inels_set_value == "07\n" * 12
 
     def test_format_inels_set_value_all_off(self, device_value_all_on):
@@ -1006,7 +923,10 @@ class Test_CU_DEVICE_TYPE_109(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_all_off.ha_value,
         )
-        assert device_value.inels_set_value == "07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n06\n07\n07\n07\n07\n"
+        assert (
+            device_value.inels_set_value
+            == "07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n06\n07\n07\n07\n07\n"
+        )
 
     def test_format_inels_set_value_all_closed(self, device_value_all_on):
         for r in device_value_all_on.ha_value.relay:
@@ -1020,7 +940,10 @@ class Test_CU_DEVICE_TYPE_109(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_all_on.ha_value,
         )
-        assert device_value.inels_set_value == "06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n07\n06\n06\n06\n06\n"
+        assert (
+            device_value.inels_set_value
+            == "06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n07\n06\n06\n06\n06\n"
+        )
 
 
 class Test_CU_DEVICE_TYPE_111(BaseDeviceTestClass):
@@ -1039,7 +962,7 @@ class Test_CU_DEVICE_TYPE_111(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object_all_off(self, device_value_all_off):
-        assert device_value_all_off.ha_value.ains == ['00000000', '00000000', '00000000']
+        assert device_value_all_off.ha_value.ains == ["00000000", "00000000", "00000000"]
 
         for aout in device_value_all_off.ha_value.aout:
             assert aout.brightness == 0
@@ -1052,7 +975,7 @@ class Test_CU_DEVICE_TYPE_111(BaseDeviceTestClass):
         assert device_value_all_off.ha_value.valves == [[False, False], [False, False]]
 
     def test_create_ha_value_object_all_on(self, device_value_all_on):
-        assert device_value_all_on.ha_value.ains == ['0000FFFF', '0000FFFF', '0000FFFF']
+        assert device_value_all_on.ha_value.ains == ["0000FFFF", "0000FFFF", "0000FFFF"]
 
         for aout in device_value_all_on.ha_value.aout:
             assert aout.brightness == 100
@@ -1092,7 +1015,7 @@ class Test_CU_DEVICE_TYPE_112(BaseDeviceTestClass):
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.relay[0], Relay)
         assert device_value_all_on.ha_value.din == [True] * 8
-        assert device_value_all_on.ha_value.temps == ['7FFFFFFF', '7FFFFFFF']
+        assert device_value_all_on.ha_value.temps == ["7FFFFFFF", "7FFFFFFF"]
         for r in device_value_all_on.ha_value.relay:
             assert r.is_on
             assert r.overflow
@@ -1100,7 +1023,7 @@ class Test_CU_DEVICE_TYPE_112(BaseDeviceTestClass):
     def test_create_ha_value_object_all_off(self, device_value_all_off):
         assert isinstance(device_value_all_off.ha_value.relay[0], Relay)
         assert device_value_all_off.ha_value.din == [False] * 8
-        assert device_value_all_off.ha_value.temps == ['7FFFFFFF', '7FFFFFFF']
+        assert device_value_all_off.ha_value.temps == ["7FFFFFFF", "7FFFFFFF"]
         for r in device_value_all_off.ha_value.relay:
             assert not r.is_on
             assert not r.overflow
@@ -1140,7 +1063,7 @@ class Test_CU_DEVICE_TYPE_114(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object_all_min(self, device_value_all_min):
-        assert device_value_all_min.ha_value.temps == ['0000', '0000']
+        assert device_value_all_min.ha_value.temps == ["0000", "0000"]
         assert device_value_all_min.ha_value.din == [False, False, False, False, False, False]
 
         for r in device_value_all_min.ha_value.relay:
@@ -1157,7 +1080,7 @@ class Test_CU_DEVICE_TYPE_114(BaseDeviceTestClass):
             assert not b.alert_dali_power
 
     def test_create_ha_value_object_all_max(self, device_value_all_max):
-        assert device_value_all_max.ha_value.temps == ['0A28', '0A28']
+        assert device_value_all_max.ha_value.temps == ["0A28", "0A28"]
         assert device_value_all_max.ha_value.din == [True, True, True, True, True, True]
 
         for r in device_value_all_max.ha_value.relay:
@@ -1187,9 +1110,12 @@ class Test_CU_DEVICE_TYPE_114(BaseDeviceTestClass):
             ha_value=device_value_all_min.ha_value,
         )
 
-        assert device_value.inels_set_value == "00\n00\n00\n00\n64\n64\n00\n00\n07\n07\n07\n07\n07\n07\n07\n07\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n"
+        assert (
+            device_value.inels_set_value
+            == "00\n00\n00\n00\n64\n64\n00\n00\n07\n07\n07\n07\n07\n07\n07\n07\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n"
+        )
 
-    def test_format_inels_set_value_all_max(self, device_value_all_max):
+    def test_format_inels_set_value_all_min(self, device_value_all_max):
         for r in device_value_all_max.ha_value.relay:
             r.is_on = False
 
@@ -1203,7 +1129,10 @@ class Test_CU_DEVICE_TYPE_114(BaseDeviceTestClass):
             ha_value=device_value_all_max.ha_value,
         )
 
-        assert device_value.inels_set_value == "00\n00\n00\n00\n00\n00\n00\n00\n06\n06\n06\n06\n06\n06\n06\n06\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
+        assert (
+            device_value.inels_set_value
+            == "00\n00\n00\n00\n00\n00\n00\n00\n06\n06\n06\n06\n06\n06\n06\n06\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
+        )
 
 
 class Test_CU_DEVICE_TYPE_115(BaseDeviceTestClass):
@@ -1211,27 +1140,19 @@ class Test_CU_DEVICE_TYPE_115(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_off(self):
-        return self.create_device_value(
-            inels_value="00\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="00\n0A\n28\n")
 
     @pytest.fixture
     def device_value_on(self):
-        return self.create_device_value(
-            inels_value="05\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="05\n0A\n28\n")
 
     @pytest.fixture
     def device_value_alert(self):
-        return self.create_device_value(
-            inels_value="0A\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="0A\n0A\n28\n")
 
     @pytest.fixture
     def device_value_tamper(self):
-        return self.create_device_value(
-            inels_value="0F\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="0F\n0A\n28\n")
 
     def test_create_ha_value_object_off(self, device_value_off):
         assert device_value_off.ha_value.temp_in == "0A28"
@@ -1255,27 +1176,19 @@ class Test_CU_DEVICE_TYPE_116(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_off(self):
-        return self.create_device_value(
-            inels_value="00\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="00\n0A\n28\n")
 
     @pytest.fixture
     def device_value_on(self):
-        return self.create_device_value(
-            inels_value="55\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="55\n0A\n28\n")
 
     @pytest.fixture
     def device_value_alert(self):
-        return self.create_device_value(
-            inels_value="AA\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="AA\n0A\n28\n")
 
     @pytest.fixture
     def device_value_tamper(self):
-        return self.create_device_value(
-            inels_value="FF\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="FF\n0A\n28\n")
 
     def test_create_ha_value_object_off(self, device_value_off):
         assert device_value_off.ha_value.temp_in == "0A28"
@@ -1299,27 +1212,19 @@ class Test_CU_DEVICE_TYPE_117(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_off(self):
-        return self.create_device_value(
-            inels_value="00\n00\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n0A\n28\n")
 
     @pytest.fixture
     def device_value_on(self):
-        return self.create_device_value(
-            inels_value="55\n55\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="55\n55\n0A\n28\n")
 
     @pytest.fixture
     def device_value_alert(self):
-        return self.create_device_value(
-            inels_value="AA\nAA\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="AA\nAA\n0A\n28\n")
 
     @pytest.fixture
     def device_value_tamper(self):
-        return self.create_device_value(
-            inels_value="FF\nFF\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="FF\nFF\n0A\n28\n")
 
     def test_create_ha_value_object_off(self, device_value_off):
         assert device_value_off.ha_value.temp == "0A28"
@@ -1343,9 +1248,7 @@ class Test_CU_DEVICE_TYPE_120(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="00\n00\n07\nE4\n0B\n07\n15\n0C\n01\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n07\nE4\n0B\n07\n15\n0C\n01\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.humidity == "150C"
@@ -1359,27 +1262,19 @@ class Test_CU_DEVICE_TYPE_121(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_off(self):
-        return self.create_device_value(
-            inels_value="00\n00\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n00\n00\n")
 
     @pytest.fixture
     def device_value_on(self):
-        return self.create_device_value(
-            inels_value="55\n55\n55\n05\n"
-        )
+        return self.create_device_value(inels_value="55\n55\n55\n05\n")
 
     @pytest.fixture
     def device_value_alert(self):
-        return self.create_device_value(
-            inels_value="AA\nAA\nAA\n0A\n"
-        )
+        return self.create_device_value(inels_value="AA\nAA\nAA\n0A\n")
 
     @pytest.fixture
     def device_value_tamper(self):
-        return self.create_device_value(
-            inels_value="FF\nFF\nFF\n0F\n"
-        )
+        return self.create_device_value(inels_value="FF\nFF\nFF\n0F\n")
 
     def test_create_ha_value_object_off(self, device_value_off):
         assert device_value_off.ha_value.input == [0] * 14
@@ -1399,9 +1294,7 @@ class Test_CU_DEVICE_TYPE_122(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="03\n03\n0A\n56\n7F\nFC\n"
-        )
+        return self.create_device_value(inels_value="03\n03\n0A\n56\n7F\nFC\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFC"
@@ -1415,9 +1308,7 @@ class Test_CU_DEVICE_TYPE_123(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="0F\n03\n0A\n52\n7F\nFC\n"
-        )
+        return self.create_device_value(inels_value="0F\n03\n0A\n52\n7F\nFC\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFC"
@@ -1431,9 +1322,7 @@ class Test_CU_DEVICE_TYPE_124(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="03\n03\n09\nF9\n7F\nFF\n14\n25\n05\nB0\n"
-        )
+        return self.create_device_value(inels_value="03\n03\n09\nF9\n7F\nFF\n14\n25\n05\nB0\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFF"
@@ -1448,9 +1337,7 @@ class Test_CU_DEVICE_TYPE_125(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="0F\n03\n09\nF9\n7F\nFF\n14\n25\n05\nB0\n"
-        )
+        return self.create_device_value(inels_value="0F\n03\n09\nF9\n7F\nFF\n14\n25\n05\nB0\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFF"
@@ -1510,16 +1397,12 @@ class Test_CU_DEVICE_TYPE_129(BaseDeviceTestClass):
 
     def test_format_inels_set_value_relay_on(self, device_value):
         device_value.ha_value.simple_relay[0].is_on = True
-        device_value = self.create_device_value(
-            ha_value=device_value.ha_value
-        )
+        device_value = self.create_device_value(ha_value=device_value.ha_value)
         assert device_value.inels_set_value == "04\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
 
     def test_format_inels_set_value_relay_off(self, device_value):
         device_value.ha_value.simple_relay[0].is_on = False
-        device_value = self.create_device_value(
-            ha_value=device_value.ha_value
-        )
+        device_value = self.create_device_value(ha_value=device_value.ha_value)
         assert device_value.inels_set_value == "00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
 
 
@@ -1528,9 +1411,7 @@ class Test_CU_DEVICE_TYPE_136(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="FF\n0F\n09\nDA\n00\n00\n02\n5A\n7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="FF\n0F\n09\nDA\n00\n00\n02\n5A\n7F\nFF\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFF"
@@ -1545,9 +1426,7 @@ class Test_CU_DEVICE_TYPE_137(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="2A\n03\n09\nA4\n00\n00\n00\n4C\n7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="2A\n03\n09\nA4\n00\n00\n00\n4C\n7F\nFF\n")
 
     def test_create_ha_value_object_all_on(self, device_value):
         assert device_value.ha_value.interface == [True, True, True]
@@ -1562,9 +1441,7 @@ class Test_CU_DEVICE_TYPE_138(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="0F\n03\n0A\n03\n00\n00\n2F\n63\n7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="0F\n03\n0A\n03\n00\n00\n2F\n63\n7F\nFF\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFF"
@@ -1579,9 +1456,7 @@ class Test_CU_DEVICE_TYPE_139(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="3F\n03\n0A\n03\n00\n00\n2F\n63\n7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="3F\n03\n0A\n03\n00\n00\n2F\n63\n7F\nFF\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFF"
@@ -1596,9 +1471,7 @@ class Test_CU_DEVICE_TYPE_140(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="03\n03\n0A\n03\n00\n00\n2F\n63\n7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="03\n03\n0A\n03\n00\n00\n2F\n63\n7F\nFF\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFF"
@@ -1613,9 +1486,7 @@ class Test_CU_DEVICE_TYPE_141(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="3F\n03\n0A\n03\n00\n00\n2F\n63\n7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="3F\n03\n0A\n03\n00\n00\n2F\n63\n7F\nFF\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.ain == "7FFF"
@@ -1630,9 +1501,7 @@ class Test_CU_DEVICE_TYPE_143(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="0F\n0A\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="0F\n0A\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True, True, True, True]
@@ -1650,9 +1519,7 @@ class Test_CU_DEVICE_TYPE_144(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="3F\n0A\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="3F\n0A\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True] * 6
@@ -1670,9 +1537,7 @@ class Test_CU_DEVICE_TYPE_146(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="FF\n0B\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="FF\n0B\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True] * 9
@@ -1690,9 +1555,7 @@ class Test_CU_DEVICE_TYPE_147(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="0A\n28\n01\n00\n32\n32\n32\n32\n"
-        )
+        return self.create_device_value(inels_value="0A\n28\n01\n00\n32\n32\n32\n32\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.temp_out == "0A28"
@@ -1715,9 +1578,7 @@ class Test_CU_DEVICE_TYPE_148(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="0A\n28\nFF\n00\n32\n32\n32\n32\n"
-        )
+        return self.create_device_value(inels_value="0A\n28\nFF\n00\n32\n32\n32\n32\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.temp_out == "0A28"
@@ -1740,9 +1601,7 @@ class Test_CU_DEVICE_TYPE_150(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="00\n00\n07\n00\n32\n32\n32\n32\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n07\n00\n32\n32\n32\n32\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.sw == [True, True, True]
@@ -1784,7 +1643,6 @@ class Test_CU_DEVICE_TYPE_151(BaseDeviceTestClass):
             assert x.toa
             assert x.coa
 
-
     def test_create_ha_value_object_all_min(self, device_value_all_min):
         assert isinstance(device_value_all_min.ha_value.light_coa_toa[0], LightCoaToa)
         assert device_value_all_min.ha_value.sw == [False, False, False, False, False, False]
@@ -1801,8 +1659,10 @@ class Test_CU_DEVICE_TYPE_151(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_all_min.ha_value,
         )
-        assert device_value.inels_set_value == "00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
-
+        assert (
+            device_value.inels_set_value
+            == "00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
+        )
 
     def test_format_inels_set_value_all_to_min(self, device_value_all_max):
         for x in device_value_all_max.ha_value.light_coa_toa:
@@ -1811,7 +1671,10 @@ class Test_CU_DEVICE_TYPE_151(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_all_max.ha_value,
         )
-        assert device_value.inels_set_value == "00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
+        assert (
+            device_value.inels_set_value
+            == "00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
+        )
 
 
 class Test_CU_DEVICE_TYPE_156(BaseDeviceTestClass):
@@ -1824,7 +1687,7 @@ class Test_CU_DEVICE_TYPE_156(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.ains == ['00000064', '00000064', '00000064', '00000064', '00000064', '00000064']
+        assert device_value.ha_value.ains == ["00000064", "00000064", "00000064", "00000064", "00000064", "00000064"]
 
 
 class Test_CU_DEVICE_TYPE_157(BaseDeviceTestClass):
@@ -1832,12 +1695,10 @@ class Test_CU_DEVICE_TYPE_157(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="7F\nFF\n")
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.temps == ['7FFF']
+        assert device_value.ha_value.temps == ["7FFF"]
 
 
 class Test_CU_DEVICE_TYPE_158(BaseDeviceTestClass):
@@ -1845,12 +1706,10 @@ class Test_CU_DEVICE_TYPE_158(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="7F\nFF\n7F\nFF\n7F\nFF\n7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="7F\nFF\n7F\nFF\n7F\nFF\n7F\nFF\n")
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.temps == ['7FFF', '7FFF', '7FFF', '7FFF']
+        assert device_value.ha_value.temps == ["7FFF", "7FFF", "7FFF", "7FFF"]
 
 
 class Test_CU_DEVICE_TYPE_159(BaseDeviceTestClass):
@@ -1858,12 +1717,10 @@ class Test_CU_DEVICE_TYPE_159(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="7F\nFF\n7F\nFF\n7F\nFF\n7F\nFF\n7F\nFF\n7F\nFF\n"
-        )
+        return self.create_device_value(inels_value="7F\nFF\n7F\nFF\n7F\nFF\n7F\nFF\n7F\nFF\n7F\nFF\n")
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.temps == ['7FFF', '7FFF', '7FFF', '7FFF', '7FFF', '7FFF']
+        assert device_value.ha_value.temps == ["7FFF", "7FFF", "7FFF", "7FFF", "7FFF", "7FFF"]
 
 
 class Test_CU_DEVICE_TYPE_160(BaseDeviceTestClass):
@@ -1871,9 +1728,7 @@ class Test_CU_DEVICE_TYPE_160(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="00\n0F\n0A\n28\n00\n00\n00\n00\n0A\n28\n"
-        )
+        return self.create_device_value(inels_value="00\n0F\n0A\n28\n00\n00\n00\n00\n0A\n28\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.din == [True, True]
@@ -1901,13 +1756,13 @@ class Test_CU_DEVICE_TYPE_163(BaseDeviceTestClass):
         assert device_value_open.ha_value.interface == [True] * 18
         for shutter in device_value_open.ha_value.simple_shutters:
             assert shutter.state == Shutter_state.Open
-            assert shutter.is_closed == None
+            assert shutter.is_closed is None
 
     def test_create_ha_value_object_closed(self, device_value_closed):
         assert device_value_closed.ha_value.interface == [False] * 18
         for shutter in device_value_closed.ha_value.simple_shutters:
             assert shutter.state == Shutter_state.Closed
-            assert shutter.is_closed == None
+            assert shutter.is_closed is None
 
     def test_format_inels_set_value_all_open(self, device_value_closed):
         for x in device_value_closed.ha_value.simple_shutters:
@@ -1916,7 +1771,9 @@ class Test_CU_DEVICE_TYPE_163(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_closed.ha_value,
         )
-        assert device_value.inels_set_value == "07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n"
+        assert (
+            device_value.inels_set_value == "07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n"
+        )
 
     def test_format_inels_set_value_all_closed(self, device_value_closed):
         for x in device_value_closed.ha_value.simple_shutters:
@@ -1925,7 +1782,9 @@ class Test_CU_DEVICE_TYPE_163(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_closed.ha_value,
         )
-        assert device_value.inels_set_value == "06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n"
+        assert (
+            device_value.inels_set_value == "06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n"
+        )
 
 
 class Test_CU_DEVICE_TYPE_164(BaseDeviceTestClass):
@@ -1933,15 +1792,11 @@ class Test_CU_DEVICE_TYPE_164(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_all_max(self):
-        return self.create_device_value(
-            inels_value="00\n00\n00\n00\n64\n64\n64\n64\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n00\n00\n64\n64\n64\n64\n")
 
     @pytest.fixture
     def device_value_all_min(self):
-        return self.create_device_value(
-            inels_value="00\n00\n00\n00\n00\n00\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n00\n00\n00\n00\n00\n00\n")
 
     def test_create_ha_value_object_all_max(self, device_value_all_max):
         assert isinstance(device_value_all_max.ha_value.simple_light[0], SimpleLight)
@@ -1977,15 +1832,11 @@ class Test_CU_DEVICE_TYPE_165(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_all_max(self):
-        return self.create_device_value(
-            inels_value="00\n00\n00\n00\n64\n64\n64\n64\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n00\n00\n64\n64\n64\n64\n")
 
     @pytest.fixture
     def device_value_all_min(self):
-        return self.create_device_value(
-            inels_value="00\n00\n00\n00\n00\n00\n00\n00\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n00\n00\n00\n00\n00\n00\n")
 
     def test_create_ha_value_object_all_max(self, device_value_all_max):
         assert isinstance(device_value_all_max.ha_value.warm_light[0], WarmLight)
@@ -2044,7 +1895,10 @@ class Test_CU_DEVICE_TYPE_166(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value.ha_value,
         )
-        assert device_value.inels_set_value == "3F\n0A\n00\n00\nFB\nFF\nFF\n7F\n00\n00\n00\n00\n00\n00\n00\n00\n00\n07\n00\n"
+        assert (
+            device_value.inels_set_value
+            == "3F\n0A\n00\n00\nFB\nFF\nFF\n7F\n00\n00\n00\n00\n00\n00\n00\n00\n00\n07\n00\n"
+        )
 
 
 class Test_CU_DEVICE_TYPE_167(BaseDeviceTestClass):
@@ -2052,15 +1906,11 @@ class Test_CU_DEVICE_TYPE_167(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_on(self):
-        return self.create_device_value(
-            inels_value="00\n01\n"
-        )
+        return self.create_device_value(inels_value="00\n01\n")
 
     @pytest.fixture
     def device_value_off(self):
-        return self.create_device_value(
-            inels_value="00\n00\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n")
 
     def test_create_ha_value_object_on(self, device_value_on):
         assert device_value_on.ha_value.heating_out == True
@@ -2074,15 +1924,11 @@ class Test_CU_DEVICE_TYPE_168(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value_on(self):
-        return self.create_device_value(
-            inels_value="00\n01\n"
-        )
+        return self.create_device_value(inels_value="00\n01\n")
 
     @pytest.fixture
     def device_value_off(self):
-        return self.create_device_value(
-            inels_value="00\n00\n"
-        )
+        return self.create_device_value(inels_value="00\n00\n")
 
     def test_create_ha_value_object_on(self, device_value_on):
         assert device_value_on.ha_value.cooling_out == True
@@ -2122,9 +1968,7 @@ class Test_CU_DEVICE_TYPE_169(BaseDeviceTestClass):
         for r in device_value_all_off.ha_value.simple_relay:
             r.is_on = True
 
-        device_value = self.create_device_value(
-            ha_value=device_value_all_off.ha_value
-        )
+        device_value = self.create_device_value(ha_value=device_value_all_off.ha_value)
         assert device_value.inels_set_value == "07\n" * 14
 
     def test_format_inels_set_value_all_off(self, device_value_all_on):
@@ -2156,13 +2000,13 @@ class Test_CU_DEVICE_TYPE_170(BaseDeviceTestClass):
         assert device_value_open.ha_value.interface == [True] * 35
         for shutter in device_value_open.ha_value.simple_shutters:
             assert shutter.state == Shutter_state.Open
-            assert shutter.is_closed == None
+            assert shutter.is_closed is None
 
     def test_create_ha_value_object_closed(self, device_value_closed):
         assert device_value_closed.ha_value.interface == [False] * 35
         for shutter in device_value_closed.ha_value.simple_shutters:
             assert shutter.state == Shutter_state.Closed
-            assert shutter.is_closed == None
+            assert shutter.is_closed is None
 
     def test_format_inels_set_value(self, device_value_closed):
         device_value_closed.ha_value.simple_shutters[0].state = Shutter_state.Open
@@ -2178,9 +2022,7 @@ class Test_CU_DEVICE_TYPE_174(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="0F\n0E\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="0F\n0E\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True, True, True, True]
@@ -2198,9 +2040,7 @@ class Test_CU_DEVICE_TYPE_175(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="3F\n0E\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="3F\n0E\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True] * 6
@@ -2218,9 +2058,7 @@ class Test_CU_DEVICE_TYPE_176(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="FF\n0F\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="FF\n0F\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True] * 9
@@ -2238,9 +2076,7 @@ class Test_CU_DEVICE_TYPE_177(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="0F\n0A\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="0F\n0A\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True, True, True, True]
@@ -2258,9 +2094,7 @@ class Test_CU_DEVICE_TYPE_178(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="3F\n0A\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="3F\n0A\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True] * 6
@@ -2278,9 +2112,7 @@ class Test_CU_DEVICE_TYPE_179(BaseDeviceTestClass):
 
     @pytest.fixture
     def device_value(self):
-        return self.create_device_value(
-            inels_value="FF\n0B\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n"
-        )
+        return self.create_device_value(inels_value="FF\n0B\n0A\n9E\n00\n00\n24\n14\n7F\nFE\n12\n20\n05\n9D\n")
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.interface == [True] * 9
@@ -2323,8 +2155,10 @@ class Test_CU_DEVICE_TYPE_BITS(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_all_off.ha_value,
         )
-        assert device_value.inels_set_value == '{"cmd": {"000": 1, "001": 1, "002": 1, "003": 1, "004": 1, "005": 1, "006": 1, "007": 1, "008": 1, "009": 1, "010": 1, "011": 1, "012": 1, "013": 1}}'
-
+        assert (
+            device_value.inels_set_value
+            == '{"cmd": {"000": 1, "001": 1, "002": 1, "003": 1, "004": 1, "005": 1, "006": 1, "007": 1, "008": 1, "009": 1, "010": 1, "011": 1, "012": 1, "013": 1}}'
+        )
 
     def test_format_inels_set_value_all_off(self, device_value_all_on):
         for b in device_value_all_on.ha_value.bit:
@@ -2333,7 +2167,10 @@ class Test_CU_DEVICE_TYPE_BITS(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_all_on.ha_value,
         )
-        assert device_value.inels_set_value == '{"cmd": {"000": 0, "001": 0, "002": 0, "003": 0, "004": 0, "005": 0, "006": 0, "007": 0, "008": 0, "009": 0, "010": 0, "011": 0, "012": 0, "013": 0}}'
+        assert (
+            device_value.inels_set_value
+            == '{"cmd": {"000": 0, "001": 0, "002": 0, "003": 0, "004": 0, "005": 0, "006": 0, "007": 0, "008": 0, "009": 0, "010": 0, "011": 0, "012": 0, "013": 0}}'
+        )
 
 
 class Test_CU_DEVICE_TYPE_INTEGERS(BaseDeviceTestClass):
@@ -2366,8 +2203,10 @@ class Test_CU_DEVICE_TYPE_INTEGERS(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_all_off.ha_value,
         )
-        assert device_value.inels_set_value == '{"cmd": {"000": 1, "001": 1, "002": 1, "003": 1, "004": 1, "005": 1, "006": 1, "007": 1, "008": 1, "009": 1, "010": 1, "011": 1, "012": 1, "013": 1}}'
-
+        assert (
+            device_value.inels_set_value
+            == '{"cmd": {"000": 1, "001": 1, "002": 1, "003": 1, "004": 1, "005": 1, "006": 1, "007": 1, "008": 1, "009": 1, "010": 1, "011": 1, "012": 1, "013": 1}}'
+        )
 
     def test_format_inels_set_value_all_off(self, device_value_all_on):
         for n in device_value_all_on.ha_value.number:
@@ -2376,7 +2215,10 @@ class Test_CU_DEVICE_TYPE_INTEGERS(BaseDeviceTestClass):
         device_value = self.create_device_value(
             ha_value=device_value_all_on.ha_value,
         )
-        assert device_value.inels_set_value == '{"cmd": {"000": 0, "001": 0, "002": 0, "003": 0, "004": 0, "005": 0, "006": 0, "007": 0, "008": 0, "009": 0, "010": 0, "011": 0, "012": 0, "013": 0}}'
+        assert (
+            device_value.inels_set_value
+            == '{"cmd": {"000": 0, "001": 0, "002": 0, "003": 0, "004": 0, "005": 0, "006": 0, "007": 0, "008": 0, "009": 0, "010": 0, "011": 0, "012": 0, "013": 0}}'
+        )
 
 
 if __name__ == "__main__":

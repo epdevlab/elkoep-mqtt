@@ -1,45 +1,50 @@
-import pytest
-from unittest.mock import MagicMock, Mock, patch
-from inelsmqtt import InelsMqtt
+from unittest.mock import Mock, patch
+
 import paho.mqtt.client as mqtt
+import pytest
+
+from inelsmqtt import InelsMqtt
+
 
 @pytest.fixture
 def mqtt_config():
     return {
-        'host': 'localhost',
-        'port': 1883,
-        'username': 'user',
-        'password': 'pass',
-        'client_id': 'testclient',
-        'timeout': 0
+        "host": "localhost",
+        "port": 1883,
+        "username": "user",
+        "password": "pass",
+        "client_id": "testclient",
+        "timeout": 0,
     }
+
 
 @pytest.fixture
 def mqtt_client_mock():
-    with patch('paho.mqtt.client.Client') as mock:
+    with patch("paho.mqtt.client.Client") as mock:
         yield mock()
+
 
 @pytest.fixture
 def inels_mqtt(mqtt_config, mqtt_client_mock):
-    with patch('paho.mqtt.client.Client', return_value=mqtt_client_mock):
+    with patch("paho.mqtt.client.Client", return_value=mqtt_client_mock):
         return InelsMqtt(config=mqtt_config)
 
 
 def test_instance_initialization_pytest_style(inels_mqtt, mqtt_config):
-    """Testing initialization of all props. InelsMqtt class."""    
-    assert inels_mqtt._InelsMqtt__host == mqtt_config['host']  # pylint: disable=protected-access
-    assert inels_mqtt._InelsMqtt__port == mqtt_config['port']  # pylint: disable=protected-access
+    """Testing initialization of all props. InelsMqtt class."""
+    assert inels_mqtt._InelsMqtt__host == mqtt_config["host"]  # pylint: disable=protected-access
+    assert inels_mqtt._InelsMqtt__port == mqtt_config["port"]  # pylint: disable=protected-access
 
 
 def test_publish_pytest_style(mqtt_client_mock, inels_mqtt):
     """Test publishing a message using pytest."""
     mqtt_client_mock.publish.return_value = (mqtt.MQTT_ERR_SUCCESS, 1)
-    
-    inels_mqtt.publish('inels/status/10e97f8b7d30/01/01E8', 'data')
-    
+
+    inels_mqtt.publish("inels/status/10e97f8b7d30/01/01E8", "data")
+
     # Assert that the publish method was called with the correct parameters
-    mqtt_client_mock.publish.assert_called_once_with('inels/status/10e97f8b7d30/01/01E8', 'data', 0, True, None)
-    
+    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, True, None)
+
 
 def test_is_available_true_false_based_on__on_connect_function(mqtt_client_mock, inels_mqtt):
     """Testing if the broker is available with result True or False based on the on_connect function."""
@@ -77,16 +82,14 @@ def test_discovery_all_with_tree_messages(mqtt_client_mock, inels_mqtt):
 def test_subscribe(mqtt_client_mock, inels_mqtt):
     """Test subscribing to a topic."""
 
-    topic = 'inels/status/10e97f8b7d30/01/01E8'
+    topic = "inels/status/10e97f8b7d30/01/01E8"
     msg = type(
         "msg",
         (object,),
         {"topic": topic, "payload": "02\n01\n"},
     )
 
-    inels_mqtt._InelsMqtt__on_message(
-        inels_mqtt, Mock(), msg
-    )
+    inels_mqtt._InelsMqtt__on_message(inels_mqtt, Mock(), msg)
 
     # mqtt_client_mock.is_connected.return_value = True
     # mqtt_client_mock.subscribe.return_value = (mqtt.MQTT_ERR_SUCCESS, 1)

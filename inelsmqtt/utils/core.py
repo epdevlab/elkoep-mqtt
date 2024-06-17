@@ -1,15 +1,15 @@
 """Utility classes."""
+
 from __future__ import annotations
+
 import logging
+from typing import Any, Optional
 
-from typing import Any, Dict, Optional
-
-from inelsmqtt.protocols import elanrf, cu3
-
+from inelsmqtt.protocols import cu3, elanrf
 
 _LOGGER = logging.getLogger(__name__)
 
-# To prevent the value as being none, 
+# To prevent the value as being none,
 # if anything goes wrong when calculating the value,
 # we give an empty object that will simply not match with any keywords
 # it is filtered out in set_val
@@ -148,8 +148,10 @@ class DeviceValue:
             else:
                 _LOGGER.error("No handler found for HA update: %s", self.device_class)
         except Exception as e:
-            status_value = self.inels_status_value.replace('\n', ' ') if self.inels_status_value else 'None'
-            _LOGGER.error("Failed to update HA value for %s, status value was '%s': %s", self.device_class, status_value, str(e))
+            status_value = self.inels_status_value.replace("\n", " ") if self.inels_status_value else "None"
+            _LOGGER.error(
+                "Failed to update HA value for %s, status value was '%s': %s", self.device_class, status_value, str(e)
+            )
             self.__ha_value = DUMMY_VAL
 
     def __update_inels_value(self) -> None:
@@ -164,8 +166,13 @@ class DeviceValue:
                 else:
                     _LOGGER.error("No handler found for Inels update: %s", self.device_class)
         except Exception as e:
-            status_value = self.inels_status_value.replace('\n', ' ') if self.inels_status_value else 'None'
-            _LOGGER.error("Error making 'set' value for device of type '%s', status value was '%s': %s", self.device_class, status_value, str(e))
+            status_value = self.inels_status_value.replace("\n", " ") if self.inels_status_value else "None"
+            _LOGGER.error(
+                "Error making 'set' value for device of type '%s', status value was '%s': %s",
+                self.device_class,
+                status_value,
+                str(e),
+            )
             raise
 
     @property
@@ -177,7 +184,7 @@ class DeviceValue:
             Any: object to corespond to HA device
         """
         return self.__ha_value
-    
+
     @property
     def inels_set_value(self) -> str:
         """Raw inels value for mqtt broker

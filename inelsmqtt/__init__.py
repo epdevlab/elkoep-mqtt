@@ -1,34 +1,34 @@
 """Library specified for inels-mqtt."""
-from collections import defaultdict
+
+import copy
 import logging
 import time
 import uuid
-import copy
-
+from collections import defaultdict
 from datetime import datetime
 from typing import Any, Callable, Optional
 
 import paho.mqtt.client as mqtt
 
 from .const import (
+    DEVICE_TYPE_DICT,
+    DISCOVERY_TIMEOUT_IN_SEC,
+    FRAGMENT_DEVICE_TYPE,
+    FRAGMENT_STATE,
     MQTT_CLIENT_ID,
     MQTT_HOST,
     MQTT_PASSWORD,
     MQTT_PORT,
+    MQTT_PROTOCOL,
     MQTT_STATUS_TOPIC_PREFIX,
     MQTT_TIMEOUT,
     MQTT_TOTAL_CONNECTED_TOPIC,
     MQTT_TOTAL_STATUS_TOPIC,
     MQTT_TRANSPORT,
-    MQTT_USERNAME,
-    MQTT_PROTOCOL,
     MQTT_TRANSPORTS,
-    VERSION,
-    DEVICE_TYPE_DICT,
-    FRAGMENT_DEVICE_TYPE,
-    FRAGMENT_STATE,
+    MQTT_USERNAME,
     TOPIC_FRAGMENTS,
-    DISCOVERY_TIMEOUT_IN_SEC,
+    VERSION,
 )
 
 __version__ = VERSION
@@ -56,13 +56,9 @@ class InelsMqtt:
             transport (str): transportation protocol. Can be used tcp or websockets, defaltut tcp
             debug (bool): flag for debuging mqtt comunication. Default False
         """
-        proto = (
-            config.get(MQTT_PROTOCOL) if config.get(MQTT_PROTOCOL) else mqtt.MQTTv311
-        )
+        proto = config.get(MQTT_PROTOCOL) if config.get(MQTT_PROTOCOL) else mqtt.MQTTv311
 
-        _t: str = (
-            config.get(MQTT_TRANSPORT) if config.get(MQTT_TRANSPORT) else "tcp"
-        ).lower()
+        _t: str = (config.get(MQTT_TRANSPORT) if config.get(MQTT_TRANSPORT) else "tcp").lower()
 
         if _t not in MQTT_TRANSPORTS:
             raise Exception
@@ -91,7 +87,7 @@ class InelsMqtt:
         _t = config.get(MQTT_TIMEOUT)
         self.__timeout = _t if _t is not None else __DISCOVERY_TIMEOUT__
 
-        self.__listeners : dict[str, dict[str, Callable[[Any], Any]]] = defaultdict(lambda: dict())
+        self.__listeners: dict[str, dict[str, Callable[[Any], Any]]] = defaultdict(lambda: dict())
         self.__is_subscribed_list = dict[str, bool]()
         self.__last_values = dict[str, str]()
         self.__try_connect = False
@@ -167,15 +163,15 @@ class InelsMqtt:
             self.disconnect()
         except Exception as e:
             if isinstance(e, ConnectionRefusedError):
-                self.__connection_error = 3 # cannot connect
+                self.__connection_error = 3  # cannot connect
             else:
-                self.__connection_error = 6 # unknown
+                self.__connection_error = 6  # unknown
 
         return self.__connection_error
 
     def subscribe_listener(self, topic: str, unique_id: str, fnc: Callable[[Any], Any]) -> None:
         """Append new item into the datachange listener."""
-        #if topic not in self.__listeners:
+        # if topic not in self.__listeners:
         #    self.__listeners[topic] = dict[str, Callable[[Any], Any]]()
 
         stripped_topic = "/".join(topic.split("/")[2:])
@@ -422,7 +418,7 @@ class InelsMqtt:
                 _LOGGER.info("Device of type %s found [status].\n", device_type)
             elif action == "connected":
                 if topic not in self.__discovered:
-                    self.__discovered[topic] = None#msg.payload
+                    self.__discovered[topic] = None  # msg.payload
                     self.__last_values[msg.topic] = msg.payload
                     self.__is_subscribed_list[msg.topic] = True
                 _LOGGER.info("Device of type %s found [connected].\n", device_type)
@@ -457,13 +453,11 @@ class InelsMqtt:
         if device_type in DEVICE_TYPE_DICT or device_type == "gw":
             # keep last value
             self.__last_values[msg.topic] = (
-                copy.copy(self.__messages[msg.topic])
-                if msg.topic in self.__messages
-                else msg.payload
+                copy.copy(self.__messages[msg.topic]) if msg.topic in self.__messages else msg.payload
             )
             self.__messages[msg.topic] = msg.payload
 
-        if  device_type == "gw" and message_type == "connected":
+        if device_type == "gw" and message_type == "connected":
             mac = message_parts[2]
             for stripped_topic in self.__listeners:
                 if stripped_topic.startswith(mac):
@@ -481,7 +475,9 @@ class InelsMqtt:
     def __notify_listeners(self, stripped_topic: str, is_connected_message: bool) -> None:
         """Notify listeners for a specific topic."""
         if len(self.__listeners[stripped_topic]) > 0:
-            for unique_id in list(self.__listeners[stripped_topic]): #prevents the dictionary increased in size during iteration exception
+            for unique_id in list(
+                self.__listeners[stripped_topic]
+            ):  # prevents the dictionary increased in size during iteration exception
                 self.__listeners[stripped_topic][unique_id](is_connected_message)
 
     def __on_subscribe(
@@ -503,7 +499,7 @@ class InelsMqtt:
             properties (_type_, optional): Props from broker set.
                 Defaults to None.
         """
-        #_LOGGER.info(mid)
+        # _LOGGER.info(mid)
 
     def __disconnect(self) -> None:
         """Disconnecting from broker and stopping broker's loop"""

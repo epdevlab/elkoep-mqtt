@@ -1,27 +1,26 @@
 """Class handle base info about device."""
-from collections import defaultdict
-import logging
-import json
 
+import json
+import logging
 from typing import Any, Callable
 
-from inelsmqtt.utils.core import DeviceValue
 from inelsmqtt import InelsMqtt
 from inelsmqtt.const import (
-    DEVICE_TYPE_DICT,
-    FRAGMENT_DOMAIN,
-    INELS_DEVICE_TYPE_DICT,
-    MANUFACTURER,
-    SENSOR,
     BUTTON,
-    TOPIC_FRAGMENTS,
+    DEVICE_CONNECTED,
+    DEVICE_TYPE_DICT,
     FRAGMENT_DEVICE_TYPE,
+    FRAGMENT_DOMAIN,
     FRAGMENT_SERIAL_NUMBER,
     FRAGMENT_UNIQUE_ID,
     GW_CONNECTED,
-    DEVICE_CONNECTED,
+    INELS_DEVICE_TYPE_DICT,
+    MANUFACTURER,
+    SENSOR,
+    TOPIC_FRAGMENTS,
     VERSION,
 )
+from inelsmqtt.utils.core import DeviceValue
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,15 +51,11 @@ class Device(object):
 
         self.__mqtt = mqtt
         self.__device_class = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
-        self.__device_type = DEVICE_TYPE_DICT[
-            fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
-        ]
-        self.__inels_type = INELS_DEVICE_TYPE_DICT[
-            fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
-        ]
+        self.__device_type = DEVICE_TYPE_DICT[fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]]
+        self.__inels_type = INELS_DEVICE_TYPE_DICT[fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]]
 
-        self.__unique_id = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}_{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}" #fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]
-        self.__parent_id = self.__unique_id#fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]
+        self.__unique_id = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}_{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"  # fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]
+        self.__parent_id = self.__unique_id  # fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]
         self.__state_topic = state_topic
         self.__set_topic = None
 
@@ -73,7 +68,7 @@ class Device(object):
         self.__domain = fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]
         self.__state: Any = None
         self.__values: DeviceValue = None
-    
+
         self.__entity_callbacks: dict[tuple[str, int], Callable[[Any], Any]] = None
         # subscribe availability
         self.__mqtt.subscribe(self.__state_topic)
@@ -162,7 +157,11 @@ class Device(object):
         if self.__device_class in ["164", "165", "166", "167", "168"]:
             return self.__values is not None and self.__values._DeviceValue__ha_value is not None
         else:
-            return DEVICE_CONNECTED.get(val) and self.__values is not None and self.__values._DeviceValue__ha_value is not None
+            return (
+                DEVICE_CONNECTED.get(val)
+                and self.__values is not None
+                and self.__values._DeviceValue__ha_value is not None
+            )
 
     @property
     def set_topic(self) -> str:
@@ -191,7 +190,7 @@ class Device(object):
             str: Name of the domain
         """
         return self.__domain
-    
+
     @property
     def connected_topic(self) -> str:
         """Connected topic
@@ -231,7 +230,7 @@ class Device(object):
             DeviceValue: latest values in many formats
         """
         val = self.__mqtt.last_value(self.__state_topic)
-        
+
         dev_value = DeviceValue(
             self.__device_type,
             self.__inels_type,
@@ -257,7 +256,7 @@ class Device(object):
             self.__inels_type,
             self.__device_class,
             inels_value=(val.decode() if val is not None else None),
-            last_value=self.last_values
+            last_value=self.last_values,
         )
         self.__state = dev_value.ha_value
         self.__values = dev_value
@@ -329,8 +328,8 @@ class Device(object):
         self.__entity_callbacks[t] = fnc
 
     def ha_diff(self, last_val, curr_val):
-        for k in (key for key in dir(curr_val) if not key.startswith('_')):
-            if type(curr_val.__dict__[k]) is list:
+        for k in (key for key in dir(curr_val) if not key.startswith("_")):
+            if isinstance(curr_val.__dict__[k], list):
                 for i in range(len(curr_val.__dict__[k])):
                     if curr_val.__dict__[k][i] != last_val.__dict__[k][i]:
                         t: tuple[str, int] = (k, i)
@@ -350,14 +349,13 @@ class Device(object):
         """Update value in device and call the callbacks of the respective entities."""
         self.get_value()
 
-        if availability_update: #recalculate state for all the entities as they became unavailable/available
+        if availability_update:  # recalculate state for all the entities as they became unavailable/available
             self.complete_callback()
         else:
-            self.ha_diff( #differential availability 
+            self.ha_diff(  # differential availability
                 last_val=self.last_values.ha_value,
                 curr_val=self.__values.ha_value,
-            )   
-
+            )
 
 
 class DeviceInfo(object):

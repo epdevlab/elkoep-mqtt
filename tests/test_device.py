@@ -1,15 +1,17 @@
-import pytest
 from unittest.mock import MagicMock
-from inelsmqtt.devices import Device, DeviceInfo
-from inelsmqtt import InelsMqtt
-from inelsmqtt.utils.common import SimpleRelay, new_object
 
+import pytest
+
+from inelsmqtt import InelsMqtt
 from inelsmqtt.const import (
     MANUFACTURER,
     VERSION,
 )
+from inelsmqtt.devices import Device, DeviceInfo
+from inelsmqtt.utils.common import SimpleRelay, new_object
 
 TEST_STATE_TOPIC = "inels/status/10e97f8b7d30/02/02E8"
+
 
 @pytest.fixture
 def mqtt_mock():
@@ -17,9 +19,11 @@ def mqtt_mock():
     mqtt.last_value.return_value = b"02\n00\n"
     return mqtt
 
+
 @pytest.fixture
 def device(mqtt_mock):
     return Device(mqtt=mqtt_mock, state_topic=TEST_STATE_TOPIC, title="Test Device")
+
 
 def test_device_initialization(device, mqtt_mock):
     assert device.unique_id == "10e97f8b7d30_02E8"
@@ -46,14 +50,14 @@ def test_device_availability(device):
 
     # Simulate different gateway and device statuses
     device.mqtt.messages.return_value.get.side_effect = [
-        b"{\"status\": true}",
+        b'{"status": true}',
         "on\n",
-        b"{\"status\": true}",
+        b'{"status": true}',
         "off\n",
-        b"{\"status\": false}",
+        b'{"status": false}',
         "on\n",
-        b"{\"status\": false}",
-        "off\n"
+        b'{"status": false}',
+        "off\n",
     ]
 
     # Gateway on, device on
@@ -68,7 +72,7 @@ def test_device_availability(device):
 
 def test_device_last_values(device, mqtt_mock):
     last_values = device.last_values
-    
+
     assert last_values is not None
     assert not last_values.ha_value.simple_relay[0].is_on
 
@@ -82,29 +86,26 @@ def test_update_value(device):
 
 
 def test_device_set_ha_value(device):
-    simple_relay = new_object(
-        simple_relay=[SimpleRelay(is_on=True)]
-    )
+    simple_relay = new_object(simple_relay=[SimpleRelay(is_on=True)])
     device.set_ha_value(simple_relay)
-    device.mqtt.publish.assert_called_once_with('inels/set/10e97f8b7d30/02/02E8', '01\n00\n00\n')
-                                                
+    device.mqtt.publish.assert_called_once_with("inels/set/10e97f8b7d30/02/02E8", "01\n00\n00\n")
+
 
 def test_info_serialized(device):
     info = device.info_serialized()
-    assert info == '{"name": "Test Device", "device_type": "switch", "id": "10e97f8b7d30_02E8", "via_device": "10e97f8b7d30_02E8"}'
+    assert (
+        info
+        == '{"name": "Test Device", "device_type": "switch", "id": "10e97f8b7d30_02E8", "via_device": "10e97f8b7d30_02E8"}'
+    )
 
 
 def test_device_callbacks(device):
     callback = MagicMock()
     device.add_ha_callback("simple_relay", 0, callback)
 
-    last_val = new_object(
-        simple_relay=[SimpleRelay(is_on=False)]
-    )
+    last_val = new_object(simple_relay=[SimpleRelay(is_on=False)])
 
-    curr_val = new_object(
-        simple_relay=[SimpleRelay(is_on=True)]
-    )
+    curr_val = new_object(simple_relay=[SimpleRelay(is_on=True)])
 
     device.ha_diff(last_val, curr_val)
     callback.assert_called_once()

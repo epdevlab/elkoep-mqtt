@@ -1,10 +1,10 @@
 """Discovery class handle find all device in broker and create devices."""
+
 import logging
-from inelsmqtt.const import INELS_ASSUMED_STATE_DEVICES, INELS_COMM_TEST_DICT, INELS_DEVICE_TYPE_DICT
 
 from inelsmqtt import InelsMqtt
+from inelsmqtt.const import INELS_ASSUMED_STATE_DEVICES, INELS_COMM_TEST_DICT, INELS_DEVICE_TYPE_DICT
 from inelsmqtt.devices import Device
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,9 +36,9 @@ class InelsDiscovery(object):
 
         retry = False
         for d in devs:
-            if devs[d] is None: #if comes from 'connected'
+            if devs[d] is None:  # if comes from 'connected'
                 d_frags = d.split("/")
-                
+
                 dev_type = d_frags[1]
                 unique_id = d_frags[2]
 
@@ -51,7 +51,7 @@ class InelsDiscovery(object):
             _LOGGER.info("Retrying discovery...")
             devs = self.__mqtt.discovery_all()
 
-        #disregard any devices that don't respond
+        # disregard any devices that don't respond
         sanitized_devs = []
         for k, v in devs.items():
             k_frags = k.split("/")

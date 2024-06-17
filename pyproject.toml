@@ -5,3 +5,76 @@ build-backend = "setuptools.build_meta"
 [urls]
 "Homepage" = "https://github.com/epdevlab/elkoep-mqtt"
 "Bug Tracker" = "https://github.com/epdevlab/elkoep-mqtt/issues"
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+# Set the maximum line length to 127 characters.
+line-length = 120
+
+# Define the number of spaces used for indentation, aligning with Black's style.
+indent-width = 4
+
+# The minimum Python version to target, e.g., when considering automatic code upgrades, 
+# like rewriting type annotations
+target-version = "py310"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "E712"]
+
+[tool.ruff.lint]
+# Enable Pyflakes (F) and a subset of the pycodestyle (E)  codes by default.
+# pycodestyle warnings (W)
+# Activate Security Rules (S) to replace bandit
+# Enable the isort rules (I) to replace isort
+# flake8-bugbear (B)
+select = ["F", "E4", "E7", "E9", "W", "S", "I", "B"] 
+ignore = [] # List any rules to be ignored, currently empty.
+
+# Allow auto-fixing of all enabled rules when using the `--fix` option.
+fixable = ["ALL"]
+unfixable = [] # Specify rules that cannot be auto-fixed, if any.
+
+# Define a regex pattern for allowed unused variables (typically underscore-prefixed).
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Enforce double quotes for strings, following Black's style.
+quote-style = "double"
+
+# Use spaces for indentation, in line with Black's formatting style.
+indent-style = "space"
+
+# Keep magic trailing commas, a feature of Black's formatting.
+skip-magic-trailing-comma = false
+
+# Automatically detect and use the appropriate line ending style.
+line-ending = "auto"

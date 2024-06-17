@@ -1,9 +1,11 @@
 """Inels MQTT client."""
+
 from __future__ import annotations
 
-import logging
-from typing import Union, Callable, Awaitable
 import asyncio
+import logging
+from typing import Awaitable, Callable, Union
+
 import attr
 
 _LOGGER = logging.getLogger(__name__)
