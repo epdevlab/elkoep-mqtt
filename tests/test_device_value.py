@@ -1,164 +1,22 @@
 import pytest
 
-from inelsmqtt.util import DeviceValue, SimpleRelay, Relay, SimpleLight, RGBLight, Shutter, WarmLight, Shutter_pos, LightCoaToa
-
-from inelsmqtt.const import (
-    RELAY,
-    RF_DIMMER,
-    RF_DIMMER_RGB,
-    SHUTTER,
-    RED,
-    GREEN,
-    BLUE,
-    OUT,
-    WHITE,
-    TEMP_IN,
-    TEMP_OUT,
-    OPEN_IN_PERCENTAGE,
-    CURRENT_TEMP,
-    BATTERY,
-    REQUIRED_TEMP,
-    STATE,
-    AIN,
-    IDENTITY,
-    POSITION,
-    HUMIDITY,
-    BUTTON_NUMBER,
-    SWITCH,
-    RF_SINGLE_SWITCH,
-    RF_SWITCHING_UNIT,
-    RF_SHUTTERS,
-    RF_SINGLE_DIMMER,
-    COVER,
-    LIGHT,
-    SENSOR,
-    BUTTON,
-    CLIMATE,
-    RF_CONTROLLER,
-    RF_SHUTTER_UNIT,
-    RF_TEMPERATURE_HUMIDITY_SENSOR,
-    RF_2_BUTTON_CONTROLLER,
-    RF_MOTION_DETECTOR,
-    RF_DETECTOR,
-    RF_FLOOD_DETECTOR,
-    RF_LIGHT_BULB,
-    RF_THERMOSTAT,
-    RF_TEMPERATURE_INPUT,
-    RF_WIRELESS_THERMOVALVE,
-    RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR,
-    SA3_01B,
-    SA3_02B,
-    SA3_02M,
-    SA3_04M,
-    SA3_06M,
-    IOU3_108M,
-    SWITCH, 
-    DA3_22M,
-    TEMP_IN,
-    DIM_OUT_1,
-    DIM_OUT_2,
-    DCDA_33M,
-    GRT3_50,
-    IM3_20B,
-    IM3_40B,
-    IM3_80B,
-    PLUS_MINUS_BUTTONS,
-    LIGHT_IN,
-    AIN,
-    HUMIDITY,
-    DEW_POINT,
-    DMD3_1,
-    RELAY,
-    SW,
-    SA3_012M,
-    AOUT,
-    RELAY_OVERFLOW,
-    FA3_612M,
-    IN,
-    DIN,
-    WSB3_20,
-    WSB3_20H,
-    WSB3_40,
-    WSB3_40H,
-    STATE,
-    CARD_ID,
-    GSB3_20SX,
-    GSB3_40SX,
-    GSB3_60SX,
-    GSB3_90SX,
-    GBP3_60,
-    MSB3_40,
-    MSB3_60,
-    MSB3_90,
-    GSB3_40_V2,
-    GSB3_60_V2,
-    GSB3_90_V2,
-    GSB3_40SX_V2,
-    GSB3_60SX_V2,
-    GSB3_90SX_V2,
-    RC3_610DALI,
-    JA3_014M,
-    JA3_018M,
-    IDRT3_1,
-    IM3_140M,
-    DAC3_04B,
-    TI3_10B,
-    TI3_40B,
-    TI3_60M,
-    DAC3_04M,
-    GDB3_10,
-    GCR3_11,
-    GCH3_31,
-    TEMP_OUT,
-    ALERT,
-    OUT,
-    DALI,
-    ADC3_60M,
-    CURRENT_TEMP,
-    CRITICAL_MAX_TEMP,
-    REQUIRED_HEAT_TEMP,
-    MAX_TEMP,
-    CRITICAL_MIN_TEMP,
-    REQUIRED_COOL_TEMP,
-    TEMP_CORRECTION,
-    PUBLIC_HOLIDAY,
-    CONTROL_MODE,
-    VIRT_CONTR,
-    VIRT_HEAT_REG,
-    VIRT_COOL_REG,
-    SA3_014M,
-    GSP3_100,
-    DA3_66M,
-    SHUTTER,
-    VALVE,
-    SA3_022M,
-    DALI_DMX_UNIT,
-    DALI_DMX_UNIT_2,
-    LIGHT,
-    SENSOR,
-    BUTTON,
-    BITS,
-    INTEGERS,
-    NUMBER,
-    COVER,
-    CLIMATE,
-    Shutter_state,
-    Climate_modes,
-    Climate_action
-)
+from inelsmqtt.utils.core import DeviceValue, ProtocolHandlerMapper
+from inelsmqtt.utils.common import SimpleRelay, SimpleLight, RGBLight, Shutter, WarmLight, Shutter_pos, LightCoaToa, Relay
+from inelsmqtt.const import Shutter_state
 
 
 class BaseDeviceTestClass:
-    INELS_TYPE = None # To be defined in subclasses
-    HA_TYPE    = None # To be defined in subclasses
+    DEVICE_TYPE_ID = None  # To be defined in subclasses
 
     def create_device_value(self, inels_value=None, ha_value=None, last_value=None):
-        if self.INELS_TYPE is None or self.HA_TYPE is None:
-            raise ValueError("INELS_TYPE & HA_TYPE must be defined in the subclass.")
-        
+        if self.DEVICE_TYPE_ID is None:
+            raise ValueError("DEVICE_TYPE_ID must be defined in the subclass.")
+
+        cls = ProtocolHandlerMapper.get_handler(self.DEVICE_TYPE_ID)
         return DeviceValue(
-            device_type=self.HA_TYPE,
-            inels_type=self.INELS_TYPE,
+            device_type=cls.HA_TYPE,
+            inels_type=cls.INELS_TYPE,
+            device_class=cls.TYPE_ID,
             inels_value=inels_value,
             ha_value=ha_value,
             last_value=last_value
@@ -166,8 +24,7 @@ class BaseDeviceTestClass:
 
 
 class Test_RF_DEVICE_TYPE_01(BaseDeviceTestClass):
-    INELS_TYPE = RF_SINGLE_SWITCH
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "01"
 
     @pytest.fixture
     def device_value_on(self):
@@ -186,7 +43,7 @@ class Test_RF_DEVICE_TYPE_01(BaseDeviceTestClass):
     def test_create_ha_value_object(self, device_value_on):
         """Test creation of HA value object."""
         assert isinstance(device_value_on.ha_value.simple_relay[0], SimpleRelay)
-    
+
     def test_create_ha_value_object_on(self, device_value_on):
         """Test HA value object creation with relay ON."""
         assert device_value_on.ha_value.simple_relay[0].is_on == True
@@ -214,8 +71,7 @@ class Test_RF_DEVICE_TYPE_01(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_02(BaseDeviceTestClass):
-    INELS_TYPE = RF_SWITCHING_UNIT
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "02"
 
     @pytest.fixture
     def device_value_on(self):
@@ -230,11 +86,11 @@ class Test_RF_DEVICE_TYPE_02(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="02\n00\n"
         )
-    
+
     def test_create_ha_value_object(self, device_value_on):
         """Test creation of HA value object."""
         assert isinstance(device_value_on.ha_value.simple_relay[0], SimpleRelay)
-    
+
     def test_create_ha_value_object_on(self, device_value_on):
         """Test HA value object creation with relay ON."""
         assert device_value_on.ha_value.simple_relay[0].is_on == True
@@ -262,15 +118,14 @@ class Test_RF_DEVICE_TYPE_02(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_03(BaseDeviceTestClass):
-    INELS_TYPE = RF_SHUTTERS
-    HA_TYPE    = COVER
+    DEVICE_TYPE_ID = "03"
 
     @pytest.fixture
     def device_value_open(self):
         return self.create_device_value(
             inels_value="03\n00\n"
         )
-    
+
     @pytest.fixture
     def device_value_closed(self):
         return self.create_device_value(
@@ -299,8 +154,7 @@ class Test_RF_DEVICE_TYPE_03(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_04(BaseDeviceTestClass):
-    INELS_TYPE = RF_SINGLE_DIMMER
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "04"
 
     @pytest.fixture
     def device_value_low_brightness(self):
@@ -353,8 +207,7 @@ class Test_RF_DEVICE_TYPE_04(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_05(BaseDeviceTestClass):
-    INELS_TYPE = RF_DIMMER
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "05"
 
     @pytest.fixture
     def device_value_low_brightness(self):
@@ -407,8 +260,7 @@ class Test_RF_DEVICE_TYPE_05(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_06(BaseDeviceTestClass):
-    INELS_TYPE = RF_DIMMER_RGB
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "06"
 
     @pytest.fixture
     def device_value_rgba_all_min(self):
@@ -417,7 +269,7 @@ class Test_RF_DEVICE_TYPE_06(BaseDeviceTestClass):
             inels_value="01\n00\n00\n00\n00\n00\n"
         )
         return device_value
-    
+
     @pytest.fixture
     def device_value_rgba_all_max(self):
         """Fixture for creating a device value with RGB settings."""
@@ -459,8 +311,7 @@ class Test_RF_DEVICE_TYPE_06(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_07(BaseDeviceTestClass):
-    INELS_TYPE = RF_SWITCHING_UNIT_WITH_EXTERNAL_TEMPERATURE_SENSOR
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "07"
 
     @pytest.fixture
     def device_value_on(self):
@@ -475,12 +326,12 @@ class Test_RF_DEVICE_TYPE_07(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="07\n00\n92\n09\n"
         )
-    
+
     def test_create_ha_value_object(self, device_value_on):
         """Test creation of HA value object."""
         assert isinstance(device_value_on.ha_value.simple_relay[0], SimpleRelay)
         assert device_value_on.ha_value.temp_out == '0992'
-    
+
     def test_create_ha_value_object_on(self, device_value_on):
         """Test HA value object creation with relay ON."""
         assert device_value_on.ha_value.simple_relay[0].is_on == True
@@ -508,8 +359,7 @@ class Test_RF_DEVICE_TYPE_07(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_09(BaseDeviceTestClass):
-    INELS_TYPE = RF_WIRELESS_THERMOVALVE
-    HA_TYPE    = CLIMATE
+    DEVICE_TYPE_ID = "09"
 
     @pytest.fixture
     def device_value(self):
@@ -522,7 +372,7 @@ class Test_RF_DEVICE_TYPE_09(BaseDeviceTestClass):
         assert device_value.ha_value.thermovalve.current == 30
         assert device_value.ha_value.thermovalve.required == 32
         assert device_value.ha_value.thermovalve.climate_mode == 1
-        assert device_value.ha_value.thermovalve.open_in_percentage == 50  
+        assert device_value.ha_value.thermovalve.open_in_percentage == 50
 
     def test_format_inels_set_value(self, device_value):
         device_value.ha_value.thermovalve.required = 25
@@ -533,8 +383,7 @@ class Test_RF_DEVICE_TYPE_09(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_10(BaseDeviceTestClass):
-    INELS_TYPE = RF_TEMPERATURE_INPUT
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "10"
 
     @pytest.fixture
     def device_value(self):
@@ -550,8 +399,7 @@ class Test_RF_DEVICE_TYPE_10(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_12(BaseDeviceTestClass):
-    INELS_TYPE = RF_THERMOSTAT
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "12"
 
     @pytest.fixture
     def device_value(self):
@@ -565,8 +413,7 @@ class Test_RF_DEVICE_TYPE_12(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_13(BaseDeviceTestClass):
-    INELS_TYPE = RF_LIGHT_BULB
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "13"
 
     @pytest.fixture
     def device_value_lowest_brightness_highest_white(self):
@@ -613,8 +460,7 @@ class Test_RF_DEVICE_TYPE_13(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_15(BaseDeviceTestClass):
-    INELS_TYPE = RF_FLOOD_DETECTOR
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "15"
 
     @pytest.fixture
     def device_value(self):
@@ -629,8 +475,7 @@ class Test_RF_DEVICE_TYPE_15(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_16(BaseDeviceTestClass):
-    INELS_TYPE = RF_DETECTOR
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "16"
 
     @pytest.fixture
     def device_value(self):
@@ -645,8 +490,7 @@ class Test_RF_DEVICE_TYPE_16(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_17(BaseDeviceTestClass):
-    INELS_TYPE = RF_MOTION_DETECTOR
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "17"
 
     @pytest.fixture
     def device_value(self):
@@ -661,8 +505,7 @@ class Test_RF_DEVICE_TYPE_17(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_18(BaseDeviceTestClass):
-    INELS_TYPE = RF_2_BUTTON_CONTROLLER
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "18"
 
     @pytest.fixture
     def device_value(self):
@@ -676,8 +519,7 @@ class Test_RF_DEVICE_TYPE_18(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_19(BaseDeviceTestClass):
-    INELS_TYPE = RF_CONTROLLER
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "19"
 
     @pytest.fixture
     def device_value(self):
@@ -691,15 +533,14 @@ class Test_RF_DEVICE_TYPE_19(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
-    INELS_TYPE = RF_SHUTTER_UNIT
-    HA_TYPE    = COVER
+    DEVICE_TYPE_ID = "21"
 
     @pytest.fixture
     def device_value_open(self):
         return self.create_device_value(
             inels_value="03\n00\n00\n"
         )
-    
+
     @pytest.fixture
     def device_value_closed(self):
         return self.create_device_value(
@@ -712,7 +553,7 @@ class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
         assert not device_value_open.ha_value.shutters_with_pos[0].set_pos
         assert device_value_open.ha_value.shutters_with_pos[0].position == 100
         assert device_value_open.ha_value.shutters_with_pos[0].state == 0
-        
+
 
     def test_create_ha_value_object_closed(self, device_value_closed):
         assert isinstance(device_value_closed.ha_value.shutters_with_pos[0], Shutter_pos)
@@ -743,8 +584,7 @@ class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
 
 
 class Test_RF_DEVICE_TYPE_30(BaseDeviceTestClass):
-    INELS_TYPE = RF_TEMPERATURE_HUMIDITY_SENSOR
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "30"
 
     @pytest.fixture
     def device_value(self):
@@ -759,8 +599,7 @@ class Test_RF_DEVICE_TYPE_30(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_100(BaseDeviceTestClass):
-    INELS_TYPE = SA3_01B
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "100"
 
     @pytest.fixture
     def device_value_on(self):
@@ -800,8 +639,7 @@ class Test_CU_DEVICE_TYPE_100(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_101(BaseDeviceTestClass):
-    INELS_TYPE = DA3_22M
-    HA_TYPE    = LIGHT 
+    DEVICE_TYPE_ID = "101"
 
     @pytest.fixture
     def device_value(self):
@@ -839,8 +677,7 @@ class Test_CU_DEVICE_TYPE_101(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_102(BaseDeviceTestClass):
-    INELS_TYPE = GRT3_50
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "102"
 
     @pytest.fixture
     def device_value(self):
@@ -860,8 +697,7 @@ class Test_CU_DEVICE_TYPE_102(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_103(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_90SX
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "103"
 
     @pytest.fixture
     def device_value(self):
@@ -883,8 +719,7 @@ class Test_CU_DEVICE_TYPE_103(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_104(BaseDeviceTestClass):
-    INELS_TYPE = SA3_02B
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "104"
 
     @pytest.fixture
     def device_value_all_on(self):
@@ -903,7 +738,7 @@ class Test_CU_DEVICE_TYPE_104(BaseDeviceTestClass):
         assert device_value_all_on.ha_value.temp_in == "0A28"
         for r in device_value_all_on.ha_value.simple_relay:
             assert r.is_on
-        
+
     def test_create_ha_value_object_all_off(self, device_value_all_off):
         assert isinstance(device_value_all_off.ha_value.simple_relay[0], SimpleRelay)
         assert device_value_all_off.ha_value.temp_in == "0A28"
@@ -930,8 +765,7 @@ class Test_CU_DEVICE_TYPE_104(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_105(BaseDeviceTestClass):
-    INELS_TYPE = SA3_02M
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "105"
 
     @pytest.fixture
     def device_value_all_on(self):
@@ -950,7 +784,7 @@ class Test_CU_DEVICE_TYPE_105(BaseDeviceTestClass):
         assert device_value_all_on.ha_value.sw == [True, True]
         for r in device_value_all_on.ha_value.simple_relay:
             assert r.is_on
-        
+
     def test_create_ha_value_object_all_off(self, device_value_all_off):
         assert isinstance(device_value_all_off.ha_value.simple_relay[0], SimpleRelay)
         assert device_value_all_off.ha_value.sw == [False, False]
@@ -977,9 +811,8 @@ class Test_CU_DEVICE_TYPE_105(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_106(BaseDeviceTestClass):
-    INELS_TYPE = SA3_04M
-    HA_TYPE    = SWITCH
-   
+    DEVICE_TYPE_ID = "106"
+
     @pytest.fixture
     def device_value_all_on(self):
         return self.create_device_value(
@@ -1024,8 +857,7 @@ class Test_CU_DEVICE_TYPE_106(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_107(BaseDeviceTestClass):
-    INELS_TYPE = SA3_06M
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "107"
 
     @pytest.fixture
     def device_value_all_on(self):
@@ -1038,7 +870,7 @@ class Test_CU_DEVICE_TYPE_107(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="06\n06\n06\n06\n06\n06\n00\n00\n"
         )
-    
+
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.simple_relay[0], SimpleRelay)
         assert device_value_all_on.ha_value.sw == [True, True, True, True, True, True]
@@ -1072,8 +904,7 @@ class Test_CU_DEVICE_TYPE_107(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_108(BaseDeviceTestClass):
-    INELS_TYPE = SA3_012M
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "108"
 
     @pytest.fixture
     def device_value_all_on(self):
@@ -1086,7 +917,7 @@ class Test_CU_DEVICE_TYPE_108(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n06\n00\n00\n00\n00\n"
         )
-    
+
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.simple_relay[0], SimpleRelay)
         assert device_value_all_on.ha_value.sw == [True] * 12
@@ -1119,15 +950,14 @@ class Test_CU_DEVICE_TYPE_108(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_109(BaseDeviceTestClass):
-    INELS_TYPE = SA3_022M
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "109"
 
     @pytest.fixture
     def device_value_all_on(self):
         return self.create_device_value(
             inels_value="07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\n07\nFF\nFF\nFF\nFF\nFF\nFF\nFF\n"
         )
-    
+
     @pytest.fixture
     def device_value_all_off(self):
         return self.create_device_value(
@@ -1144,7 +974,7 @@ class Test_CU_DEVICE_TYPE_109(BaseDeviceTestClass):
 
         for s in device_value_all_on.ha_value.simple_shutters:
             assert s.state == Shutter_state.Open
-        
+
         assert device_value_all_on.ha_value.shutter_motors == [True, True]
         assert device_value_all_on.ha_value.sw == [True] * 16
         assert device_value_all_on.ha_value.valve == [True, True, True, True]
@@ -1159,7 +989,7 @@ class Test_CU_DEVICE_TYPE_109(BaseDeviceTestClass):
 
         for s in device_value_all_off.ha_value.simple_shutters:
             assert s.state == Shutter_state.Stop_down
-        
+
         assert device_value_all_off.ha_value.shutter_motors == [False, False]
         assert device_value_all_off.ha_value.sw == [False] * 16
         assert device_value_all_off.ha_value.valve == [False, False, False, False]
@@ -1194,21 +1024,20 @@ class Test_CU_DEVICE_TYPE_109(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_111(BaseDeviceTestClass):
-    INELS_TYPE = FA3_612M
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "111"
 
     @pytest.fixture
     def device_value_all_off(self):
         return self.create_device_value(
             inels_value="00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
         )
-    
+
     @pytest.fixture
     def device_value_all_on(self):
         return self.create_device_value(
             inels_value="FF\nFF\nFF\nFF\n64\n64\n64\n64\n07\n07\n07\n07\n07\n07\n07\n07\n00\n00\nFF\nFF\n00\n00\nFF\nFF\n00\n00\nFF\nFF\n"
         )
-    
+
     def test_create_ha_value_object_all_off(self, device_value_all_off):
         assert device_value_all_off.ha_value.ains == ['00000000', '00000000', '00000000']
 
@@ -1234,7 +1063,7 @@ class Test_CU_DEVICE_TYPE_111(BaseDeviceTestClass):
         assert device_value_all_on.ha_value.heating_out == True
         assert device_value_all_on.ha_value.sw == [True, True, True, True, True, True, True, True, True]
         assert device_value_all_on.ha_value.valves == [[True, True], [True, True]]
-    
+
     def test_format_inels_set_value(self, device_value_all_off):
         device_value_all_off.ha_value.fan_speed = 3
         device_value_all_off.ha_value.aout[0].brightness = 100
@@ -1246,8 +1075,7 @@ class Test_CU_DEVICE_TYPE_111(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_112(BaseDeviceTestClass):
-    INELS_TYPE = IOU3_108M
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "112"
 
     @pytest.fixture
     def device_value_all_on(self):
@@ -1297,21 +1125,20 @@ class Test_CU_DEVICE_TYPE_112(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_114(BaseDeviceTestClass):
-    INELS_TYPE = RC3_610DALI
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "114"
 
     @pytest.fixture
     def device_value_all_min(self):
         return self.create_device_value(
             inels_value="00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
         )
-    
+
     @pytest.fixture
     def device_value_all_max(self):
         return self.create_device_value(
             inels_value="00\n00\n0A\n28\n64\n64\n00\n00\n07\n07\n07\n07\n07\n07\n07\n07\n00\n00\n0A\n28\n64\n64\n64\n64\n3F\nFF\nFF\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n"
         )
-    
+
     def test_create_ha_value_object_all_min(self, device_value_all_min):
         assert device_value_all_min.ha_value.temps == ['0000', '0000']
         assert device_value_all_min.ha_value.din == [False, False, False, False, False, False]
@@ -1345,7 +1172,7 @@ class Test_CU_DEVICE_TYPE_114(BaseDeviceTestClass):
             assert b.brightness == 100
             assert b.alert_dali_communication
             assert b.alert_dali_power
-    
+
     def test_format_inels_set_value_all_max(self, device_value_all_min):
         for r in device_value_all_min.ha_value.relay:
             r.is_on = True
@@ -1380,15 +1207,14 @@ class Test_CU_DEVICE_TYPE_114(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_115(BaseDeviceTestClass):
-    INELS_TYPE = IM3_20B
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "115"
 
     @pytest.fixture
     def device_value_off(self):
         return self.create_device_value(
             inels_value="00\n0A\n28\n"
         )
-    
+
     @pytest.fixture
     def device_value_on(self):
         return self.create_device_value(
@@ -1400,7 +1226,7 @@ class Test_CU_DEVICE_TYPE_115(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="0A\n0A\n28\n"
         )
-    
+
     @pytest.fixture
     def device_value_tamper(self):
         return self.create_device_value(
@@ -1425,15 +1251,14 @@ class Test_CU_DEVICE_TYPE_115(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_116(BaseDeviceTestClass):
-    INELS_TYPE = IM3_40B
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "116"
 
     @pytest.fixture
     def device_value_off(self):
         return self.create_device_value(
             inels_value="00\n0A\n28\n"
         )
-    
+
     @pytest.fixture
     def device_value_on(self):
         return self.create_device_value(
@@ -1445,7 +1270,7 @@ class Test_CU_DEVICE_TYPE_116(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="AA\n0A\n28\n"
         )
-    
+
     @pytest.fixture
     def device_value_tamper(self):
         return self.create_device_value(
@@ -1470,15 +1295,14 @@ class Test_CU_DEVICE_TYPE_116(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_117(BaseDeviceTestClass):
-    INELS_TYPE = IM3_80B
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "117"
 
     @pytest.fixture
     def device_value_off(self):
         return self.create_device_value(
             inels_value="00\n00\n0A\n28\n"
         )
-    
+
     @pytest.fixture
     def device_value_on(self):
         return self.create_device_value(
@@ -1490,7 +1314,7 @@ class Test_CU_DEVICE_TYPE_117(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="AA\nAA\n0A\n28\n"
         )
-    
+
     @pytest.fixture
     def device_value_tamper(self):
         return self.create_device_value(
@@ -1515,8 +1339,7 @@ class Test_CU_DEVICE_TYPE_117(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_120(BaseDeviceTestClass):
-    INELS_TYPE = DMD3_1
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "120"
 
     @pytest.fixture
     def device_value(self):
@@ -1532,15 +1355,14 @@ class Test_CU_DEVICE_TYPE_120(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_121(BaseDeviceTestClass):
-    INELS_TYPE = IM3_140M
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "121"
 
     @pytest.fixture
     def device_value_off(self):
         return self.create_device_value(
             inels_value="00\n00\n00\n00\n"
         )
-    
+
     @pytest.fixture
     def device_value_on(self):
         return self.create_device_value(
@@ -1552,7 +1374,7 @@ class Test_CU_DEVICE_TYPE_121(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="AA\nAA\nAA\n0A\n"
         )
-    
+
     @pytest.fixture
     def device_value_tamper(self):
         return self.create_device_value(
@@ -1573,8 +1395,7 @@ class Test_CU_DEVICE_TYPE_121(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_122(BaseDeviceTestClass):
-    INELS_TYPE = WSB3_20
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "122"
 
     @pytest.fixture
     def device_value(self):
@@ -1590,8 +1411,7 @@ class Test_CU_DEVICE_TYPE_122(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_123(BaseDeviceTestClass):
-    INELS_TYPE = WSB3_40
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "123"
 
     @pytest.fixture
     def device_value(self):
@@ -1603,12 +1423,11 @@ class Test_CU_DEVICE_TYPE_123(BaseDeviceTestClass):
         assert device_value.ha_value.ain == "7FFC"
         assert device_value.ha_value.din == [True, True]
         assert device_value.ha_value.interface == [True, True, True, True]
-        assert device_value.ha_value.temp_in == "0A52" 
+        assert device_value.ha_value.temp_in == "0A52"
 
 
 class Test_CU_DEVICE_TYPE_124(BaseDeviceTestClass):
-    INELS_TYPE = WSB3_20H
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "124"
 
     @pytest.fixture
     def device_value(self):
@@ -1621,12 +1440,11 @@ class Test_CU_DEVICE_TYPE_124(BaseDeviceTestClass):
         assert device_value.ha_value.dewpoint == "05B0"
         assert device_value.ha_value.din == [True, True]
         assert device_value.ha_value.interface == [True, True]
-        assert device_value.ha_value.temp_in == "09F9"   
+        assert device_value.ha_value.temp_in == "09F9"
 
 
 class Test_CU_DEVICE_TYPE_125(BaseDeviceTestClass):
-    INELS_TYPE = WSB3_40H
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "125"
 
     @pytest.fixture
     def device_value(self):
@@ -1640,12 +1458,11 @@ class Test_CU_DEVICE_TYPE_125(BaseDeviceTestClass):
         assert device_value.ha_value.humidity == "1425"
         assert device_value.ha_value.din == [True, True]
         assert device_value.ha_value.interface == [True, True, True, True]
-        assert device_value.ha_value.temp_in == "09F9"   
+        assert device_value.ha_value.temp_in == "09F9"
 
 
 class Test_CU_DEVICE_TYPE_128(BaseDeviceTestClass):
-    INELS_TYPE = GCR3_11
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "128"
 
     @pytest.fixture
     def device_value(self):
@@ -1658,7 +1475,7 @@ class Test_CU_DEVICE_TYPE_128(BaseDeviceTestClass):
         assert device_value.ha_value.simple_relay[0].is_on == True
         assert device_value.ha_value.card_present == True
         assert device_value.ha_value.interface == [True, True, True]
-        assert device_value.ha_value.temp_in == "09F4" 
+        assert device_value.ha_value.temp_in == "09F4"
 
     def test_format_inels_set_value_relay_on(self, device_value):
         device_value.ha_value.simple_relay[0].is_on = True
@@ -1676,8 +1493,7 @@ class Test_CU_DEVICE_TYPE_128(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_129(BaseDeviceTestClass):
-    INELS_TYPE = GCH3_31
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "129"
 
     @pytest.fixture
     def device_value(self):
@@ -1690,7 +1506,7 @@ class Test_CU_DEVICE_TYPE_129(BaseDeviceTestClass):
         assert device_value.ha_value.simple_relay[0].is_on == True
         assert device_value.ha_value.card_present == True
         assert device_value.ha_value.interface == [True, True, True]
-        assert device_value.ha_value.temp_in == "09F4" 
+        assert device_value.ha_value.temp_in == "09F4"
 
     def test_format_inels_set_value_relay_on(self, device_value):
         device_value.ha_value.simple_relay[0].is_on = True
@@ -1708,8 +1524,7 @@ class Test_CU_DEVICE_TYPE_129(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_136(BaseDeviceTestClass):
-    INELS_TYPE = GSP3_100
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "136"
 
     @pytest.fixture
     def device_value(self):
@@ -1726,8 +1541,7 @@ class Test_CU_DEVICE_TYPE_136(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_137(BaseDeviceTestClass):
-    INELS_TYPE = GDB3_10
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "137"
 
     @pytest.fixture
     def device_value(self):
@@ -1744,8 +1558,7 @@ class Test_CU_DEVICE_TYPE_137(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_138(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_40SX
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "138"
 
     @pytest.fixture
     def device_value(self):
@@ -1758,12 +1571,11 @@ class Test_CU_DEVICE_TYPE_138(BaseDeviceTestClass):
         assert device_value.ha_value.din == [True, True]
         assert device_value.ha_value.interface == [True, True, True, True]
         assert device_value.ha_value.light_in == "00002F63"
-        assert device_value.ha_value.temp_in == "0A03"  
+        assert device_value.ha_value.temp_in == "0A03"
 
 
 class Test_CU_DEVICE_TYPE_139(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_60SX
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "139"
 
     @pytest.fixture
     def device_value(self):
@@ -1776,12 +1588,11 @@ class Test_CU_DEVICE_TYPE_139(BaseDeviceTestClass):
         assert device_value.ha_value.din == [True, True]
         assert device_value.ha_value.interface == [True, True, True, True, True, True]
         assert device_value.ha_value.light_in == "00002F63"
-        assert device_value.ha_value.temp_in == "0A03"  
+        assert device_value.ha_value.temp_in == "0A03"
 
 
 class Test_CU_DEVICE_TYPE_140(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_20SX
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "140"
 
     @pytest.fixture
     def device_value(self):
@@ -1794,12 +1605,11 @@ class Test_CU_DEVICE_TYPE_140(BaseDeviceTestClass):
         assert device_value.ha_value.din == [True, True]
         assert device_value.ha_value.interface == [True, True]
         assert device_value.ha_value.light_in == "00002F63"
-        assert device_value.ha_value.temp_in == "0A03" 
+        assert device_value.ha_value.temp_in == "0A03"
 
 
 class Test_CU_DEVICE_TYPE_141(BaseDeviceTestClass):
-    INELS_TYPE = GBP3_60
-    HA_TYPE    = BUTTON
+    DEVICE_TYPE_ID = "141"
 
     @pytest.fixture
     def device_value(self):
@@ -1812,12 +1622,11 @@ class Test_CU_DEVICE_TYPE_141(BaseDeviceTestClass):
         assert device_value.ha_value.din == [True, True]
         assert device_value.ha_value.interface == [True, True, True, True, True, True]
         assert device_value.ha_value.light_in == "00002F63"
-        assert device_value.ha_value.temp_in == "0A03" 
+        assert device_value.ha_value.temp_in == "0A03"
 
 
 class Test_CU_DEVICE_TYPE_143(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_40_V2
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "143"
 
     @pytest.fixture
     def device_value(self):
@@ -1832,13 +1641,12 @@ class Test_CU_DEVICE_TYPE_143(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_144(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_60_V2
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "144"
 
     @pytest.fixture
     def device_value(self):
@@ -1853,13 +1661,12 @@ class Test_CU_DEVICE_TYPE_144(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_146(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_90_V2
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "146"
 
     @pytest.fixture
     def device_value(self):
@@ -1874,13 +1681,12 @@ class Test_CU_DEVICE_TYPE_146(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_147(BaseDeviceTestClass):
-    INELS_TYPE = DAC3_04B
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "147"
 
     @pytest.fixture
     def device_value(self):
@@ -1889,7 +1695,7 @@ class Test_CU_DEVICE_TYPE_147(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.temp_out == "0A28" 
+        assert device_value.ha_value.temp_out == "0A28"
         for aout in device_value.ha_value.aout:
             assert aout.brightness == 50
             assert aout.aout_coa == True
@@ -1905,8 +1711,7 @@ class Test_CU_DEVICE_TYPE_147(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_148(BaseDeviceTestClass):
-    INELS_TYPE = DAC3_04M
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "148"
 
     @pytest.fixture
     def device_value(self):
@@ -1915,7 +1720,7 @@ class Test_CU_DEVICE_TYPE_148(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.temp_out == "0A28" 
+        assert device_value.ha_value.temp_out == "0A28"
         for aout in device_value.ha_value.aout:
             assert aout.brightness == 50
             assert aout.aout_coa == True
@@ -1931,8 +1736,7 @@ class Test_CU_DEVICE_TYPE_148(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_150(BaseDeviceTestClass):
-    INELS_TYPE = DCDA_33M
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "150"
 
     @pytest.fixture
     def device_value(self):
@@ -1941,7 +1745,7 @@ class Test_CU_DEVICE_TYPE_150(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.sw == [True, True, True] 
+        assert device_value.ha_value.sw == [True, True, True]
         for aout in device_value.ha_value.aout:
             assert aout.brightness == 50
             assert aout.aout_coa == False
@@ -1957,15 +1761,14 @@ class Test_CU_DEVICE_TYPE_150(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_151(BaseDeviceTestClass):
-    INELS_TYPE = DA3_66M
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "151"
 
     @pytest.fixture
     def device_value_all_max(self):
         return self.create_device_value(
             inels_value="00\nFF\n0F\n7F\n64\n64\n64\n64\n7F\n00\n00\n00\n64\n64\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
         )
-    
+
     @pytest.fixture
     def device_value_all_min(self):
         return self.create_device_value(
@@ -1979,7 +1782,7 @@ class Test_CU_DEVICE_TYPE_151(BaseDeviceTestClass):
         for x in device_value_all_max.ha_value.light_coa_toa:
             assert x.brightness == 100
             assert x.toa
-            assert x.coa 
+            assert x.coa
 
 
     def test_create_ha_value_object_all_min(self, device_value_all_min):
@@ -1989,7 +1792,7 @@ class Test_CU_DEVICE_TYPE_151(BaseDeviceTestClass):
         for x in device_value_all_min.ha_value.light_coa_toa:
             assert not x.brightness
             assert not x.toa
-            assert not x.coa 
+            assert not x.coa
 
     def test_format_inels_set_value_all_to_max(self, device_value_all_min):
         for x in device_value_all_min.ha_value.light_coa_toa:
@@ -2012,8 +1815,7 @@ class Test_CU_DEVICE_TYPE_151(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_156(BaseDeviceTestClass):
-    INELS_TYPE = ADC3_60M
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "156"
 
     @pytest.fixture
     def device_value(self):
@@ -2022,13 +1824,12 @@ class Test_CU_DEVICE_TYPE_156(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.ains == ['00000064', '00000064', '00000064', '00000064', '00000064', '00000064'] 
+        assert device_value.ha_value.ains == ['00000064', '00000064', '00000064', '00000064', '00000064', '00000064']
 
 
 class Test_CU_DEVICE_TYPE_157(BaseDeviceTestClass):
-    INELS_TYPE = TI3_10B
-    HA_TYPE    = SENSOR
-    
+    DEVICE_TYPE_ID = "157"
+
     @pytest.fixture
     def device_value(self):
         return self.create_device_value(
@@ -2036,12 +1837,11 @@ class Test_CU_DEVICE_TYPE_157(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.temps == ['7FFF'] 
+        assert device_value.ha_value.temps == ['7FFF']
 
 
 class Test_CU_DEVICE_TYPE_158(BaseDeviceTestClass):
-    INELS_TYPE = TI3_40B
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "158"
 
     @pytest.fixture
     def device_value(self):
@@ -2054,8 +1854,7 @@ class Test_CU_DEVICE_TYPE_158(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_159(BaseDeviceTestClass):
-    INELS_TYPE = TI3_60M
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "159"
 
     @pytest.fixture
     def device_value(self):
@@ -2064,12 +1863,11 @@ class Test_CU_DEVICE_TYPE_159(BaseDeviceTestClass):
         )
 
     def test_create_ha_value_object(self, device_value):
-        assert device_value.ha_value.temps == ['7FFF', '7FFF', '7FFF', '7FFF', '7FFF', '7FFF'] 
+        assert device_value.ha_value.temps == ['7FFF', '7FFF', '7FFF', '7FFF', '7FFF', '7FFF']
 
 
 class Test_CU_DEVICE_TYPE_160(BaseDeviceTestClass):
-    INELS_TYPE = IDRT3_1
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "160"
 
     @pytest.fixture
     def device_value(self):
@@ -2085,15 +1883,14 @@ class Test_CU_DEVICE_TYPE_160(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_163(BaseDeviceTestClass):
-    INELS_TYPE = JA3_018M
-    HA_TYPE    = COVER
+    DEVICE_TYPE_ID = "163"
 
     @pytest.fixture
     def device_value_open(self):
         return self.create_device_value(
             inels_value="07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\nFF\nFF\nFF\nFF\n"
         )
-    
+
     @pytest.fixture
     def device_value_closed(self):
         return self.create_device_value(
@@ -2132,15 +1929,14 @@ class Test_CU_DEVICE_TYPE_163(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_164(BaseDeviceTestClass):
-    INELS_TYPE = DALI_DMX_UNIT
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "164"
 
     @pytest.fixture
     def device_value_all_max(self):
         return self.create_device_value(
             inels_value="00\n00\n00\n00\n64\n64\n64\n64\n"
         )
-    
+
     @pytest.fixture
     def device_value_all_min(self):
         return self.create_device_value(
@@ -2177,15 +1973,14 @@ class Test_CU_DEVICE_TYPE_164(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_165(BaseDeviceTestClass):
-    INELS_TYPE = DALI_DMX_UNIT_2
-    HA_TYPE    = LIGHT
+    DEVICE_TYPE_ID = "165"
 
     @pytest.fixture
     def device_value_all_max(self):
         return self.create_device_value(
             inels_value="00\n00\n00\n00\n64\n64\n64\n64\n"
         )
-    
+
     @pytest.fixture
     def device_value_all_min(self):
         return self.create_device_value(
@@ -2224,8 +2019,7 @@ class Test_CU_DEVICE_TYPE_165(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_166(BaseDeviceTestClass):
-    INELS_TYPE = VIRT_CONTR
-    HA_TYPE    = CLIMATE
+    DEVICE_TYPE_ID = "166"
 
     @pytest.fixture
     def device_value(self):
@@ -2254,8 +2048,7 @@ class Test_CU_DEVICE_TYPE_166(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_167(BaseDeviceTestClass):
-    INELS_TYPE = VIRT_HEAT_REG
-    HA_TYPE    = CLIMATE
+    DEVICE_TYPE_ID = "167"
 
     @pytest.fixture
     def device_value_on(self):
@@ -2277,8 +2070,7 @@ class Test_CU_DEVICE_TYPE_167(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_168(BaseDeviceTestClass):
-    INELS_TYPE = VIRT_COOL_REG
-    HA_TYPE    = CLIMATE
+    DEVICE_TYPE_ID = "168"
 
     @pytest.fixture
     def device_value_on(self):
@@ -2300,8 +2092,7 @@ class Test_CU_DEVICE_TYPE_168(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_169(BaseDeviceTestClass):
-    INELS_TYPE = SA3_014M
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "169"
 
     @pytest.fixture
     def device_value_all_on(self):
@@ -2347,15 +2138,14 @@ class Test_CU_DEVICE_TYPE_169(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_170(BaseDeviceTestClass):
-    INELS_TYPE = JA3_014M
-    HA_TYPE    = COVER
+    DEVICE_TYPE_ID = "170"
 
     @pytest.fixture
     def device_value_open(self):
         return self.create_device_value(
             inels_value="07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n06\nFF\nFF\nFF\nFF\nFF\n"
         )
-    
+
     @pytest.fixture
     def device_value_closed(self):
         return self.create_device_value(
@@ -2384,8 +2174,7 @@ class Test_CU_DEVICE_TYPE_170(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_174(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_40SX_V2
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "174"
 
     @pytest.fixture
     def device_value(self):
@@ -2400,13 +2189,12 @@ class Test_CU_DEVICE_TYPE_174(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_175(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_60SX_V2
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "175"
 
     @pytest.fixture
     def device_value(self):
@@ -2421,13 +2209,12 @@ class Test_CU_DEVICE_TYPE_175(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_176(BaseDeviceTestClass):
-    INELS_TYPE = GSB3_90SX_V2
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "176"
 
     @pytest.fixture
     def device_value(self):
@@ -2442,13 +2229,12 @@ class Test_CU_DEVICE_TYPE_176(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_177(BaseDeviceTestClass):
-    INELS_TYPE = MSB3_40
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "177"
 
     @pytest.fixture
     def device_value(self):
@@ -2463,13 +2249,12 @@ class Test_CU_DEVICE_TYPE_177(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_178(BaseDeviceTestClass):
-    INELS_TYPE = MSB3_60
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "178"
 
     @pytest.fixture
     def device_value(self):
@@ -2484,13 +2269,12 @@ class Test_CU_DEVICE_TYPE_178(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_179(BaseDeviceTestClass):
-    INELS_TYPE = MSB3_90
-    HA_TYPE    = SENSOR
+    DEVICE_TYPE_ID = "179"
 
     @pytest.fixture
     def device_value(self):
@@ -2505,13 +2289,12 @@ class Test_CU_DEVICE_TYPE_179(BaseDeviceTestClass):
         assert device_value.ha_value.temp_in == "0A9E"
         assert device_value.ha_value.light_in == "00002414"
         assert device_value.ha_value.ain == "7FFE"
-        assert device_value.ha_value.humidity == "1220"   
+        assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
 
 
 class Test_CU_DEVICE_TYPE_BITS(BaseDeviceTestClass):
-    INELS_TYPE = BITS
-    HA_TYPE    = SWITCH
+    DEVICE_TYPE_ID = "bits"
 
     @pytest.fixture
     def device_value_all_off(self):
@@ -2554,8 +2337,7 @@ class Test_CU_DEVICE_TYPE_BITS(BaseDeviceTestClass):
 
 
 class Test_CU_DEVICE_TYPE_INTEGERS(BaseDeviceTestClass):
-    INELS_TYPE = INTEGERS
-    HA_TYPE    = NUMBER
+    DEVICE_TYPE_ID = "integers"
 
     @pytest.fixture
     def device_value_all_off(self):

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from inelsmqtt.devices import Device, DeviceInfo
 from inelsmqtt import InelsMqtt
-from inelsmqtt.util import SimpleRelay, new_object
+from inelsmqtt.utils.common import SimpleRelay, new_object
 
 from inelsmqtt.const import (
     MANUFACTURER,

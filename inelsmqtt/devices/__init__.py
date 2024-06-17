@@ -5,7 +5,7 @@ import json
 
 from typing import Any, Callable
 
-from inelsmqtt.util import DeviceValue
+from inelsmqtt.utils.core import DeviceValue
 from inelsmqtt import InelsMqtt
 from inelsmqtt.const import (
     DEVICE_TYPE_DICT,
@@ -235,6 +235,7 @@ class Device(object):
         dev_value = DeviceValue(
             self.__device_type,
             self.__inels_type,
+            self.__device_class,
             inels_value=(val.decode() if val is not None else None),
         )
         return dev_value
@@ -254,6 +255,7 @@ class Device(object):
         dev_value = DeviceValue(
             self.__device_type,
             self.__inels_type,
+            self.__device_class,
             inels_value=(val.decode() if val is not None else None),
             last_value=self.last_values
         )
@@ -284,6 +286,7 @@ class Device(object):
         dev = DeviceValue(
             self.__device_type,
             self.__inels_type,
+            self.__device_class,
             ha_value=value,
             last_value=self.__state,
         )
