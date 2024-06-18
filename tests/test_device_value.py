@@ -137,11 +137,33 @@ class Test_RF_DEVICE_TYPE_03(BaseDeviceTestClass):
         assert isinstance(device_value_closed.ha_value.shutters[0], Shutter)
         assert device_value_closed.ha_value.shutters[0].is_closed
 
-    def test_format_inels_set_value_open(self, device_value_open):
-        assert device_value_open.inels_set_value == "01\n00\n00\n"
+    def test_format_inels_set_value_open(self, device_value_closed):
+        device_value_closed.ha_value.shutters[0].state = Shutter_state.Open
+        device_value = self.create_device_value(
+            ha_value=device_value_closed.ha_value,
+        )
+        assert device_value.inels_set_value == "01\n00\n00\n"
 
-    def test_format_inels_set_value_closed(self, device_value_closed):
-        assert device_value_closed.inels_set_value == "02\n00\n00\n"
+    def test_format_inels_set_value_closed(self, device_value_open):
+        device_value_open.ha_value.shutters[0].state = Shutter_state.Closed
+        device_value = self.create_device_value(
+            ha_value=device_value_open.ha_value,
+        )
+        assert device_value.inels_set_value == "02\n00\n00\n"
+
+    def test_format_inels_set_value_stop_up(self, device_value_closed):
+        device_value_closed.ha_value.shutters[0].state = Shutter_state.Stop_up
+        device_value = self.create_device_value(
+            ha_value=device_value_closed.ha_value,
+        )
+        assert device_value.inels_set_value == "04\n00\n00\n"
+
+    def test_format_inels_set_value_stop_down(self, device_value_open):
+        device_value_open.ha_value.shutters[0].state = Shutter_state.Stop_down
+        device_value = self.create_device_value(
+            ha_value=device_value_open.ha_value,
+        )
+        assert device_value.inels_set_value == "06\n00\n00\n"
 
     def test_comm_test(self):
         device_value = self.create_device_value()
@@ -517,11 +539,33 @@ class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
         assert device_value_closed.ha_value.shutters_with_pos[0].position == 0
         assert device_value_closed.ha_value.shutters_with_pos[0].state == 1
 
-    def test_format_inels_set_value_open(self, device_value_open):
-        assert device_value_open.inels_set_value == "01\n00\n00\n"
+    def test_format_inels_set_value_open(self, device_value_closed):
+        device_value_closed.ha_value.shutters_with_pos[0].state = Shutter_state.Open
+        device_value = self.create_device_value(
+            ha_value=device_value_closed.ha_value,
+        )
+        assert device_value.inels_set_value == "01\n00\n00\n"
 
-    def test_format_inels_set_value_closed(self, device_value_closed):
-        assert device_value_closed.inels_set_value == "02\n00\n00\n"
+    def test_format_inels_set_value_closed(self, device_value_open):
+        device_value_open.ha_value.shutters_with_pos[0].state = Shutter_state.Closed
+        device_value = self.create_device_value(
+            ha_value=device_value_open.ha_value,
+        )
+        assert device_value.inels_set_value == "02\n00\n00\n"
+
+    def test_format_inels_set_value_stop_up(self, device_value_closed):
+        device_value_closed.ha_value.shutters_with_pos[0].state = Shutter_state.Stop_up
+        device_value = self.create_device_value(
+            ha_value=device_value_closed.ha_value,
+        )
+        assert device_value.inels_set_value == "04\n00\n00\n"
+
+    def test_format_inels_set_value_stop_down(self, device_value_open):
+        device_value_open.ha_value.shutters_with_pos[0].state = Shutter_state.Stop_down
+        device_value = self.create_device_value(
+            ha_value=device_value_open.ha_value,
+        )
+        assert device_value.inels_set_value == "06\n00\n00\n"
 
     def test_format_inels_set_value_open_to_70_percent(self, device_value_closed):
         device_value_closed.ha_value.shutters_with_pos[0].set_pos = True

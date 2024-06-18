@@ -188,6 +188,8 @@ class DT_03(CommTest):
     SHUTTER_STATE_SET = {
         Shutter_state.Open: Command.OPEN,
         Shutter_state.Closed: Command.CLOSE,
+        Shutter_state.Stop_up: Command.STOP_UP,
+        Shutter_state.Stop_down: Command.STOP_DOWN,
     }
 
     @classmethod
@@ -702,6 +704,8 @@ class DT_21(CommTest):
     SHUTTER_STATE_SET = {
         Shutter_state.Open: Command.OPEN,
         Shutter_state.Closed: Command.CLOSE,
+        Shutter_state.Stop_up: Command.STOP_UP,
+        Shutter_state.Stop_down: Command.STOP_DOWN,
     }
 
     @classmethod
