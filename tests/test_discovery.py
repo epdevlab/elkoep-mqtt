@@ -45,6 +45,8 @@ def test_discovery_with_retry(mqtt_mock, discovery):
     assert len(discovered_devices) == 1
     assert mqtt_mock.discovery_all.call_count == 2
 
+    mqtt_mock.publish.assert_called_with("inels/set/10e97f8b7d30/01/01E8", "08\n00\n")
+
 
 def test_discovery_with_assumed_state_devices(mqtt_mock, discovery):
     """Test discovery where devices are assumed to be in a certain state."""
@@ -52,10 +54,11 @@ def test_discovery_with_assumed_state_devices(mqtt_mock, discovery):
         "10e97f8b7d30/01/01E8": None,  # disregard
         "10e97f8b7d30/03/03E8": None,  # disregard
         "10e97f8b7d30/18/18E8": None,  # Device is in assumed state list
+        "10e97f8b7d30/18/19E8": None,  # Device is in assumed state list
     }
 
     discovered_devices = discovery.discovery()
-    assert len(discovered_devices) == 1
+    assert len(discovered_devices) == 2
 
 
 def test_discovery_no_devices_found(mqtt_mock, discovery):

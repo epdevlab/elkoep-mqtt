@@ -10,8 +10,9 @@ from typing import Any, Callable, Optional
 
 import paho.mqtt.client as mqtt
 
+from inelsmqtt.utils.core import ProtocolHandlerMapper
+
 from .const import (
-    DEVICE_TYPE_DICT,
     DISCOVERY_TIMEOUT_IN_SEC,
     FRAGMENT_DEVICE_TYPE,
     FRAGMENT_STATE,
@@ -410,7 +411,7 @@ class InelsMqtt:
         topic = msg.topic.split("/")[2:]
         topic = "/".join(topic)
 
-        if device_type in DEVICE_TYPE_DICT:
+        if device_type in ProtocolHandlerMapper.DEVICE_TYPE_MAP:
             if action == "status":
                 self.__discovered[topic] = msg.payload
                 self.__last_values[msg.topic] = msg.payload
@@ -430,6 +431,8 @@ class InelsMqtt:
                     self.__last_values[msg.topic] = copy.copy(msg.topic)
                     self.__is_subscribed_list[msg.topic] = True
                     _LOGGER.info("Device of type %s found [gw].\n", device_type)
+            elif device_type != "gw":
+                _LOGGER.error("No handler found for device_type: %s", device_type)
 
     def __on_message(
         self,
@@ -450,7 +453,7 @@ class InelsMqtt:
 
         message_type = message_parts[TOPIC_FRAGMENTS[FRAGMENT_STATE]]
 
-        if device_type in DEVICE_TYPE_DICT or device_type == "gw":
+        if device_type in ProtocolHandlerMapper.DEVICE_TYPE_MAP or device_type == "gw":
             # keep last value
             self.__last_values[msg.topic] = (
                 copy.copy(self.__messages[msg.topic]) if msg.topic in self.__messages else msg.payload

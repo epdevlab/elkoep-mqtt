@@ -8,19 +8,17 @@ from inelsmqtt import InelsMqtt
 from inelsmqtt.const import (
     BUTTON,
     DEVICE_CONNECTED,
-    DEVICE_TYPE_DICT,
     FRAGMENT_DEVICE_TYPE,
     FRAGMENT_DOMAIN,
     FRAGMENT_SERIAL_NUMBER,
     FRAGMENT_UNIQUE_ID,
     GW_CONNECTED,
-    INELS_DEVICE_TYPE_DICT,
     MANUFACTURER,
     SENSOR,
     TOPIC_FRAGMENTS,
     VERSION,
 )
-from inelsmqtt.utils.core import DeviceValue
+from inelsmqtt.utils.core import DeviceValue, ProtocolHandlerMapper
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,9 +48,10 @@ class Device(object):
         fragments = state_topic.split("/")
 
         self.__mqtt = mqtt
-        self.__device_class = fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
-        self.__device_type = DEVICE_TYPE_DICT[fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]]
-        self.__inels_type = INELS_DEVICE_TYPE_DICT[fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]]
+
+        self.__device_class = ProtocolHandlerMapper.get_handler(fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]])
+        self.__device_type = self.__device_class.HA_TYPE
+        self.__inels_type = self.__device_class.INELS_TYPE
 
         self.__unique_id = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}_{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"  # fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]
         self.__parent_id = self.__unique_id  # fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]
@@ -99,7 +98,7 @@ class Device(object):
         Returns:
             str: Device class
         """
-        return self.__device_class
+        return self.__device_class.TYPE_ID
 
     @property
     def inels_type(self) -> str:
@@ -154,7 +153,7 @@ class Device(object):
             val = val.decode()
 
         # Temporary workaround to provide an always-online status for DT [164, 165, 166, 167, 168]
-        if self.__device_class in ["164", "165", "166", "167", "168"]:
+        if self.__device_class.TYPE_ID in ["164", "165", "166", "167", "168"]:
             return self.__values is not None and self.__values._DeviceValue__ha_value is not None
         else:
             return (

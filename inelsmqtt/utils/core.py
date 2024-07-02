@@ -127,7 +127,7 @@ class DeviceValue:
         self,
         device_type: str,
         inels_type: str,
-        device_class: str,
+        device_class: type,
         inels_value: str = None,
         ha_value: Any = None,
         last_value: Any = None,
@@ -148,38 +148,33 @@ class DeviceValue:
 
     def __update_ha_value(self) -> None:
         try:
-            protocol_handler = ProtocolHandlerMapper.get_handler(self.device_class)
-            if protocol_handler:
-                if self.__inels_status_value is None:
-                    _LOGGER.info("inels_status_value was 'None' for %s", self.inels_type)
-                    self.__ha_value = None
-                else:
-                    self.__ha_value = protocol_handler.create_ha_value_object(self)
+            if self.__inels_status_value is None:
+                _LOGGER.info("inels_status_value was 'None' for %s", self.inels_type)
+                self.__ha_value = None
             else:
-                _LOGGER.error("No handler found for HA update: %s", self.device_class)
+                self.__ha_value = self.device_class.create_ha_value_object(self)
         except Exception as e:
             status_value = self.inels_status_value.replace("\n", " ") if self.inels_status_value else "None"
             _LOGGER.error(
-                "Failed to update HA value for %s, status value was '%s': %s", self.device_class, status_value, str(e)
+                "Failed to update HA value for %s, status value was '%s': %s",
+                self.device_class.TYPE_ID,
+                status_value,
+                str(e),
             )
             self.__ha_value = DUMMY_VAL
 
     def __update_inels_value(self) -> None:
         try:
             if self.__ha_value is not DUMMY_VAL:
-                protocol_handler = ProtocolHandlerMapper.get_handler(self.device_class)
-                if protocol_handler:
-                    if self.__ha_value is None:
-                        self.__inels_set_value = protocol_handler.COMM_TEST()
-                    else:
-                        self.__inels_set_value = protocol_handler.create_inels_set_value(self)
+                if self.__ha_value is None:
+                    self.__inels_set_value = self.device_class.COMM_TEST()
                 else:
-                    _LOGGER.error("No handler found for Inels update: %s", self.device_class)
+                    self.__inels_set_value = self.device_class.create_inels_set_value(self)
         except Exception as e:
             status_value = self.inels_status_value.replace("\n", " ") if self.inels_status_value else "None"
             _LOGGER.error(
                 "Error making 'set' value for device of type '%s', status value was '%s': %s",
-                self.device_class,
+                self.device_class.TYPE_ID,
                 status_value,
                 str(e),
             )

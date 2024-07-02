@@ -25,7 +25,7 @@ class BaseDeviceTestClass:
         return DeviceValue(
             device_type=cls.HA_TYPE,
             inels_type=cls.INELS_TYPE,
-            device_class=cls.TYPE_ID,
+            device_class=cls,
             inels_value=inels_value,
             ha_value=ha_value,
             last_value=last_value,
