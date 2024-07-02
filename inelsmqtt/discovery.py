@@ -3,8 +3,8 @@
 import logging
 
 from inelsmqtt import InelsMqtt
-from inelsmqtt.const import INELS_ASSUMED_STATE_DEVICES, INELS_COMM_TEST_DICT, INELS_DEVICE_TYPE_DICT
 from inelsmqtt.devices import Device
+from inelsmqtt.utils.core import INELS_ASSUMED_STATE_DEVICES, ProtocolHandlerMapper
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,8 +42,9 @@ class InelsDiscovery(object):
                 dev_type = d_frags[1]
                 unique_id = d_frags[2]
 
-                if dev_type in INELS_COMM_TEST_DICT:
-                    self.__mqtt.publish("inels/set/" + d, INELS_COMM_TEST_DICT[dev_type])
+                command = ProtocolHandlerMapper.get_handler(dev_type).COMM_TEST()
+                if command:
+                    self.__mqtt.publish("inels/set/" + d, command)
                     _LOGGER.info("Sending comm test to device of type %s, unique_id %s", dev_type, unique_id)
                     retry = True
 
@@ -56,7 +57,7 @@ class InelsDiscovery(object):
         for k, v in devs.items():
             k_frags = k.split("/")
             dev_type = k_frags[1]
-            if v is not None or INELS_DEVICE_TYPE_DICT[dev_type] in INELS_ASSUMED_STATE_DEVICES:
+            if v is not None or ProtocolHandlerMapper.get_handler(dev_type) in INELS_ASSUMED_STATE_DEVICES:
                 sanitized_devs.append(k)
         devs = sanitized_devs
 

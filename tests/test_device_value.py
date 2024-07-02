@@ -315,6 +315,11 @@ class Test_RF_DEVICE_TYPE_06(BaseDeviceTestClass):
         # TODO: fix with rounding it should be "01\nFF\nFF\nFF\nFF\n00\n"
         assert device_value.inels_set_value == "01\nFF\nFF\nFF\nFE\n00\n"
 
+    def test_comm_test(self):
+        device_value = self.create_device_value()
+        assert device_value.inels_set_value == "07\n00\n00\n00\n00\n00\n"
+        assert device_value.ha_value is None
+
 
 class Test_RF_DEVICE_TYPE_07(BaseDeviceTestClass):
     DEVICE_TYPE_ID = "07"
@@ -380,6 +385,11 @@ class Test_RF_DEVICE_TYPE_09(BaseDeviceTestClass):
             ha_value=device_value.ha_value,
         )
         assert device_value.inels_set_value == "00\n32\n00\n"
+
+    def test_comm_test(self):
+        device_value = self.create_device_value()
+        assert device_value.inels_set_value == ""
+        assert device_value.ha_value is None
 
 
 class Test_RF_DEVICE_TYPE_10(BaseDeviceTestClass):
@@ -1721,6 +1731,37 @@ class Test_CU_DEVICE_TYPE_151(BaseDeviceTestClass):
         )
 
 
+class Test_CU_DEVICE_TYPE_153(BaseDeviceTestClass):
+    DEVICE_TYPE_ID = "153"
+
+    @pytest.fixture
+    def device_value(self):
+        return self.create_device_value(
+            inels_value="00\n00\n00\n00\n01\n01\n01\n01\n0A\n28\n00\n00\n64\n01\n01\n01\n00\n00\n00\n00\n01\n64\n01\n01\n00\n00\n00\n00\n01\n01\n64\n"
+        )
+
+    def test_create_ha_value_object(self, device_value):
+        assert device_value.ha_value.temp_in == "0A28"
+        for led in device_value.ha_value.rgbw:
+            assert led.r == 1
+            assert led.g == 1
+            assert led.b == 1
+            assert led.w == 1
+            assert led.brightness == 100
+
+    def test_format_inels_set_value_all_to_min(self, device_value):
+        for led in device_value.ha_value.rgbw:
+            led.r, led.g, led.b, led.w, led.brightness = [100] * 5
+
+        device_value = self.create_device_value(
+            ha_value=device_value.ha_value,
+        )
+        assert (
+            device_value.inels_set_value
+            == "00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n00\n"
+        )
+
+
 class Test_CU_DEVICE_TYPE_156(BaseDeviceTestClass):
     DEVICE_TYPE_ID = "156"
 
@@ -2061,6 +2102,42 @@ class Test_CU_DEVICE_TYPE_170(BaseDeviceTestClass):
         assert device_value.inels_set_value == "07\n06\n06\n07\n06\n07\n06\n07\n06\n07\n06\n07\n07\n06\n"
 
 
+class Test_CU_DEVICE_TYPE_171(BaseDeviceTestClass):
+    DEVICE_TYPE_ID = "171"
+
+    @pytest.fixture
+    def device_value_move_in_on(self):
+        return self.create_device_value(inels_value="01\n")
+
+    @pytest.fixture
+    def device_value_move_in_off(self):
+        return self.create_device_value(inels_value="00\n")
+
+    def test_create_ha_value_object_on(self, device_value_move_in_on):
+        assert device_value_move_in_on.ha_value.motion
+
+    def test_create_ha_value_object_off(self, device_value_move_in_off):
+        assert not device_value_move_in_off.ha_value.motion
+
+
+class Test_CU_DEVICE_TYPE_172(BaseDeviceTestClass):
+    DEVICE_TYPE_ID = "172"
+
+    @pytest.fixture
+    def device_value_move_in_on(self):
+        return self.create_device_value(inels_value="01\n")
+
+    @pytest.fixture
+    def device_value_move_in_off(self):
+        return self.create_device_value(inels_value="00\n")
+
+    def test_create_ha_value_object_on(self, device_value_move_in_on):
+        assert device_value_move_in_on.ha_value.motion
+
+    def test_create_ha_value_object_off(self, device_value_move_in_off):
+        assert not device_value_move_in_off.ha_value.motion
+
+
 class Test_CU_DEVICE_TYPE_174(BaseDeviceTestClass):
     DEVICE_TYPE_ID = "174"
 
@@ -2149,6 +2226,27 @@ class Test_CU_DEVICE_TYPE_178(BaseDeviceTestClass):
         assert device_value.ha_value.ain == "7FFE"
         assert device_value.ha_value.humidity == "1220"
         assert device_value.ha_value.dewpoint == "059D"
+
+
+class Test_CU_DEVICE_TYPE_180(BaseDeviceTestClass):
+    DEVICE_TYPE_ID = "180"
+
+    @pytest.fixture
+    def device_value(self):
+        return self.create_device_value(
+            inels_value="00\n7F\n0A\n1D\n00\n00\n00\n03\n00\n00\n04\n37\n7F\nFF\n16\n60\n06\n7B\n"
+        )
+
+    def test_create_ha_value_object(self, device_value):
+        assert device_value.ha_value.din == [True]
+        assert device_value.ha_value.prox == True
+        assert device_value.ha_value.interface == [True] * 7
+        assert device_value.ha_value.temp_in == "0A1D"
+        assert device_value.ha_value.light_in == "00000437"
+        assert device_value.ha_value.ain == "7FFF"
+        assert device_value.ha_value.humidity == "1660"
+        assert device_value.ha_value.dewpoint == "067B"
+        assert device_value.ha_value.backlit == False
 
 
 class Test_CU_DEVICE_TYPE_179(BaseDeviceTestClass):

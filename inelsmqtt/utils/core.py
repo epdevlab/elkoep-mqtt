@@ -15,6 +15,12 @@ _LOGGER = logging.getLogger(__name__)
 # it is filtered out in set_val
 DUMMY_VAL = object()
 
+# Devices that support having no state topic at setup time
+INELS_ASSUMED_STATE_DEVICES = [
+    elanrf.DT_18,
+    elanrf.DT_19,
+]
+
 
 class ProtocolHandlerMapper:
     DEVICE_TYPE_MAP = {
@@ -73,6 +79,7 @@ class ProtocolHandlerMapper:
         "148": cu3.DT_148,
         "150": cu3.DT_150,
         "151": cu3.DT_151,
+        "153": cu3.DT_153,
         "156": cu3.DT_156,
         "157": cu3.DT_157,
         "158": cu3.DT_158,
@@ -86,12 +93,15 @@ class ProtocolHandlerMapper:
         "168": cu3.DT_168,
         "169": cu3.DT_169,
         "170": cu3.DT_170,
+        "171": cu3.DT_171,
+        "172": cu3.DT_172,
         "174": cu3.DT_174,
         "175": cu3.DT_175,
         "176": cu3.DT_176,
         "177": cu3.DT_177,
         "178": cu3.DT_178,
         "179": cu3.DT_179,
+        "180": cu3.DT_180,
         "bits": cu3.DT_BITS,
         "integers": cu3.DT_INTEGERS,
     }

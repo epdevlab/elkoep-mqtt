@@ -321,7 +321,7 @@ class DT_06(CommTest):
 
     @classmethod
     def COMM_TEST(cls):
-        return cls.create_command_payload(cls.Command.COMM_TEST, 0, 0, 0, 0, 0)
+        return cls.create_command_payload(cls.Command.COMM_TEST, 0, 0, 0, 0)
 
     @staticmethod
     def create_command_payload(command: int, red: int, green: int, blue: int, brightness: int) -> str:

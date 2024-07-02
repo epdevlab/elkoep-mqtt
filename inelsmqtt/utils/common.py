@@ -67,6 +67,14 @@ class RGBLight(SimpleLight):
 
 
 @dataclass
+class RGBWLight(SimpleLight):
+    r: int
+    g: int
+    b: int
+    w: int
+
+
+@dataclass
 class AOUTLight(SimpleLight):
     aout_coa: bool
 

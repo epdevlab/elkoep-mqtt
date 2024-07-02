@@ -32,6 +32,7 @@ from inelsmqtt.const import (
     DEW_POINT,
     DIM_OUT_1,
     DIM_OUT_2,
+    DIMMER_RGBW,
     DIN,
     DMD3_1,
     FA3_612M,
@@ -40,6 +41,7 @@ from inelsmqtt.const import (
     GCR3_11,
     GDB3_10,
     GRT3_50,
+    GRT3_70,
     GSB3_20SX,
     GSB3_40_V2,
     GSB3_40SX,
@@ -66,12 +68,14 @@ from inelsmqtt.const import (
     LIGHT,
     LIGHT_IN,
     MAX_TEMP,
+    MCD3_01,
     MSB3_40,
     MSB3_60,
     MSB3_90,
     NUMBER,
     OUT,
     PLUS_MINUS_BUTTONS,
+    PMS3_01,
     PUBLIC_HOLIDAY,
     RC3_610DALI,
     RELAY,
@@ -118,6 +122,7 @@ from inelsmqtt.utils.common import (
     LightCoaToa,
     Number,
     Relay,
+    RGBWLight,
     Shutter,
     SimpleLight,
     SimpleRelay,
@@ -1703,6 +1708,75 @@ class DT_151:
         return cls.create_command_payload(cmd)
 
 
+class DT_153(Base):
+    INELS_TYPE = DIMMER_RGBW
+    HA_TYPE = LIGHT
+    TYPE_ID = "153"
+
+    DATA = {
+        "LED_1": [4, 5, 6, 7, 12],
+        "LED_2": [13, 14, 15, 20, 21],
+        "LED_3": [22, 23, 28, 29, 30],
+        TEMP_IN: [8, 9],
+    }
+
+    @classmethod
+    def create_ha_value_object(cls, device_value: DeviceValue) -> str:
+        """Create a HA value object for a RGBW."""
+        led_1 = trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, "LED_1")
+        led_2 = trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, "LED_2")
+        led_3 = trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, "LED_3")
+
+        temp_in = trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_IN, "")
+
+        rgbw = []
+        for led in [led_1, led_2, led_3]:
+            r, g, b, w, y = [int(i, 16) for i in led]
+            rgbw.append(RGBWLight(r=r, g=g, b=b, w=w, brightness=y))
+
+        return new_object(rgbw=rgbw, temp_in=temp_in)
+
+    @classmethod
+    def create_inels_set_value(cls, device_value: DeviceValue) -> str:
+        """Generate command string to set the RGBW and brightness values."""
+        led_1, led_2, led_3 = device_value.ha_value.rgbw
+        command = [
+            0,
+            0,
+            0,
+            0,
+            led_1.r,
+            led_1.g,
+            led_1.b,
+            led_1.w,
+            0,
+            0,
+            0,
+            0,
+            led_1.brightness,
+            led_2.r,
+            led_2.g,
+            led_2.b,
+            0,
+            0,
+            0,
+            0,
+            led_2.w,
+            led_2.brightness,
+            led_3.r,
+            led_3.g,
+            0,
+            0,
+            0,
+            0,
+            led_3.b,
+            led_3.w,
+            led_3.brightness,
+            0,
+        ]
+        return Formatter.format_data(command)
+
+
 class DT_156(Base):
     INELS_TYPE = ADC3_60M
     HA_TYPE = SENSOR
@@ -1812,6 +1886,8 @@ class DT_163(Base):
     SHUTTER_STATE_SET = {
         Shutter_state.Open: [Command.OPEN, Command.CLOSE],
         Shutter_state.Closed: [Command.CLOSE, Command.OPEN],
+        Shutter_state.Stop_up: [Command.CLOSE, Command.CLOSE],
+        Shutter_state.Stop_down: [Command.CLOSE, Command.CLOSE],
     }
 
     @staticmethod
@@ -2305,6 +2381,29 @@ class DT_170(DT_163):
         )
 
 
+class DT_171(Base):
+    INELS_TYPE = MCD3_01
+    HA_TYPE = SENSOR
+    TYPE_ID = "171"
+
+    DATA = {STATE: [0]}
+
+    @classmethod
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
+        state = trim_inels_status_values(device_value.inels_status_value, cls.DATA, STATE, "")
+        motion = int(state, 16) == 1
+
+        return new_object(
+            motion=motion,
+        )
+
+
+class DT_172(DT_171):
+    INELS_TYPE = PMS3_01
+    HA_TYPE = SENSOR
+    TYPE_ID = "172"
+
+
 class DT_174(DT_143):
     INELS_TYPE = GSB3_40SX_V2
     HA_TYPE = SENSOR
@@ -2349,6 +2448,61 @@ class DT_179(DT_143):
     TYPE_ID = "179"
 
     INTERFACE_BUTTON_COUNT = 9
+
+
+class DT_180(Base):
+    INELS_TYPE = GRT3_70
+    HA_TYPE = SENSOR
+    TYPE_ID = "180"
+
+    DATA = {
+        SW: [1],
+        TEMP_IN: [2, 3],
+        DIN: [7],
+        LIGHT_IN: [8, 9, 10, 11],
+        AIN: [12, 13],
+        HUMIDITY: [14, 15],
+        DEW_POINT: [16, 17],
+    }
+
+    @classmethod
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
+        switches = trim_inels_status_values(device_value.inels_status_value, cls.DATA, SW, "")
+        switches_hex_str = f"0x{switches}"
+        switches_bin_str = f"{int(switches_hex_str, 16):0>8b}"
+
+        temp_in = trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_IN, "")
+
+        digital_inputs = trim_inels_status_values(device_value.inels_status_value, cls.DATA, DIN, "")
+        digital_inputs = f"0x{digital_inputs}"
+        digital_inputs = f"{int(digital_inputs, 16):0>8b}"
+        din = [digital_inputs[7] == "1"]
+        prox = digital_inputs[6] == "1"
+
+        light_in = trim_inels_status_values(device_value.inels_status_value, cls.DATA, LIGHT_IN, "")
+        ain = trim_inels_status_values(device_value.inels_status_value, cls.DATA, AIN, "")
+        humidity = trim_inels_status_values(device_value.inels_status_value, cls.DATA, HUMIDITY, "")
+        dewpoint = trim_inels_status_values(device_value.inels_status_value, cls.DATA, DEW_POINT, "")
+
+        return new_object(
+            din=din,
+            prox=prox,
+            interface=[
+                switches_bin_str[7] == "1",
+                switches_bin_str[6] == "1",
+                switches_bin_str[5] == "1",
+                switches_bin_str[4] == "1",
+                switches_bin_str[3] == "1",
+                switches_bin_str[2] == "1",
+                switches_bin_str[1] == "1",
+            ],
+            temp_in=temp_in,
+            light_in=light_in,
+            ain=ain,
+            humidity=humidity,
+            dewpoint=dewpoint,
+            backlit=False,
+        )
 
 
 class DT_BITS:
