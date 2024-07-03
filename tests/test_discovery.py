@@ -34,6 +34,34 @@ def test_discovery_successful(mqtt_mock, discovery):
     mqtt_mock.discovery_all.assert_called_once()
 
 
+def test_discovery_class_com_test(mqtt_mock, discovery):
+    """Test discovery of devices when the handler has a COMM_TEST method."""
+    mqtt_mock.discovery_all.return_value = {
+        "10e97f8b7d30/01/19E8": None,
+        "10e97f8b7d30/02/30E8": None,
+    }
+    expected_devices = []
+
+    discovered_devices = discovery.discovery()
+    assert len(discovered_devices) == len(expected_devices)
+    assert mqtt_mock.discovery_all.call_count == 2
+
+
+def test_discovery_class_without_com_test(mqtt_mock, discovery):
+    """Test discovery of devices when the handler does not have a COMM_TEST method."""
+    mqtt_mock.discovery_all.return_value = {
+        "2C6A6F1036B3/108/02A89F": None,
+        "2C6A6F1036B3/101/0294DD": None,
+        "10e97f8b7d30/17/19E8": None,
+        "10e97f8b7d30/30/30E8": None,
+    }
+    expected_devices = []
+
+    discovered_devices = discovery.discovery()
+    assert len(discovered_devices) == len(expected_devices)
+    mqtt_mock.discovery_all.assert_called_once()
+
+
 def test_discovery_with_retry(mqtt_mock, discovery):
     """Test discovery with retry logic when initial discovery fails."""
     mqtt_mock.discovery_all.side_effect = [

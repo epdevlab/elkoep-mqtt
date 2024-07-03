@@ -167,7 +167,7 @@ class DeviceValue:
         try:
             if self.__ha_value is not DUMMY_VAL:
                 if self.__ha_value is None:
-                    self.__inels_set_value = self.device_class.COMM_TEST()
+                    self.__inels_set_value = getattr(self.device_class, "COMM_TEST", lambda: "")()
                 else:
                     self.__inels_set_value = self.device_class.create_inels_set_value(self)
         except Exception as e:

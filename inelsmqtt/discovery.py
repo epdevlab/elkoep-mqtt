@@ -42,7 +42,8 @@ class InelsDiscovery(object):
                 dev_type = d_frags[1]
                 unique_id = d_frags[2]
 
-                command = ProtocolHandlerMapper.get_handler(dev_type).COMM_TEST()
+                handler = ProtocolHandlerMapper.get_handler(dev_type)
+                command = getattr(handler, "COMM_TEST", lambda: None)()
                 if command:
                     self.__mqtt.publish("inels/set/" + d, command)
                     _LOGGER.info("Sending comm test to device of type %s, unique_id %s", dev_type, unique_id)
