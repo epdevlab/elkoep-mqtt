@@ -2,6 +2,7 @@
 
 import copy
 import logging
+import threading
 import time
 import uuid
 from collections import defaultdict
@@ -10,6 +11,7 @@ from typing import Any, Callable, Optional
 
 import paho.mqtt.client as mqtt
 
+from inelsmqtt.const import GATEWAY
 from inelsmqtt.utils.core import ProtocolHandlerMapper
 
 from .const import (
@@ -45,7 +47,7 @@ class InelsMqtt:
 
     def __init__(
         self,
-        config: dict[str, Any],
+        config: dict,
     ) -> None:
         """InelsMqtt instance initialization.
 
@@ -70,9 +72,9 @@ class InelsMqtt:
         self.__client = mqtt.Client(client_id, protocol=proto, transport=_t)
 
         self.__client.on_connect = self.__on_connect
-        self.client.on_publish = self.__on_publish
-        self.client.on_subscribe = self.__on_subscribe
-        self.client.on_disconnect = self.__on_disconnect
+        self.__client.on_subscribe = self.__on_subscribe
+        self.__client.on_unsubscribe = self.__on_unsubscribe
+        self.__client.on_disconnect = self.__on_disconnect
         self.__connection_error: Optional[int] = None
         self.__client.enable_logger()
 
@@ -92,12 +94,14 @@ class InelsMqtt:
         self.__is_subscribed_list = dict[str, bool]()
         self.__last_values = dict[str, str]()
         self.__try_connect = False
-        self.__message_readed = False
         self.__messages = dict[str, str]()
         self.__discovered = dict[str, str]()
         self.__is_available = False
         self.__discover_start_time = None
-        self.__published = False
+
+        self.__expected_mid = {}
+        self.__subscription_condition = threading.Condition()
+        self.__lock = threading.Lock()
 
     @property
     def client(self) -> mqtt.Client:
@@ -117,6 +121,24 @@ class InelsMqtt:
     def list_of_listeners(self) -> dict[str, dict[str, Callable[[Any], Any]]]:
         """List of listeners."""
         return self.__listeners
+
+    @property
+    def subscribed_topics_status(self) -> dict[str, bool]:
+        """Get all subscribed topics and their subscription status.
+
+        Returns:
+            dict[str, bool]: Dictionary with topics as keys and subscription status as values.
+        """
+        return self.__is_subscribed_list
+
+    @property
+    def expected_mid(self) -> dict[str, int]:
+        """Get the expected message IDs for subscribed topics.
+
+        Returns:
+            dict[str, int]: Dictionary with topics as keys and expected message IDs as values.
+        """
+        return self.__expected_mid
 
     @property
     def connection_error(self) -> Optional[str]:
@@ -186,9 +208,13 @@ class InelsMqtt:
         """Create connection and register callback function to neccessary
         purposes.
         """
-        if self.__client.is_connected() is False:
-            self.__client.connect(self.__host, self.__port)
-            self.__client.loop_start()
+        if not self.__client.is_connected():
+            try:
+                self.__client.connect(self.__host, self.__port)
+                self.__client.loop_start()
+            except Exception as e:
+                _LOGGER.error("Failed to connect to MQTT broker: %s", e)
+                raise
 
         start_time = datetime.now()
 
@@ -206,6 +232,7 @@ class InelsMqtt:
         client: mqtt.Client,  # pylint: disable=unused-argument
         userdata,  # pylint: disable=unused-argument
         reason_code,
+        properties=None,
     ) -> None:
         """On disconnect callback function
 
@@ -250,86 +277,147 @@ class InelsMqtt:
         )
 
     def publish(self, topic, payload, qos=0, retain=True, properties=None) -> bool:
-        """Publish to mqtt broker. Will automatically connect
-        establish all neccessary callback functions. Made
-        publishing and disconnect from broker
+        """
+        Publish a message to a specified MQTT topic.
 
         Args:
-            topic (str): topic string where to publish
-            payload (str): data content
-            qos (int, optional): quality of service
-              https://mosquitto.org/man/mqtt-7.html. Defaults to 0.
-            retain (bool, optional): Broke will keep message after sending it
-              to all subscribers. Defaults to True.
-            properties (_type_, optional): Props from mqtt sets.
-              Defaults to None.
+            topic (str): The topic to publish to.
+            payload (Any): The message payload.
+            qos (int, optional): The Quality of Service level. Defaults to 0.
+            retain (bool, optional): If True, the message will be retained. Defaults to True.
+            properties (Any, optional): Additional properties for the message. Defaults to None.
+
+        Returns:
+            bool: True if the message was published successfully, False otherwise.
         """
-        self.__published = False
         self.__connect()
-        self.client.publish(topic, payload, qos, retain, properties)
+        info = self.client.publish(topic, payload, qos, retain, properties)
 
-        start_time = datetime.now()
+        if info.rc != mqtt.MQTT_ERR_SUCCESS:
+            _LOGGER.error("Could not publish message to topic %s, error code: %d", topic, info.rc)
+            return False
 
-        while self.__published is False:
-            # there should be timeout to discover all topics
-            time_delta = datetime.now() - start_time
-            if time_delta.total_seconds() > self.__timeout:
-                self.__published = False
-                break
+        try:
+            # Wait for the message to be published if it hasn't been already
+            if not info.is_published():
+                info.wait_for_publish(timeout=self.__timeout)
+        except Exception as e:
+            _LOGGER.error("Exception occurred while waiting for publish to topic %s: %s", topic, e)
+            return False
+        else:
+            return True
 
-            time.sleep(0.1)
+    def subscribe(self, topics, qos=0, options=None, properties=None) -> dict[str, str]:
+        """Subscribe to selected topics.
 
-        return self.__published
+        Args:
+            topics (str or list[str] or list[tuple[str, int]]): Topic string representation, list of topics, or list of (topic, qos) tuples.
+            qos (int, optional): Quality of service. Defaults to 0.
+            options (Any, optional): Options is not used, but callback must
+              have implemented. Defaults to None.
+            properties (Any, optional): Props from mqtt set. Defaults to None.
 
-    def __on_publish(
+        Returns:
+            dict[str, str]: Dictionary of messages for the subscribed topics.
+        """
+        with self.__lock:
+            if isinstance(topics, str):
+                topics = [(topics, qos)]
+            elif isinstance(topics, list) and all(isinstance(t, str) for t in topics):
+                topics = [(t, qos) for t in topics]
+
+            self.__connect()
+
+            filtered_topics = []
+            for t, q in topics:
+                if not self.__is_subscribed_list.get(t, False):
+                    self.__is_subscribed_list[t] = False
+                    filtered_topics.append((t, q))
+
+            if filtered_topics:
+                r, mid = self.__client.subscribe(filtered_topics, options, properties)
+                if r != mqtt.MQTT_ERR_SUCCESS:
+                    _LOGGER.error("Failed to subscribe to topics: %s", filtered_topics)
+                    return {}
+
+                for topic, _ in filtered_topics:
+                    self.__expected_mid[topic] = mid
+
+            with self.__subscription_condition:
+                self.__subscription_condition.wait_for(
+                    lambda: not self.__expected_mid.get(topic), timeout=self.__timeout
+                )
+
+        for topic, _ in filtered_topics:
+            if not self.__is_subscribed_list[topic]:
+                _LOGGER.error("Subscription to topic %s failed", topic)
+                self.__expected_mid.pop(topic, None)
+                self.__is_subscribed_list.pop(topic, None)
+
+        return {topic: self.__messages.get(topic) for topic, _ in topics}
+
+    def __on_subscribe(
         self,
         client: mqtt.Client,  # pylint: disable=unused-argument
         userdata,  # pylint: disable=unused-argument
         mid,  # pylint: disable=unused-argument
-    ) -> None:
-        """Callback function called after publish
-          has been created. Will log it.
+        granted_qos,  # pylint: disable=unused-argument
+        properties=None,  # pylint: disable=unused-argument
+    ):
+        """Callback for subscribe function."""
+        topics_to_delete = []
+        for topic, expected_mid in self.__expected_mid.items():
+            if mid == expected_mid:
+                topics_to_delete.append(topic)
+                self.__is_subscribed_list[topic] = True
+                _LOGGER.info("Successfully subscribed to topic: %s", topic)
 
-        Args:
-            client (MqttClient): Instance of mqtt broker
-            userdata (object): Published data
-            mid (_type_): MID
-        """
-        self.__published = True
+        for topic in topics_to_delete:
+            del self.__expected_mid[topic]
 
-    def subscribe(self, topic, qos=0, options=None, properties=None) -> Any:
-        """Subscribe to selected topic. Will connect, set all
-        callback function and subscribe to the topic. After that
-        will automatically disconnect from broker.
+        with self.__subscription_condition:
+            self.__subscription_condition.notify_all()
 
-        Args:
-            topic (str): Topic string representation
-            qos (_type_): Quality of service.
-            options (_type_): Options is not used, but callback must
-              have implemented
-            properties (_type_, optional): Props from mqtt set.
-              Defaults to None.
-        """
-        self.__message_readed = False
-        self.client.on_message = self.__on_message
-
-        self.__connect()
-        self.client.subscribe(topic, qos, options, properties)
-
-        self.__is_subscribed_list[topic] = True
-
-        start_time = datetime.now()
-
-        while self.__message_readed is False:
-            # there should be timeout to discover all topics
-            time_delta = datetime.now() - start_time
-            if time_delta.total_seconds() > self.__timeout:
-                self.__message_readed = False
+    def __on_unsubscribe(self, client, userdata, mid, properties=None, reasoncodes=None):
+        """Callback for when the client receives an UNSUBACK response from the broker."""
+        topic_to_remove = None
+        for topic, expected_mid in self.__expected_mid.items():
+            if expected_mid == mid:
+                self.__is_subscribed_list.pop(topic, None)
+                self.__messages.pop(topic, None)
+                topic_to_remove = topic
                 break
 
-            time.sleep(0.1)
+        if topic_to_remove:
+            del self.__expected_mid[topic_to_remove]
+            _LOGGER.info("Successfully unsubscribed from topic %s", topic_to_remove)
 
-        return self.__messages.get(topic)
+        with self.__subscription_condition:
+            self.__subscription_condition.notify_all()
+
+    def unsubscribe(self, topic: str) -> None:
+        """Unsubscribe from a selected topic.
+
+        Args:
+            topic (str): Topic string representation.
+        """
+        with self.__lock:
+            self.__connect()
+            if self.__is_subscribed_list.get(topic, False):
+                r, mid = self.client.unsubscribe(topic)
+                if r != mqtt.MQTT_ERR_SUCCESS:
+                    _LOGGER.error("Failed to unsubscribe from topic: %s", topic)
+                    return
+
+                self.__expected_mid[topic] = mid
+
+                with self.__subscription_condition:
+                    self.__subscription_condition.wait_for(
+                        lambda: not self.__expected_mid.get(topic), timeout=self.__timeout
+                    )
+
+        if self.__is_subscribed_list.get(topic):
+            _LOGGER.error("Unsubscription from topic %s failed", topic)
 
     def discovery_all(self) -> "dict[str, str]":
         """Subscribe to selected topic. This method is primary used for
@@ -353,37 +441,22 @@ class InelsMqtt:
             dict[str, str]: Dictionary of all topics with their payloads
         """
         self.client.on_message = self.__on_discover
-
         self.__connect()
 
-        self.client.subscribe(
-            MQTT_TOTAL_CONNECTED_TOPIC,
-            0,
-            None,
-            None,
-        )
-
-        self.client.subscribe(
-            MQTT_TOTAL_STATUS_TOPIC,
-            0,
-            None,
-            None,
-        )
+        topics_to_subscribe = [MQTT_TOTAL_CONNECTED_TOPIC, MQTT_TOTAL_STATUS_TOPIC]
+        self.subscribe(topics_to_subscribe, qos=0)
 
         self.__discover_start_time = datetime.now()
 
-        while True:
-            # there should be timeout to discover all topics
-            time_delta = datetime.now() - self.__discover_start_time
-            if time_delta.total_seconds() > self.__timeout:
-                break
-
+        while (datetime.now() - self.__discover_start_time).total_seconds() <= self.__timeout:
             time.sleep(0.1)
 
         for t in self.__discovered:
             self.__messages[MQTT_STATUS_TOPIC_PREFIX + t] = self.__discovered[t]
 
-        self.client.unsubscribe(MQTT_TOTAL_CONNECTED_TOPIC)
+        self.unsubscribe(MQTT_TOTAL_CONNECTED_TOPIC)
+        self.unsubscribe(MQTT_TOTAL_STATUS_TOPIC)
+        self.client.on_message = self.__on_message
 
         return self.__discovered
 
@@ -415,21 +488,18 @@ class InelsMqtt:
             if action == "status":
                 self.__discovered[topic] = msg.payload
                 self.__last_values[msg.topic] = msg.payload
-                self.__is_subscribed_list[msg.topic] = True
                 _LOGGER.info("Device of type %s found [status].\n", device_type)
             elif action == "connected":
                 if topic not in self.__discovered:
-                    self.__discovered[topic] = None  # msg.payload
+                    # Setting to None ensures that it is tracked even if its status message is not received. It will be used for COM_TEST.
+                    self.__discovered[topic] = None
                     self.__last_values[msg.topic] = msg.payload
-                    self.__is_subscribed_list[msg.topic] = True
                 _LOGGER.info("Device of type %s found [connected].\n", device_type)
         else:
             if device_type == "gw" and action == "connected":
-                if msg.topic not in self.__is_subscribed_list:
-                    client.subscribe(msg.topic, 0, None, None)
-                    self.__messages[msg.topic] = msg.payload
-                    self.__last_values[msg.topic] = copy.copy(msg.topic)
-                    self.__is_subscribed_list[msg.topic] = True
+                if msg.topic not in self.__discovered:
+                    self.__discovered[msg.topic] = GATEWAY
+                    self.__last_values[msg.topic] = msg.payload
                     _LOGGER.info("Device of type %s found [gw].\n", device_type)
             elif device_type != "gw":
                 _LOGGER.error("No handler found for device_type: %s", device_type)
@@ -447,7 +517,6 @@ class InelsMqtt:
             userdata (_type_): Date about user
             msg (object): Topic with payload from broker
         """
-        self.__message_readed = True
         message_parts = msg.topic.split("/")
         device_type = message_parts[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
 
@@ -482,27 +551,6 @@ class InelsMqtt:
                 self.__listeners[stripped_topic]
             ):  # prevents the dictionary increased in size during iteration exception
                 self.__listeners[stripped_topic][unique_id](is_connected_message)
-
-    def __on_subscribe(
-        self,
-        client: mqtt.Client,  # pylint: disable=unused-argument
-        userdata,  # pylint: disable=unused-argument
-        mid,  # pylint: disable=unused-argument
-        granted_qos,  # pylint: disable=unused-argument
-        properties=None,  # pylint: disable=unused-argument
-    ):
-        """Callback for subscribe function. Is called after subscribe to
-        the topic. Will handle disconnection from mqtt broker loop
-
-        Args:
-            client (MqttClient): Instance of mqtt broker
-            userdata (_type_): Data about user
-            mid (_type_): MID
-            granted_qos (_type_): Quality of service is granted
-            properties (_type_, optional): Props from broker set.
-                Defaults to None.
-        """
-        # _LOGGER.info(mid)
 
     def __disconnect(self) -> None:
         """Disconnecting from broker and stopping broker's loop"""

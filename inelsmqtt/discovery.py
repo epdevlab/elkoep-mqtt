@@ -3,6 +3,7 @@
 import logging
 
 from inelsmqtt import InelsMqtt
+from inelsmqtt.const import GATEWAY
 from inelsmqtt.devices import Device
 from inelsmqtt.utils.core import INELS_ASSUMED_STATE_DEVICES, ProtocolHandlerMapper
 
@@ -34,6 +35,8 @@ class InelsDiscovery(object):
         """
         devs = self.__mqtt.discovery_all()
 
+        gateways_topics = []
+
         retry = False
         for d in devs:
             if devs[d] is None:  # if comes from 'connected'
@@ -48,10 +51,15 @@ class InelsDiscovery(object):
                     self.__mqtt.publish("inels/set/" + d, command)
                     _LOGGER.info("Sending comm test to device of type %s, unique_id %s", dev_type, unique_id)
                     retry = True
+            elif devs[d] == GATEWAY:
+                gateways_topics.append(d)
 
         if retry:
             _LOGGER.info("Retrying discovery...")
             devs = self.__mqtt.discovery_all()
+
+        # Remove gateways from devs
+        devs = {k: v for k, v in devs.items() if k not in gateways_topics}
 
         # disregard any devices that don't respond
         sanitized_devs = []
@@ -64,6 +72,14 @@ class InelsDiscovery(object):
 
         self.__devices = [Device(self.__mqtt, "inels/status/" + item) for item in devs]
 
+        connected_topics = [device.connected_topic for device in self.__devices]
+        state_topic = [device.state_topic for device in self.__devices]
+        all_topics = connected_topics + state_topic + gateways_topics
+
+        # Subscribe to all topics with QoS 0
+        self.__mqtt.subscribe(all_topics, qos=0)
+
         _LOGGER.info("Discovered %s devices", len(self.__devices))
+        _LOGGER.info("Discovered %s gateways", len(gateways_topics))
 
         return self.__devices

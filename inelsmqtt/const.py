@@ -9,6 +9,7 @@ DISCOVERY_TIMEOUT_IN_SEC = 5
 
 NAME = "inels-mqtt"
 
+GATEWAY = "gateway"
 SWITCH = "switch"
 SENSOR = "sensor"
 LIGHT = "light"

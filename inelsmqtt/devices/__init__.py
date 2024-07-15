@@ -69,9 +69,6 @@ class Device(object):
         self.__values: DeviceValue = None
 
         self.__entity_callbacks: dict[tuple[str, int], Callable[[Any], Any]] = None
-        # subscribe availability
-        self.__mqtt.subscribe(self.__state_topic)
-        self.__mqtt.subscribe(self.__connected_topic, 0, None, None)
 
     @property
     def unique_id(self) -> str:
