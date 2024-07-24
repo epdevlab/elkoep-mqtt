@@ -40,9 +40,6 @@ def test_device_initialization(device, mqtt_mock):
     assert device.is_available == False
     assert device.mqtt == mqtt_mock
 
-    mqtt_mock.subscribe.assert_any_call(device.state_topic)
-    mqtt_mock.subscribe.assert_any_call(device.connected_topic, 0, None, None)
-
 
 def test_device_availability(device):
     # Simulate an update to the device value

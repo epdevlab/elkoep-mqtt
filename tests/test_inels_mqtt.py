@@ -36,14 +36,49 @@ def test_instance_initialization_pytest_style(inels_mqtt, mqtt_config):
     assert inels_mqtt._InelsMqtt__port == mqtt_config["port"]  # pylint: disable=protected-access
 
 
-def test_publish_pytest_style(mqtt_client_mock, inels_mqtt):
-    """Test publishing a message using pytest."""
-    mqtt_client_mock.publish.return_value = (mqtt.MQTT_ERR_SUCCESS, 1)
+def test_publish_successful(mqtt_client_mock, inels_mqtt):
+    """Test successful publishing of a message."""
+    info = Mock()
+    info.rc = mqtt.MQTT_ERR_SUCCESS
+    info.is_published.return_value = True
 
-    inels_mqtt.publish("inels/status/10e97f8b7d30/01/01E8", "data")
+    mqtt_client_mock.publish.return_value = info
 
-    # Assert that the publish method was called with the correct parameters
+    result = inels_mqtt.publish("inels/status/10e97f8b7d30/01/01E8", "data")
+
     mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, True, None)
+
+    assert result == True
+
+
+def test_publish_unsuccessful(mqtt_client_mock, inels_mqtt):
+    """Test unsuccessful publishing of a message."""
+    info = Mock()
+    info.rc = mqtt.MQTT_ERR_NO_CONN
+
+    mqtt_client_mock.publish.return_value = info
+
+    result = inels_mqtt.publish("inels/status/10e97f8b7d30/01/01E8", "data")
+
+    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, True, None)
+
+    assert result == False
+
+
+def test_publish_exception(mqtt_client_mock, inels_mqtt):
+    """Test publishing a message with an exception during wait_for_publish."""
+    info = Mock()
+    info.rc = mqtt.MQTT_ERR_SUCCESS
+    info.is_published.return_value = False
+    info.wait_for_publish.side_effect = Exception("Timeout")
+
+    mqtt_client_mock.publish.return_value = info
+
+    result = inels_mqtt.publish("inels/status/10e97f8b7d30/01/01E8", "data")
+
+    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, True, None)
+
+    assert result == False
 
 
 def test_is_available_true_false_based_on__on_connect_function(mqtt_client_mock, inels_mqtt):
@@ -75,30 +110,74 @@ def test_discovery_all_with_tree_messages(mqtt_client_mock, inels_mqtt):
             inels_mqtt, Mock(), msg
         )
 
+    mqtt_client_mock.subscribe.return_value = (mqtt.MQTT_ERR_SUCCESS, 1)
+
     devices = inels_mqtt.discovery_all()
     assert len(devices) == 3
 
 
-def test_subscribe(mqtt_client_mock, inels_mqtt):
-    """Test subscribing to a topic."""
+def test_subscribe_successful(mqtt_client_mock, inels_mqtt):
+    """Test successful subscription to topics."""
+    topics = [("inels/status/10e97f8b7d30/01/01E8", 0), ("inels/status/10e97f8b7d30/01/01E9", 0)]
 
-    topic = "inels/status/10e97f8b7d30/01/01E8"
-    msg = type(
-        "msg",
-        (object,),
-        {"topic": topic, "payload": "02\n01\n"},
-    )
+    mqtt_client_mock.subscribe.return_value = (mqtt.MQTT_ERR_SUCCESS, 1)
 
-    inels_mqtt._InelsMqtt__on_message(inels_mqtt, Mock(), msg)
+    # Simulate the behavior of __on_subscribe
+    def wait_for_side_effect(condition_func, timeout):
+        for topic, _ in topics:
+            inels_mqtt._InelsMqtt__is_subscribed_list[topic] = True
+            inels_mqtt._InelsMqtt__expected_mid.pop(topic, None)
 
-    # mqtt_client_mock.is_connected.return_value = True
-    # mqtt_client_mock.subscribe.return_value = (mqtt.MQTT_ERR_SUCCESS, 1)
+    inels_mqtt._InelsMqtt__subscription_condition.wait_for = wait_for_side_effect
+    inels_mqtt._InelsMqtt__timeout = 0.1
+    result = inels_mqtt.subscribe(topics)
 
-    last_messages = inels_mqtt.subscribe(topic)
+    mqtt_client_mock.subscribe.assert_called_once_with(topics, None, None)
+    assert result == {topic: None for topic, _ in topics}
 
-    mqtt_client_mock.subscribe.assert_called_once_with(topic, 0, None, None)
-    assert inels_mqtt._InelsMqtt__is_subscribed_list[topic] == True
-    assert msg.payload == last_messages
+    for topic, _ in topics:
+        assert inels_mqtt._InelsMqtt__is_subscribed_list[topic] == True
+        assert topic not in inels_mqtt._InelsMqtt__expected_mid
+
+
+def test_subscribe_unsuccessful(mqtt_client_mock, inels_mqtt):
+    """Test unsuccessful subscription to a topic."""
+    topics = [("inels/status/10e97f8b7d30/01/01E8", 0), ("inels/status/10e97f8b7d30/01/01E9", 0)]
+
+    mqtt_client_mock.subscribe.return_value = (mqtt.MQTT_ERR_NO_CONN, 0)
+
+    result = inels_mqtt.subscribe(topics)
+
+    mqtt_client_mock.subscribe.assert_called_once_with(topics, None, None)
+    assert result == {}
+
+    # Check that failed topics are removed
+    for topic, _ in topics:
+        assert topic not in inels_mqtt._InelsMqtt__is_subscribed_list
+        assert topic not in inels_mqtt._InelsMqtt__expected_mid
+
+
+def test_subscribe_unsuccessful_wait_for(mqtt_client_mock, inels_mqtt):
+    """Test unsuccessful subscription to a topic with wait_for."""
+    topics = [("inels/status/10e97f8b7d30/01/01E8", 0), ("inels/status/10e97f8b7d30/01/01E9", 0)]
+
+    mqtt_client_mock.subscribe.return_value = (mqtt.MQTT_ERR_SUCCESS, 1)
+
+    # Simulate initial state
+    for i, (topic, _) in enumerate(topics):
+        inels_mqtt._InelsMqtt__is_subscribed_list[topic] = False
+        inels_mqtt._InelsMqtt__expected_mid[topic] = i
+
+    inels_mqtt._InelsMqtt__timeout = 0.01
+    result = inels_mqtt.subscribe(topics)
+
+    mqtt_client_mock.subscribe.assert_called_once_with(topics, None, None)
+    assert result == {"inels/status/10e97f8b7d30/01/01E8": None, "inels/status/10e97f8b7d30/01/01E9": None}
+
+    # Check that failed topics are removed
+    for topic, _ in topics:
+        assert topic not in inels_mqtt._InelsMqtt__is_subscribed_list
+        assert topic not in inels_mqtt._InelsMqtt__expected_mid
 
 
 def test_message_property(inels_mqtt):
@@ -154,3 +233,36 @@ def test_unsubscribe_listeners(inels_mqtt):
 
     # Check if no listeners are left
     assert len(inels_mqtt.list_of_listeners) == 0
+
+
+def test_unsubscribe_success(mqtt_client_mock, inels_mqtt):
+    """Test successful unsubscribe."""
+    topic = "inels/status/10e97f8b7d30/01/01E8"
+    inels_mqtt._InelsMqtt__is_subscribed_list = {topic: True}
+    inels_mqtt._InelsMqtt__expected_mid = {topic: 1}
+    inels_mqtt._InelsMqtt__timeout = 0.01
+
+    mqtt_client_mock.unsubscribe.return_value = (mqtt.MQTT_ERR_SUCCESS, 1)
+
+    # Simulate the behavior of __on_unsubscribe
+    def wait_for_side_effect(condition_func, timeout):
+        inels_mqtt._InelsMqtt__is_subscribed_list.pop(topic, None)
+        inels_mqtt._InelsMqtt__expected_mid.pop(topic, None)
+
+    inels_mqtt._InelsMqtt__subscription_condition.wait_for = wait_for_side_effect
+
+    inels_mqtt.unsubscribe(topic)
+
+    mqtt_client_mock.unsubscribe.assert_called_once_with(topic)
+
+    assert topic not in inels_mqtt._InelsMqtt__is_subscribed_list
+    assert topic not in inels_mqtt._InelsMqtt__expected_mid
+
+
+def test_unsubscribe_nonexistent_topic(mqtt_client_mock, inels_mqtt):
+    """Test unsubscribe edge cases."""
+    inels_mqtt._InelsMqtt__is_subscribed_list = {}
+
+    inels_mqtt.unsubscribe("non_existent_topic")
+
+    mqtt_client_mock.unsubscribe.assert_not_called()

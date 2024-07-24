@@ -338,6 +338,9 @@ class InelsMqtt:
                 r, mid = self.__client.subscribe(filtered_topics, options, properties)
                 if r != mqtt.MQTT_ERR_SUCCESS:
                     _LOGGER.error("Failed to subscribe to topics: %s", filtered_topics)
+                    # Clean up the state for failed subscriptions
+                    for topic, _ in filtered_topics:
+                        self.__is_subscribed_list.pop(topic, None)
                     return {}
 
                 for topic, _ in filtered_topics:
