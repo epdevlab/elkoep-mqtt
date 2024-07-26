@@ -285,6 +285,8 @@ TOPIC_FRAGMENTS = {
 }
 
 GW_CONNECTED = {
+    b'{"status":true}': True,
+    b'{"status":false}': False,
     b'{"status": true}': True,
     b'{"status": false}': False,
 }
