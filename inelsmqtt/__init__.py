@@ -10,6 +10,8 @@ from datetime import datetime
 from typing import Any, Callable, Optional
 
 import paho.mqtt.client as mqtt
+from paho.mqtt.packettypes import PacketTypes
+from paho.mqtt.properties import Properties
 
 from inelsmqtt.const import GATEWAY
 from inelsmqtt.utils.core import ProtocolHandlerMapper
@@ -59,7 +61,7 @@ class InelsMqtt:
             transport (str): transportation protocol. Can be used tcp or websockets, defaltut tcp
             debug (bool): flag for debuging mqtt comunication. Default False
         """
-        proto = config.get(MQTT_PROTOCOL) if config.get(MQTT_PROTOCOL) else mqtt.MQTTv311
+        self.__proto = config.get(MQTT_PROTOCOL) if config.get(MQTT_PROTOCOL) else mqtt.MQTTv311
 
         _t: str = (config.get(MQTT_TRANSPORT) if config.get(MQTT_TRANSPORT) else "tcp").lower()
 
@@ -69,7 +71,7 @@ class InelsMqtt:
         if (client_id := config.get(MQTT_CLIENT_ID)) is None:
             client_id = mqtt.base62(uuid.uuid4().int, padding=22)
 
-        self.__client = mqtt.Client(client_id, protocol=proto, transport=_t)
+        self.__client = mqtt.Client(client_id, protocol=self.__proto, transport=_t)
 
         self.__client.on_connect = self.__on_connect
         self.__client.on_subscribe = self.__on_subscribe
@@ -210,7 +212,18 @@ class InelsMqtt:
         """
         if not self.__client.is_connected():
             try:
-                self.__client.connect(self.__host, self.__port)
+                if self.__proto == 5:
+                    properties = Properties(PacketTypes.CONNECT)
+                    properties.SessionExpiryInterval = 3600  # in seconds
+                    self.__client.connect(
+                        self.__host,
+                        self.__port,
+                        clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
+                        properties=properties,
+                        keepalive=60,
+                    )
+                else:
+                    self.__client.connect(self.__host, self.__port, keepalive=60)
                 self.__client.loop_start()
             except Exception as e:
                 _LOGGER.error("Failed to connect to MQTT broker: %s", e)
@@ -219,9 +232,9 @@ class InelsMqtt:
         start_time = datetime.now()
 
         while self.__try_connect is False:
-            # there should be timeout to discover all topics
             time_delta = datetime.now() - start_time
             if time_delta.total_seconds() > self.__timeout:
+                _LOGGER.error("Connection attempt timed out")
                 self.__try_connect = self.__is_available = False
                 break
 
@@ -241,11 +254,17 @@ class InelsMqtt:
             userdata (Any): users data
             reason_code (number): reason code
         """
-        _LOGGER.info("%s - disconnecting reason [%s]", self.__host, reason_code)
+        _LOGGER.warning("%s - disconnecting reason [%s]", self.__host, reason_code)
+
+        self.__is_available = False
 
         for item in self.__is_subscribed_list.keys():
             self.__is_subscribed_list[item] = False
             _LOGGER.info("Disconnected %s", item)
+
+        # Notify any condition variables waiting on __expected_mid
+        with self.__subscription_condition:
+            self.__subscription_condition.notify_all()
 
     def __on_connect(
         self,
@@ -346,10 +365,10 @@ class InelsMqtt:
                 for topic, _ in filtered_topics:
                     self.__expected_mid[topic] = mid
 
-            with self.__subscription_condition:
-                self.__subscription_condition.wait_for(
-                    lambda: not self.__expected_mid.get(topic), timeout=self.__timeout
-                )
+                with self.__subscription_condition:
+                    self.__subscription_condition.wait_for(
+                        lambda: not self.__expected_mid.get(topic), timeout=self.__timeout
+                    )
 
         for topic, _ in filtered_topics:
             if not self.__is_subscribed_list[topic]:
@@ -557,11 +576,19 @@ class InelsMqtt:
 
     def __disconnect(self) -> None:
         """Disconnecting from broker and stopping broker's loop"""
-        self.close()
         self.client.disconnect()
+        self.close()
 
     def close(self) -> None:
         """Close loop."""
+        _LOGGER.warning("Close called from HA")
+
+        self.__is_available = False
+
+        # Notify any condition variables waiting on __expected_mid
+        with self.__subscription_condition:
+            self.__subscription_condition.notify_all()
+
         self.client.loop_stop()
 
     def disconnect(self) -> None:
