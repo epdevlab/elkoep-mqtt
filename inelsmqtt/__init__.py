@@ -257,6 +257,7 @@ class InelsMqtt:
         _LOGGER.warning("%s - disconnecting reason [%s]", self.__host, reason_code)
 
         self.__is_available = False
+        self.__try_connect = False
 
         for item in self.__is_subscribed_list.keys():
             self.__is_subscribed_list[item] = False
