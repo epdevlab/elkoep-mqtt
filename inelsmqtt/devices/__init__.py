@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any, Callable
+from typing import Any, Callable, Optional, Union
 
 from inelsmqtt import InelsMqtt
 from inelsmqtt.const import (
@@ -18,7 +18,7 @@ from inelsmqtt.const import (
     TOPIC_FRAGMENTS,
     VERSION,
 )
-from inelsmqtt.utils.core import DeviceValue, ProtocolHandlerMapper
+from inelsmqtt.utils.core import DeviceClassProtocol, DeviceTypeNotFound, DeviceValue, ProtocolHandlerMapper
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class Device(object):
         self,
         mqtt: InelsMqtt,
         state_topic: str,
-        title: str = None,
+        title: Optional[str] = None,
     ) -> None:
         """Initialize instance of device
 
@@ -49,7 +49,14 @@ class Device(object):
 
         self.__mqtt = mqtt
 
-        self.__device_class = ProtocolHandlerMapper.get_handler(fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]])
+        try:
+            self.__device_class: type[DeviceClassProtocol] = ProtocolHandlerMapper.get_handler(
+                fragments[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
+            )
+        except DeviceTypeNotFound as e:
+            _LOGGER.error("Failed to get device class: %s", e)
+            raise
+
         self.__device_type = self.__device_class.HA_TYPE
         self.__inels_type = self.__device_class.INELS_TYPE
 
@@ -66,9 +73,9 @@ class Device(object):
         self.__title = title if title is not None else self.__unique_id
         self.__domain = fragments[TOPIC_FRAGMENTS[FRAGMENT_DOMAIN]]
         self.__state: Any = None
-        self.__values: DeviceValue = None
+        self.__values: Optional[DeviceValue] = None
 
-        self.__entity_callbacks: dict[tuple[str, int], Callable[[Any], Any]] = None
+        self.__entity_callbacks: Optional[dict[tuple[str, int], Callable[[], Any]]] = None
 
     @property
     def unique_id(self) -> str:
@@ -142,25 +149,26 @@ class Device(object):
         """
         gw = self.__mqtt.messages().get(self.gw_connected_topic)
         if gw is not None:
-            if not GW_CONNECTED.get(gw):
+            if not GW_CONNECTED.get(gw):  # type: ignore[call-overload]
                 return False
 
         val = self.__mqtt.messages().get(self.connected_topic)
         if isinstance(val, (bytes, bytearray)):
-            val = val.decode()
+            val = val.decode()  # type: ignore[unreachable]
 
         # Temporary workaround to provide an always-online status for DT [164, 165, 166, 167, 168]
         if self.__device_class.TYPE_ID in ["164", "165", "166", "167", "168"]:
-            return self.__values is not None and self.__values._DeviceValue__ha_value is not None
+            return self.__values is not None and self.__values.ha_value is not None
         else:
-            return (
-                DEVICE_CONNECTED.get(val)
+            return bool(
+                val is not None
+                and DEVICE_CONNECTED.get(val)
                 and self.__values is not None
-                and self.__values._DeviceValue__ha_value is not None
+                and self.__values.ha_value is not None
             )
 
     @property
-    def set_topic(self) -> str:
+    def set_topic(self) -> Union[str, None]:
         """Set topic
 
         Returns:
@@ -214,7 +222,7 @@ class Device(object):
         return self.__state
 
     @property
-    def values(self) -> DeviceValue:
+    def values(self) -> Optional[DeviceValue]:
         """Get values of inels and ha type."""
         return self.__values
 
@@ -231,7 +239,7 @@ class Device(object):
             self.__device_type,
             self.__inels_type,
             self.__device_class,
-            inels_value=(val.decode() if val is not None else None),
+            inels_value=val.decode() if val is not None else None,  # type: ignore[attr-defined]
         )
         return dev_value
 
@@ -295,7 +303,7 @@ class Device(object):
 
         return ret
 
-    def info(self):
+    def info(self) -> "DeviceInfo":
         """Device info."""
         return DeviceInfo(self)
 
@@ -323,23 +331,26 @@ class Device(object):
             self.__entity_callbacks = dict()
         self.__entity_callbacks[t] = fnc
 
-    def ha_diff(self, last_val, curr_val):
-        for k in (key for key in dir(curr_val) if not key.startswith("_")):
-            if isinstance(curr_val.__dict__[k], list):
-                for i in range(len(curr_val.__dict__[k])):
-                    if curr_val.__dict__[k][i] != last_val.__dict__[k][i]:
-                        t: tuple[str, int] = (k, i)
-                        if t in self.__entity_callbacks:
-                            self.__entity_callbacks[t]()
-            else:
-                if curr_val.__dict__[k] != last_val.__dict__[k]:
-                    t: tuple[str, int] = (k, -1)
-                    if t in self.__entity_callbacks:
-                        self.__entity_callbacks[t]()
+    def ha_diff(self, last_val: Any, curr_val: Any) -> None:
+        if self.__entity_callbacks is None:
+            return
+
+        for k, curr_value in curr_val.__dict__.items():
+            if k.startswith("_"):
+                continue
+
+            last_value = last_val.__dict__.get(k)
+            if isinstance(curr_value, list):
+                for i, (curr_item, last_item) in enumerate(zip(curr_value, last_value, strict=True)):
+                    if curr_item != last_item:
+                        self.__entity_callbacks.get((k, i), lambda: None)()  # type: ignore [call-arg]
+            elif curr_value != last_value:
+                self.__entity_callbacks.get((k, -1), lambda: None)()  # type: ignore [call-arg]
 
     def complete_callback(self) -> None:
-        for v in self.__entity_callbacks.values():
-            v()
+        if self.__entity_callbacks:
+            for v in self.__entity_callbacks.values():
+                v()
 
     def callback(self, availability_update: bool) -> None:
         """Update value in device and call the callbacks of the respective entities."""
@@ -347,7 +358,7 @@ class Device(object):
 
         if availability_update:  # recalculate state for all the entities as they became unavailable/available
             self.complete_callback()
-        else:
+        elif self.__values and self.last_values:
             self.ha_diff(  # differential availability
                 last_val=self.last_values.ha_value,
                 curr_val=self.__values.ha_value,

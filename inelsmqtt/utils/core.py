@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any, List, Optional, Protocol
 
 from inelsmqtt.protocols import cu3, elanrf
 
@@ -16,14 +16,37 @@ _LOGGER = logging.getLogger(__name__)
 DUMMY_VAL = object()
 
 # Devices that support having no state topic at setup time
-INELS_ASSUMED_STATE_DEVICES = [
+INELS_ASSUMED_STATE_DEVICES: List[type[DeviceClassProtocol]] = [
     elanrf.DT_18,
     elanrf.DT_19,
 ]
 
 
+class DeviceTypeNotFound(Exception):
+    """Raised when a device type is not found in the ProtocolHandlerMapper."""
+
+    pass
+
+
+class DeviceClassProtocol(Protocol):
+    """
+    Protocol defining the interface for device classes.
+    This is used for static type checking.
+    """
+
+    INELS_TYPE: str
+    HA_TYPE: str
+    TYPE_ID: str
+
+    @classmethod
+    def create_ha_value_object(cls, device_value: Any) -> Any: ...
+
+    @classmethod
+    def create_inels_set_value(cls, device_value: Any) -> str: ...
+
+
 class ProtocolHandlerMapper:
-    DEVICE_TYPE_MAP = {
+    DEVICE_TYPE_MAP: dict[str, type[DeviceClassProtocol]] = {
         "01": elanrf.DT_01,
         "02": elanrf.DT_02,
         "03": elanrf.DT_03,
@@ -107,7 +130,7 @@ class ProtocolHandlerMapper:
     }
 
     @staticmethod
-    def get_handler(device_type: str) -> Optional[Any]:
+    def get_handler(device_type: str) -> type[DeviceClassProtocol]:
         """
         Retrieve the handler based on the device type code.
 
@@ -115,9 +138,15 @@ class ProtocolHandlerMapper:
             device_type (str): The code that identifies the device type.
 
         Returns:
-            Optional[Any]: The handler associated with the device type code, or None if not found.
+            type[DeviceClassProtocol]: The handler associated with the device type code.
+
+        Raises:
+            DeviceTypeNotFound: If the device type is not found in the DEVICE_TYPE_MAP.
         """
-        return ProtocolHandlerMapper.DEVICE_TYPE_MAP.get(device_type)
+        handler = ProtocolHandlerMapper.DEVICE_TYPE_MAP.get(device_type)
+        if handler is None:
+            raise DeviceTypeNotFound(f"Unknown device type: {device_type}")
+        return handler
 
 
 class DeviceValue:
@@ -127,8 +156,8 @@ class DeviceValue:
         self,
         device_type: str,
         inels_type: str,
-        device_class: type,
-        inels_value: str = None,
+        device_class: type[DeviceClassProtocol],
+        inels_value: Optional[str] = None,
         ha_value: Any = None,
         last_value: Any = None,
     ) -> None:
@@ -206,7 +235,7 @@ class DeviceValue:
         Returns:
             str: quated string from mqtt broker
         """
-        return self.__inels_status_value
+        return self.__inels_status_value or ""
 
     @property
     def last_value(self) -> Any:

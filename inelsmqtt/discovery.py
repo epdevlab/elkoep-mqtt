@@ -27,7 +27,7 @@ class InelsDiscovery(object):
         """
         return self.__devices
 
-    def discovery(self) -> dict[str, list[Device]]:
+    def discovery(self) -> list[Device]:
         """Discover and create device list
 
         Returns:
@@ -62,15 +62,14 @@ class InelsDiscovery(object):
         devs = {k: v for k, v in devs.items() if k not in gateways_topics}
 
         # disregard any devices that don't respond
-        sanitized_devs = []
+        sanitized_devs: list[str] = []
         for k, v in devs.items():
             k_frags = k.split("/")
             dev_type = k_frags[1]
             if v is not None or ProtocolHandlerMapper.get_handler(dev_type) in INELS_ASSUMED_STATE_DEVICES:
                 sanitized_devs.append(k)
-        devs = sanitized_devs
 
-        self.__devices = [Device(self.__mqtt, "inels/status/" + item) for item in devs]
+        self.__devices = [Device(self.__mqtt, "inels/status/" + item) for item in sanitized_devs]
 
         connected_topics = [device.connected_topic for device in self.__devices]
         state_topic = [device.state_topic for device in self.__devices]

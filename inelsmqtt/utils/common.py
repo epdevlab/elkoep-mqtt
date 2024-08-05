@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from operator import itemgetter
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, TypeAlias, Union
 
 from inelsmqtt import const
 
@@ -90,30 +90,34 @@ class DALILight(SimpleLight):
     alert_dali_power: bool
 
 
-def new_object(**kwargs):
+DataValue: TypeAlias = Union[int, List[int]]
+DataDict: TypeAlias = dict[str, DataValue]
+
+
+def new_object(**kwargs: Any) -> Any:
     """Create new anonymous object."""
     return type("Object", (), kwargs)
 
 
-def break_into_bytes(line: str):
+def break_into_bytes(line: str) -> List[str]:
     if len(line) % 2 == 0:
         return [line[i : i + 2] for i in range(0, len(line), 2)]
     return []
 
 
 def trim_inels_status_values(
-    inels_status_value: str, selector: Dict[str, Union[int, tuple]], fragment: str, jointer: str
+    inels_status_value: str, selector: dict[str, Union[int, list[int]]], fragment: str, jointer: str
 ) -> str:
     """Trim inels status from broker into the pure string."""
     data = inels_status_value.split("\n")[:-1]
 
-    # Ensure the selector for the fragment is a tuple, even if it's a single value
+    # Ensure the selector for the fragment is a list, even if it's a single value
     indices = selector[fragment]
     if isinstance(indices, int):
-        indices = (indices,)  # Make it a tuple if it's not
+        indices = [indices]  # Make it a list if it's not
 
     selected = itemgetter(*indices)(data)
-    return jointer.join(selected)
+    return jointer.join(selected) if isinstance(selected, tuple) else jointer.join([selected])
 
 
 def trim_inels_status_bytes(inels_status_value: str, selector: Dict[str, Any], fragment: str) -> List[str]:
@@ -121,13 +125,13 @@ def trim_inels_status_bytes(inels_status_value: str, selector: Dict[str, Any], f
     data = inels_status_value.split("\n")[:-1]
 
     selected = itemgetter(*selector[fragment])(data)
-    return selected
+    return list(selected) if isinstance(selected, tuple) else [selected]
 
 
-def parse_formated_json(data):
+def parse_formated_json(data: str) -> List[Tuple[str, int]]:
     addr_val_list = []
     data = json.loads(data)
-    for addr, val in data["state"].items():
+    for addr, val in data["state"].items():  # type: ignore
         addr_val_list.append((addr, val))
     return addr_val_list
 

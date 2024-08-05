@@ -118,6 +118,7 @@ from inelsmqtt.utils.common import (
     AOUTLight,
     Bit,
     DALILight,
+    DataDict,
     Formatter,
     LightCoaToa,
     Number,
@@ -150,7 +151,7 @@ class DT_100:
     HA_TYPE = SWITCH
     TYPE_ID = "100"
 
-    DATA = {RELAY: [0], TEMP_IN: [2, 3], RELAY_OVERFLOW: [4]}
+    DATA: DataDict = {RELAY: [0], TEMP_IN: [2, 3], RELAY_OVERFLOW: [4]}
 
     RELAY_SET = {
         True: Command.ON,
@@ -173,14 +174,7 @@ class DT_100:
             int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, RELAY_OVERFLOW, ""), 16) == 1
         )
 
-        relay: list[Relay] = []
-        for i in range(len(re)):
-            relay.append(
-                Relay(
-                    is_on=re[i],
-                    overflow=relay_overflow[i],
-                )
-            )
+        relay = [Relay(is_on=re[i], overflow=relay_overflow[i]) for i in range(len(re))]
 
         return new_object(
             # re=re,
@@ -207,7 +201,7 @@ class DT_101(Base):
     HA_TYPE = LIGHT
     TYPE_ID = "101"
 
-    DATA = {
+    DATA: DataDict = {
         TEMP_IN: [0, 1],
         DA3_22M: [2],
         DIM_OUT_1: [4],
@@ -279,7 +273,7 @@ class DT_102(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "102"
 
-    DATA = {
+    DATA: DataDict = {
         GRT3_50: [1],
         TEMP_IN: [2, 3],
         PLUS_MINUS_BUTTONS: [7],
@@ -334,7 +328,7 @@ class DT_103(Base):
     HA_TYPE = BUTTON
     TYPE_ID = "103"
 
-    DATA = {
+    DATA: DataDict = {
         GSB3_90SX: [0, 1],
         TEMP_IN: [2, 3],
         LIGHT_IN: [4, 5, 6, 7],
@@ -391,7 +385,7 @@ class DT_104(DT_100):
     HA_TYPE = SWITCH
     TYPE_ID = "104"
 
-    DATA = {
+    DATA: DataDict = {
         RELAY: [0, 1],
         TEMP_IN: [2, 3],
     }
@@ -415,7 +409,7 @@ class DT_105(DT_100):
     HA_TYPE = SWITCH
     TYPE_ID = "105"
 
-    DATA = {RELAY: [0, 1], SW: [2]}
+    DATA: DataDict = {RELAY: [0, 1], SW: [2]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -441,7 +435,7 @@ class DT_106(DT_100):
     HA_TYPE = SWITCH
     TYPE_ID = "106"
 
-    DATA = {
+    DATA: DataDict = {
         RELAY: [0, 1, 2, 3],
         SW: [4],
     }
@@ -470,7 +464,7 @@ class DT_107(DT_100):
     HA_TYPE = SWITCH
     TYPE_ID = "107"
 
-    DATA = {
+    DATA: DataDict = {
         RELAY: [0, 1, 2, 3, 4, 5],
         SW: [6],
     }
@@ -499,7 +493,7 @@ class DT_108(DT_100):
     HA_TYPE = SWITCH
     TYPE_ID = "108"
 
-    DATA = {
+    DATA: DataDict = {
         RELAY: list(range(12)),
         SW: [12, 13],
     }
@@ -535,7 +529,7 @@ class DT_109(Base):
     HA_TYPE = SWITCH
     TYPE_ID = "109"
 
-    DATA = {
+    DATA: DataDict = {
         RELAY: list(range(16)),
         SHUTTER: [16, 17],
         VALVE: [18, 19, 20, 21],
@@ -564,8 +558,8 @@ class DT_109(Base):
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         re = []
-        for relay in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, RELAY):
-            re.append((int(relay, 16) & 1) != 0)
+        for _relay in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, RELAY):
+            re.append((int(_relay, 16) & 1) != 0)
 
         overflows = []
         alerts = trim_inels_status_values(device_value.inels_status_value, cls.DATA, RELAY_OVERFLOW, "")
@@ -586,13 +580,11 @@ class DT_109(Base):
         for i in range(8):
             sw.append(digital_inputs[15 - i] == "1")
 
-        relay: list[Relay] = []
-        for i in range(len(re)):
-            relay.append(Relay(is_on=re[i], overflow=overflows[i]))
+        relay = [Relay(is_on=re[i], overflow=overflows[i]) for i in range(len(re))]
 
-        shutter = []
-        for s in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, SHUTTER):
-            shutter.append((int(s, 16) & 1) != 0)
+        shutter = [
+            int(s, 16) & 1 != 0 for s in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, SHUTTER)
+        ]
 
         simple_shutters = []
         shutters = list(zip(shutter[::2], shutter[1::2], strict=True))
@@ -638,7 +630,7 @@ class DT_111:
     HA_TYPE = SWITCH
     TYPE_ID = "111"
 
-    DATA = {
+    DATA: DataDict = {
         FA3_612M: [0, 1, 2],
         RELAY_OVERFLOW: [3],
         AOUT: list(range(4, 8)),
@@ -749,7 +741,7 @@ class DT_112(DT_100):
     HA_TYPE = SWITCH
     TYPE_ID = "112"
 
-    DATA = {
+    DATA: DataDict = {
         RELAY: list(range(8)),
         TEMP_IN: [8, 9, 10, 11, 12, 13, 14, 15],
         DIN: [24],
@@ -760,11 +752,11 @@ class DT_112(DT_100):
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         re = []
-        for relay in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, RELAY):
-            re.append((int(relay, 16) & 1) != 0)
+        for _relay in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, RELAY):
+            re.append((int(_relay, 16) & 1) != 0)
 
-        temps = trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_IN, "")
-        temps = [temps[0:8], temps[8:16]]
+        temps_str = trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_IN, "")
+        temps: List[str] = [temps_str[0:8], temps_str[8:16]]
 
         digital_inputs = trim_inels_status_values(device_value.inels_status_value, cls.DATA, DIN, "")
         digital_inputs = f"0x{digital_inputs}"
@@ -782,14 +774,7 @@ class DT_112(DT_100):
         for _ in range(8):
             relay_overflow.append(digital_inputs[7 - 1] == "1")
 
-        relay: list[Relay] = []
-        for i in range(8):
-            relay.append(
-                Relay(
-                    is_on=re[i],
-                    overflow=relay_overflow[i],
-                )
-            )
+        relay = [Relay(is_on=re[i], overflow=relay_overflow[i]) for i in range(len(re))]
 
         return new_object(
             relay=relay,
@@ -809,7 +794,7 @@ class DT_114(Base):
     HA_TYPE = SWITCH
     TYPE_ID = "114"
 
-    DATA = {
+    DATA: DataDict = {
         TEMP_IN: [2, 3, 18, 19],
         AOUT: [4, 5],
         RELAY: list(range(8, 16)),
@@ -833,8 +818,8 @@ class DT_114(Base):
 
         # relays
         re = []
-        for relay in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, RELAY):
-            re.append((int(relay, 16) & 1) != 0)
+        for _relay in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, RELAY):
+            re.append((int(_relay, 16) & 1) != 0)
 
         # temperatures
         temps = []
@@ -862,14 +847,7 @@ class DT_114(Base):
         for i in range(len(re)):
             relay_overflow.append(overflows[7 - i] == "1")
 
-        relay: list[Relay] = []
-        for i in range(len(re)):
-            relay.append(
-                Relay(
-                    is_on=re[i],
-                    overflow=relay_overflow[i],
-                )
-            )
+        relay = [Relay(is_on=re[i], overflow=relay_overflow[i]) for i in range(len(re))]
 
         sync_error = []
         aout_coa = []
@@ -937,7 +915,7 @@ class DT_115(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "115"
 
-    DATA = {
+    DATA: DataDict = {
         IN: [0],
         TEMP_IN: [1, 2],
     }
@@ -963,7 +941,7 @@ class DT_116(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "116"
 
-    DATA = {
+    DATA: DataDict = {
         IN: [0],
         TEMP_IN: [1, 2],
     }
@@ -989,7 +967,7 @@ class DT_117(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "117"
 
-    DATA = {
+    DATA: DataDict = {
         IN: [0, 1],
         TEMP_IN: [2, 3],
     }
@@ -1018,7 +996,7 @@ class DT_120(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "120"
 
-    DATA = {
+    DATA: DataDict = {
         LIGHT_IN: [0, 1, 2, 3],
         TEMP_IN: [4, 5],
         HUMIDITY: [6, 7],
@@ -1030,11 +1008,11 @@ class DT_120(Base):
         light_in = trim_inels_status_values(device_value.inels_status_value, cls.DATA, LIGHT_IN, "")
         temp_in = trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_IN, "")
         humidity = trim_inels_status_values(device_value.inels_status_value, cls.DATA, HUMIDITY, "")
-        motion = trim_inels_status_values(device_value.inels_status_value, cls.DATA, DMD3_1, "")
-        motion = f"0x{motion}"
-        motion = f"{int(motion, 16):0>8b}"
+        motion_str = trim_inels_status_values(device_value.inels_status_value, cls.DATA, DMD3_1, "")
+        motion_str = f"0x{motion_str}"
+        motion_str = f"{int(motion_str, 16):0>8b}"
 
-        motion = motion[7] == "1"
+        motion = motion_str[7] == "1"
 
         return new_object(
             light_in=light_in,
@@ -1049,7 +1027,7 @@ class DT_121(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "121"
 
-    DATA = {IN: [0, 1, 2, 3]}
+    DATA: DataDict = {IN: [0, 1, 2, 3]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -1078,7 +1056,7 @@ class DT_122(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "122"
 
-    DATA = {
+    DATA: DataDict = {
         SW: [0],
         DIN: [1],
         TEMP_IN: [2, 3],
@@ -1125,7 +1103,7 @@ class DT_124(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "124"
 
-    DATA = {
+    DATA: DataDict = {
         SW: [0],
         DIN: [1],
         TEMP_IN: [2, 3],
@@ -1183,7 +1161,7 @@ class DT_128:
     HA_TYPE = SWITCH
     TYPE_ID = "128"
 
-    DATA = {  # Card holder/reader
+    DATA: DataDict = {  # Card holder/reader
         STATE: [0, 1],
         CARD_ID: list(range(4, 12)),
         LIGHT_IN: [12, 13, 14, 15],
@@ -1201,7 +1179,7 @@ class DT_128:
         state = f"{int(state, 16):0>16b}"
 
         simple_relay: list[SimpleRelay] = []
-        simple_relay.append(SimpleRelay(is_on=state[5] == "1"))
+        simple_relay.append(SimpleRelay(is_on=bool(int(state[5]))))
 
         card_present = state[4] == "1"
 
@@ -1241,7 +1219,7 @@ class DT_136(Base):
     HA_TYPE = BUTTON
     TYPE_ID = "136"
 
-    DATA = {
+    DATA: DataDict = {
         SW: [0],
         DIN: [1],
         TEMP_IN: [2, 3],
@@ -1286,7 +1264,7 @@ class DT_137(Base):
     HA_TYPE = BUTTON
     TYPE_ID = "137"
 
-    DATA = {
+    DATA: DataDict = {
         SW: [0],
         DIN: [1],
         TEMP_IN: [2, 3],
@@ -1329,7 +1307,7 @@ class DT_138(Base):
     HA_TYPE = BUTTON
     TYPE_ID = "138"
 
-    DATA = {
+    DATA: DataDict = {
         SW: [0],
         DIN: [1],
         TEMP_IN: [2, 3],
@@ -1393,7 +1371,7 @@ class DT_143(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "143"
 
-    DATA = {
+    DATA: DataDict = {
         SW: [0],
         DIN: [1],
         TEMP_IN: [2, 3],
@@ -1477,14 +1455,14 @@ class DT_147:
     HA_TYPE = LIGHT
     TYPE_ID = "147"
 
-    DATA = {
+    DATA: DataDict = {
         TEMP_OUT: [0, 1],
         ALERT: [2],
         OUT: [4, 5, 6, 7],
     }
 
     @staticmethod
-    def create_command_payload(cmd: int) -> str:
+    def create_command_payload(cmd: List[int]) -> str:
         return Formatter.format_data([0, 0, 0, 0] + cmd)
 
     @classmethod
@@ -1496,11 +1474,10 @@ class DT_147:
         aout_str = trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, OUT)
         aout = []
         for d in aout_str:
-            d = int(d, 16)
-            d = d if d <= 100 else 100
+            brightness = min(int(d, 16), 100)
             aout.append(
                 AOUTLight(
-                    brightness=d,
+                    brightness=brightness,
                     aout_coa=aout_alert,
                 )
             )
@@ -1523,14 +1500,14 @@ class DT_148:
     HA_TYPE = LIGHT
     TYPE_ID = "148"
 
-    DATA = {
+    DATA: DataDict = {
         TEMP_OUT: [0, 1],
         ALERT: [2],
         OUT: [4, 5, 6, 7],
     }
 
     @staticmethod
-    def create_command_payload(cmd: int) -> str:
+    def create_command_payload(cmd: List[int]) -> str:
         return Formatter.format_data([0, 0, 0, 0] + cmd)
 
     @classmethod
@@ -1546,9 +1523,8 @@ class DT_148:
         aout_str = trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, OUT)
         aout_val = []
         for d in aout_str:
-            d = int(d, 16)
-            d = d if d <= 100 else 100
-            aout_val.append(d)
+            brightness = min(int(d, 16), 100)
+            aout_val.append(brightness)
 
         aout = []
         for i in range(4):
@@ -1577,13 +1553,13 @@ class DT_150:
     HA_TYPE = LIGHT
     TYPE_ID = "150"
 
-    DATA = {
+    DATA: DataDict = {
         ALERT: [2],
         OUT: [4, 5, 6, 7],
     }
 
     @staticmethod
-    def create_command_payload(cmd: int) -> str:
+    def create_command_payload(cmd: List[int]) -> str:
         return Formatter.format_data([0, 0, 0, 0] + cmd)
 
     @classmethod
@@ -1634,7 +1610,7 @@ class DT_151:
     HA_TYPE = LIGHT
     TYPE_ID = "151"
 
-    DATA = {
+    DATA: DataDict = {
         ALERT: [1, 2],
         SW: [3],
         OUT: [4, 5, 6, 7, 12, 13],
@@ -1644,7 +1620,7 @@ class DT_151:
     }
 
     @staticmethod
-    def create_command_payload(cmd: int) -> str:
+    def create_command_payload(cmd: List[int]) -> str:
         return Formatter.format_data([0] * 4 + cmd[:4] + [0] * 4 + cmd[4:] + [0] * 12)
 
     @classmethod
@@ -1713,7 +1689,7 @@ class DT_153(Base):
     HA_TYPE = LIGHT
     TYPE_ID = "153"
 
-    DATA = {
+    DATA: DataDict = {
         "LED_1": [4, 5, 6, 7, 12],
         "LED_2": [13, 14, 15, 20, 21],
         "LED_3": [22, 23, 28, 29, 30],
@@ -1721,7 +1697,7 @@ class DT_153(Base):
     }
 
     @classmethod
-    def create_ha_value_object(cls, device_value: DeviceValue) -> str:
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         """Create a HA value object for a RGBW."""
         led_1 = trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, "LED_1")
         led_2 = trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, "LED_2")
@@ -1782,7 +1758,7 @@ class DT_156(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "156"
 
-    DATA = {
+    DATA: DataDict = {
         AIN: list(range(24)),
         ADC3_60M: [24],
     }
@@ -1804,7 +1780,7 @@ class DT_157(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "157"
 
-    DATA = {TEMP_IN: [0, 1]}
+    DATA: DataDict = {TEMP_IN: [0, 1]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -1822,7 +1798,7 @@ class DT_158(DT_157):
     HA_TYPE = SENSOR
     TYPE_ID = "158"
 
-    DATA = {TEMP_IN: list(range(8))}
+    DATA: DataDict = {TEMP_IN: list(range(8))}
 
 
 class DT_159(DT_157):
@@ -1830,7 +1806,7 @@ class DT_159(DT_157):
     HA_TYPE = SENSOR
     TYPE_ID = "159"
 
-    DATA = {TEMP_IN: list(range(12))}
+    DATA: DataDict = {TEMP_IN: list(range(12))}
 
 
 class DT_160(Base):
@@ -1838,7 +1814,7 @@ class DT_160(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "160"
 
-    DATA = {
+    DATA: DataDict = {
         SW: [1],
         TEMP_IN: [2, 3],
         TEMP_OUT: [8, 9],
@@ -1876,7 +1852,7 @@ class DT_163(Base):
     HA_TYPE = COVER
     TYPE_ID = "163"
 
-    DATA = {
+    DATA: DataDict = {
         SHUTTER: list(range(18)),
         SW: [18, 19],
         ALERT: [20],
@@ -1962,7 +1938,7 @@ class DT_164(Base):
     HA_TYPE = LIGHT
     TYPE_ID = "164"
 
-    DATA = {
+    DATA: DataDict = {
         OUT: list(range(4, 8)),
     }
 
@@ -1975,11 +1951,10 @@ class DT_164(Base):
         outs = trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, OUT)
         simple_light = []
         for o in outs:
-            o = int(o, 16)
-            o = o if o < 100 else 100
+            brightness = min(int(o, 16), 100)
             simple_light.append(
                 SimpleLight(
-                    brightness=o,
+                    brightness=brightness,
                 )
             )
 
@@ -1992,7 +1967,7 @@ class DT_164(Base):
         cmd: List[int] = []
         for i in range(4):
             out = device_value.ha_value.simple_light[i].brightness
-            out = cmd.append(out if out <= 100 else 100)
+            cmd.append(min(out, 100))
         return cls.create_command_payload(cmd)
 
 
@@ -2001,7 +1976,7 @@ class DT_165(Base):
     HA_TYPE = LIGHT
     TYPE_ID = "165"
 
-    DATA = {
+    DATA: DataDict = {
         OUT: list(range(4, 8)),
     }
 
@@ -2033,11 +2008,11 @@ class DT_165(Base):
     def create_inels_set_value(cls, device_value: DeviceValue) -> str:
         cmd: List[int] = []
         for i in range(2):
-            out = device_value.ha_value.warm_light[i].brightness
-            out = cmd.append(min(out, 100))
+            out = min(device_value.ha_value.warm_light[i].brightness, 100)
+            cmd.append(out)
 
-            white = device_value.ha_value.warm_light[i].relative_ct
-            white = cmd.append(min(white, 100))
+            white = min(device_value.ha_value.warm_light[i].relative_ct, 100)
+            cmd.append(white)
 
         return cls.create_command_payload(cmd)
 
@@ -2047,7 +2022,7 @@ class DT_166:
     HA_TYPE = CLIMATE
     TYPE_ID = "166"
 
-    DATA = {
+    DATA: DataDict = {
         CURRENT_TEMP: [3, 2, 1, 0],
         CRITICAL_MAX_TEMP: [7, 6, 5, 4],
         REQUIRED_HEAT_TEMP: [11, 10, 9, 8],
@@ -2066,11 +2041,14 @@ class DT_166:
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
-        temp_current = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, CURRENT_TEMP, ""), 16)
+        temp_current: float = int(
+            trim_inels_status_values(device_value.inels_status_value, cls.DATA, CURRENT_TEMP, ""), 16
+        )
         if temp_current == 0x7FFFFFFB:
             temp_current = 0
         else:
             temp_current /= 100
+
         temp_critical_max = (
             int(
                 trim_inels_status_values(  # check if 0x7F FF FF FB -> make it 50
@@ -2080,13 +2058,14 @@ class DT_166:
             )
             / 100
         )
-        temp_required_heat = int(
+        temp_required_heat: float = int(
             trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_HEAT_TEMP, ""), 16
         )
         if temp_required_heat == 0x7FFFFFFB:
             temp_required_heat = 0
         else:
             temp_required_heat /= 100
+
         temp_critical_min = (
             int(
                 trim_inels_status_values(  # check if 0x7F FF FF FB -> make it -50
@@ -2096,13 +2075,14 @@ class DT_166:
             )
             / 100
         )
-        temp_required_cool = int(
+        temp_required_cool: float = int(
             trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_COOL_TEMP, ""), 16
         )
         if temp_required_cool == 0x7FFFFFFB:
             temp_required_cool = 0
         else:
             temp_required_cool /= 100
+
         temp_correction = (
             int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_CORRECTION, ""), 16) / 100
         )
@@ -2231,7 +2211,7 @@ class DT_167(Base):
     HA_TYPE = CLIMATE
     TYPE_ID = "167"
 
-    DATA = {
+    DATA: DataDict = {
         STATE: [0],
         VIRT_HEAT_REG: [1],
     }
@@ -2254,7 +2234,7 @@ class DT_168(Base):
     HA_TYPE = CLIMATE
     TYPE_ID = "168"
 
-    DATA = {
+    DATA: DataDict = {
         STATE: [0],
         VIRT_HEAT_REG: [1],
     }
@@ -2279,7 +2259,7 @@ class DT_169(DT_100):
     HA_TYPE = SWITCH
     TYPE_ID = "169"
 
-    DATA = {
+    DATA: DataDict = {
         RELAY: list(range(14)),  # relays
         SW: [17, 18],  # switch inputs
     }
@@ -2288,7 +2268,7 @@ class DT_169(DT_100):
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         simple_relay: list[SimpleRelay] = []
         for relay in trim_inels_status_bytes(device_value.inels_status_value, cls.DATA, RELAY):
-            simple_relay.append(SimpleRelay(is_on=((int(relay, 16) & 1) != 0)))
+            simple_relay.append(SimpleRelay(is_on=bool(int(relay, 16) & 1)))
 
         digital_inputs = trim_inels_status_values(device_value.inels_status_value, cls.DATA, SW, "")
         digital_inputs = f"0x{digital_inputs}"
@@ -2311,7 +2291,7 @@ class DT_170(DT_163):
     HA_TYPE = COVER
     TYPE_ID = "170"
 
-    DATA = {
+    DATA: DataDict = {
         SHUTTER: list(range(14)),
         SW: [17, 18],
         ALERT: [16],
@@ -2365,7 +2345,7 @@ class DT_170(DT_163):
         overflows = f"{int(overflows, 16):0>16b}"
 
         # TODO add overflows and alerts to the shutters
-        relay_overflow = []
+        relay_overflow: list[bool] = []
         for i in range(8):
             interface.append(overflows[7 - i] == "1")
         for i in range(6):
@@ -2386,7 +2366,7 @@ class DT_171(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "171"
 
-    DATA = {STATE: [0]}
+    DATA: DataDict = {STATE: [0]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -2455,7 +2435,7 @@ class DT_180(Base):
     HA_TYPE = SENSOR
     TYPE_ID = "180"
 
-    DATA = {
+    DATA: DataDict = {
         SW: [1],
         TEMP_IN: [2, 3],
         DIN: [7],
@@ -2518,7 +2498,7 @@ class DT_BITS:
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         bit: list[Bit] = []
         for addr, val in parse_formated_json(device_value.inels_status_value):
-            bit.append(Bit(is_on=val, addr=addr))
+            bit.append(Bit(is_on=bool(val), addr=addr))
 
         return new_object(
             bit=bit,

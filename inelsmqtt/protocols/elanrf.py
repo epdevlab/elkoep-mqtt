@@ -54,6 +54,7 @@ from inelsmqtt.const import (
     Shutter_state,
 )
 from inelsmqtt.utils.common import (
+    DataDict,
     Formatter,
     RGBLight,
     Shutter,
@@ -90,7 +91,7 @@ class DT_01(CommTest):
     HA_TYPE = SWITCH
     TYPE_ID = "01"
 
-    DATA = {RELAY: 1}
+    DATA: DataDict = {RELAY: 1}
 
     @classmethod
     def COMM_TEST(cls) -> str:
@@ -101,7 +102,7 @@ class DT_01(CommTest):
         return Formatter.format_data([command, 0])
 
     @classmethod
-    def create_ha_value_object(cls, device_value: DeviceValue) -> str:
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         simple_relay: list[SimpleRelay] = []
         simple_relay.append(
             SimpleRelay(
@@ -133,7 +134,7 @@ class DT_02(CommTest):
     HA_TYPE = SWITCH
     TYPE_ID = "02"
 
-    DATA = {RELAY: 1}
+    DATA: DataDict = {RELAY: 1}
     TIME_HIGH_BYTE = 0
     TIME_LOW_BYTE = 0
 
@@ -146,7 +147,7 @@ class DT_02(CommTest):
         return Formatter.format_data([command, time_high_byte, time_low_byte])
 
     @classmethod
-    def create_ha_value_object(cls, device_value: DeviceValue) -> str:
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         """Create a HA value object for a switch."""
         simple_relay: list[SimpleRelay] = []
         simple_relay.append(
@@ -181,7 +182,7 @@ class DT_03(CommTest):
     HA_TYPE = COVER
     TYPE_ID = "03"
 
-    DATA = {SHUTTER: [1]}
+    DATA: DataDict = {SHUTTER: [1]}
     TIME_HIGH_BYTE = 0
     TIME_LOW_BYTE = 0
 
@@ -193,7 +194,7 @@ class DT_03(CommTest):
     }
 
     @classmethod
-    def COMM_TEST(cls):
+    def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST, cls.TIME_HIGH_BYTE, cls.TIME_LOW_BYTE)
 
     @staticmethod
@@ -202,8 +203,9 @@ class DT_03(CommTest):
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
-        # shutters True -> closed, False -> open
-        shutter_val = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, SHUTTER, ""), 16)
+        shutter_val = Shutter_state(
+            int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, SHUTTER, ""), 16)
+        )
 
         # So as to continue driving it down if it aisn't closed
         # and continue opening it if it isn't open
@@ -231,10 +233,10 @@ class DT_04(CommTest):
     HA_TYPE = LIGHT
     TYPE_ID = "04"
 
-    DATA = {RF_DIMMER: [0, 1]}
+    DATA: DataDict = {RF_DIMMER: [0, 1]}
 
     @classmethod
-    def COMM_TEST(cls):
+    def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST)
 
     @staticmethod
@@ -275,10 +277,10 @@ class DT_05(CommTest):
     HA_TYPE = LIGHT
     TYPE_ID = "05"
 
-    DATA = {RF_DIMMER: [0, 1]}
+    DATA: DataDict = {RF_DIMMER: [0, 1]}
 
     @classmethod
-    def COMM_TEST(cls):
+    def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST)
 
     @staticmethod
@@ -286,7 +288,7 @@ class DT_05(CommTest):
         return Formatter.format_data([command, high_byte, low_byte])
 
     @classmethod
-    def create_ha_value_object(cls, device_value: DeviceValue) -> str:
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         """Create a HA value object for a dimmer."""
         brightness = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, RF_DIMMER, ""), 16)
         brightness = int((((0xFFFF - brightness) - 10000) / 1000) * 5)
@@ -317,10 +319,10 @@ class DT_06(CommTest):
     HA_TYPE = LIGHT
     TYPE_ID = "06"
 
-    DATA = {RED: [1], GREEN: [2], BLUE: [3], OUT: [4]}
+    DATA: DataDict = {RED: [1], GREEN: [2], BLUE: [3], OUT: [4]}
 
     @classmethod
-    def COMM_TEST(cls):
+    def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST, 0, 0, 0, 0)
 
     @staticmethod
@@ -328,7 +330,7 @@ class DT_06(CommTest):
         return Formatter.format_data([command, red, green, blue, brightness, 0])
 
     @classmethod
-    def create_ha_value_object(cls, device_value: DeviceValue) -> str:
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         """Create a HA value object for a RGB."""
         red = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, RED, ""), 16)
         green = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, GREEN, ""), 16)
@@ -367,7 +369,7 @@ class DT_07(CommTest):
     HA_TYPE = SWITCH
     TYPE_ID = "07"
 
-    DATA = {RELAY: [1], TEMP_OUT: [3, 2]}
+    DATA: DataDict = {RELAY: [1], TEMP_OUT: [3, 2]}
     RESERVED_BYTE = 0
 
     STATE_SET = {
@@ -376,7 +378,7 @@ class DT_07(CommTest):
     }
 
     @classmethod
-    def COMM_TEST(cls):
+    def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST)
 
     @staticmethod
@@ -409,7 +411,7 @@ class DT_09(CommTest):
     HA_TYPE = CLIMATE
     TYPE_ID = "09"
 
-    DATA = {
+    DATA: DataDict = {
         OPEN_IN_PERCENTAGE: [0],
         CURRENT_TEMP: [1],
         BATTERY: [2],
@@ -456,7 +458,7 @@ class DT_10(CommTest):
     HA_TYPE = SENSOR
     TYPE_ID = "10"
 
-    DATA = {BATTERY: [0], TEMP_IN: [2, 1], TEMP_OUT: [4, 3]}
+    DATA: DataDict = {BATTERY: [0], TEMP_IN: [2, 1], TEMP_OUT: [4, 3]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -476,7 +478,7 @@ class DT_12(CommTest):
     HA_TYPE = SENSOR
     TYPE_ID = "12"
 
-    DATA = {TEMP_IN: [0], BATTERY: [2]}
+    DATA: DataDict = {TEMP_IN: [0], BATTERY: [2]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -498,10 +500,10 @@ class DT_13(CommTest):
     HA_TYPE = LIGHT
     TYPE_ID = "13"
 
-    DATA = {OUT: [4], WHITE: [5]}
+    DATA: DataDict = {OUT: [4], WHITE: [5]}
 
     @classmethod
-    def COMM_TEST(cls):
+    def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST)
 
     @staticmethod
@@ -540,7 +542,7 @@ class DT_15(CommTest):
     HA_TYPE = SENSOR
     TYPE_ID = "15"
 
-    DATA = {STATE: [0], AIN: [2, 1]}
+    DATA: DataDict = {STATE: [0], AIN: [2, 1]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -567,7 +569,7 @@ class DT_16(CommTest):
     HA_TYPE = SENSOR
     TYPE_ID = "16"
 
-    DATA = {STATE: [0]}
+    DATA: DataDict = {STATE: [0]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -591,7 +593,7 @@ class DT_17(CommTest):
     HA_TYPE = SENSOR
     TYPE_ID = "17"
 
-    DATA = {STATE: [0]}
+    DATA: DataDict = {STATE: [0]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -615,7 +617,7 @@ class DT_18(CommTest):
     HA_TYPE = BUTTON
     TYPE_ID = "18"
 
-    DATA = {STATE: [0], IDENTITY: [1]}
+    DATA: DataDict = {STATE: [0], IDENTITY: [1]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -648,7 +650,7 @@ class DT_19(CommTest):
     HA_TYPE = BUTTON
     TYPE_ID = "19"
 
-    DATA = {STATE: [0], IDENTITY: [1]}
+    DATA: DataDict = {STATE: [0], IDENTITY: [1]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
@@ -697,7 +699,7 @@ class DT_21(CommTest):
     HA_TYPE = COVER
     TYPE_ID = "21"
 
-    DATA = {SHUTTER: [1], POSITION: [2]}
+    DATA: DataDict = {SHUTTER: [1], POSITION: [2]}
     HIGH_BYTE = 0
     LOW_BYTE = 0
 
@@ -709,7 +711,7 @@ class DT_21(CommTest):
     }
 
     @classmethod
-    def COMM_TEST(cls):
+    def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST, cls.HIGH_BYTE, cls.LOW_BYTE)
 
     @staticmethod
@@ -733,7 +735,7 @@ class DT_21(CommTest):
 
         shutters_with_pos.append(
             Shutter_pos(
-                state=shutter_val,
+                state=Shutter_state(shutter_val),
                 is_closed=shutter_val == Shutter_state.Closed,
                 position=position,
                 set_pos=False,
@@ -759,7 +761,7 @@ class DT_30(CommTest):
     HA_TYPE = SENSOR
     TYPE_ID = "30"
 
-    DATA = {BATTERY: [0], TEMP_IN: [2, 1], HUMIDITY: [3]}
+    DATA: DataDict = {BATTERY: [0], TEMP_IN: [2, 1], HUMIDITY: [3]}
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
