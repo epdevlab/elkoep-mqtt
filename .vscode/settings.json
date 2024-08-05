@@ -1,12 +1,17 @@
 {
   "python.pythonPath": "${workspaceFolder}/venv/bin/python",
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "mypy-type-checker.reportingScope": "workspace",
+  "mypy-type-checker.args": [
+    "--config-file=${workspaceFolder}/pyproject.toml"
+  ],
   "python.testing.pytestArgs": [],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "python.testing.cwd": "${workspaceFolder}/tests",
   "python.testing.autoTestDiscoverOnSaveEnabled": true,
-  "editor.formatOnSave": true,
-  "editor.formatOnType": false,
+  "ruff.configurationPreference": "filesystemFirst",
+  "ruff.configuration": "${workspaceFolder}/pyproject.toml",
   "python.analysis.extraPaths": [
     "./inelsmqtt"
   ],
@@ -16,4 +21,13 @@
   "terminal.integrated.env.linux": {
     "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}",
   },
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  }
 }
