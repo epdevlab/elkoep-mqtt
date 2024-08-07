@@ -9,6 +9,7 @@ from inelsmqtt.const import (
 )
 from inelsmqtt.devices import Device, DeviceInfo
 from inelsmqtt.utils.common import SimpleRelay, WarmLight, new_object
+from inelsmqtt.utils.core import DUMMY_VAL
 
 TEST_STATE_TOPIC = "inels/status/10e97f8b7d30/02/02E8"
 
@@ -204,4 +205,38 @@ def test_ha_diff_plain(device):
     device.ha_diff(curr_val, new_val)
     callback_low_battery.assert_not_called()
     callback_temp_in.assert_called_once()
+    callback_temp_out.assert_not_called()
+
+
+def test_ha_diff_dummy_val(device):
+    callback_low_battery = MagicMock()
+    callback_temp_in = MagicMock()
+    callback_temp_out = MagicMock()
+
+    device.add_ha_callback("low_battery", -1, callback_low_battery)
+    device.add_ha_callback("temp_in", -1, callback_temp_in)
+    device.add_ha_callback("temp_out", -1, callback_temp_out)
+
+    curr_val = new_object(
+        low_battery=True,
+        temp_in=2250,
+        temp_out=2000,
+    )
+
+    # Test when last_val is DUMMY_VAL
+    device.ha_diff(DUMMY_VAL, curr_val)
+    callback_low_battery.assert_not_called()
+    callback_temp_in.assert_not_called()
+    callback_temp_out.assert_not_called()
+
+    # Test when curr_val is DUMMY_VAL
+    device.ha_diff(curr_val, DUMMY_VAL)
+    callback_low_battery.assert_not_called()
+    callback_temp_in.assert_not_called()
+    callback_temp_out.assert_not_called()
+
+    # Test when both values are DUMMY_VAL
+    device.ha_diff(DUMMY_VAL, DUMMY_VAL)
+    callback_low_battery.assert_not_called()
+    callback_temp_in.assert_not_called()
     callback_temp_out.assert_not_called()

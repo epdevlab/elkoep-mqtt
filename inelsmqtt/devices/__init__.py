@@ -18,7 +18,7 @@ from inelsmqtt.const import (
     TOPIC_FRAGMENTS,
     VERSION,
 )
-from inelsmqtt.utils.core import DeviceClassProtocol, DeviceTypeNotFound, DeviceValue, ProtocolHandlerMapper
+from inelsmqtt.utils.core import DUMMY_VAL, DeviceClassProtocol, DeviceTypeNotFound, DeviceValue, ProtocolHandlerMapper
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -333,6 +333,9 @@ class Device(object):
 
     def ha_diff(self, last_val: Any, curr_val: Any) -> None:
         if self.__entity_callbacks is None:
+            return
+
+        if last_val is DUMMY_VAL or curr_val is DUMMY_VAL:
             return
 
         for k, curr_value in curr_val.__dict__.items():
