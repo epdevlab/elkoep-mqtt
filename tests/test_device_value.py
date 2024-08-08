@@ -549,6 +549,10 @@ class Test_RF_DEVICE_TYPE_21(BaseDeviceTestClass):
         assert device_value_closed.ha_value.shutters_with_pos[0].position == 0
         assert device_value_closed.ha_value.shutters_with_pos[0].state == 1
 
+    def test_create_ha_value_object_last_value(self, device_value_open):
+        device_value = self.create_device_value(inels_value="03\n01\n64\n", last_value=device_value_open.ha_value)
+        assert device_value.ha_value.shutters_with_pos[0].state == 0
+
     def test_format_inels_set_value_open(self, device_value_closed):
         device_value_closed.ha_value.shutters_with_pos[0].state = Shutter_state.Open
         device_value = self.create_device_value(
