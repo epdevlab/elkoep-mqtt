@@ -79,7 +79,7 @@ skip-magic-trailing-comma = false
 # Automatically detect and use the appropriate line ending style.
 line-ending = "auto"
 
-[tool.ruff.mccabe]
+[lint.mccabe]
 max-complexity = 10
 
 # https://github.com/home-assistant/core/blob/dev/mypy.ini

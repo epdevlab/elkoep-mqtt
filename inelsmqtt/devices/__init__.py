@@ -104,6 +104,13 @@ class Device(object):
         """
         return self.__device_class.TYPE_ID
 
+    def get_settable_attributes(self) -> dict:
+        """
+        Returns the settable attributes dictionary.
+        This method is used ONLY by the IntegrationDeviceTester for testing purposes.
+        """
+        return getattr(self.__device_class, "SETTABLE_ATTRIBUTES", {})
+
     @property
     def inels_type(self) -> str:
         """Get inels type of the device

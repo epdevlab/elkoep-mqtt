@@ -141,3 +141,25 @@ class Formatter:
     def format_data(data: List[int]) -> str:
         """Formats a list of integers into a newline-separated hexadecimal string with a trailing newline."""
         return "\n".join(f"{x:02X}" for x in data) + "\n"
+
+
+class SettableAttribute:
+    def __init__(self, route: str, attr_type: type, possible_values: Union[List[Any], Tuple[int, int], None] = None):
+        self.route = route
+        self.attr_type = attr_type
+        self.possible_values = possible_values
+
+    def is_valid_value(self, value: Any) -> bool:
+        if self.possible_values is None:
+            return True
+        if isinstance(self.possible_values, tuple) and len(self.possible_values) == 2:
+            min_val, max_val = self.possible_values
+            return bool(min_val <= value <= max_val)  # Explicit cast to bool
+        return value in self.possible_values
+
+    def get_value_description(self) -> str:
+        if self.possible_values is None:
+            return f"Any {self.attr_type.__name__}"
+        if isinstance(self.possible_values, tuple) and len(self.possible_values) == 2:
+            return f"Range: {self.possible_values[0]} to {self.possible_values[1]}"
+        return f"Possible values: {self.possible_values}"

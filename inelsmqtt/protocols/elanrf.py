@@ -3,6 +3,8 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, List
 
+from inelsmqtt.utils.common import SettableAttribute
+
 if TYPE_CHECKING:
     from inelsmqtt.utils.core import DeviceValue
 
@@ -93,6 +95,9 @@ class DT_01(CommTest):
 
     DATA: DataDict = {RELAY: 1}
 
+    # NOTE: This dictionary is used ONLY for testing purposes.
+    SETTABLE_ATTRIBUTES = {"is_on": SettableAttribute("simple_relay.0.is_on", bool, [True, False])}
+
     @classmethod
     def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST)
@@ -137,6 +142,8 @@ class DT_02(CommTest):
     DATA: DataDict = {RELAY: 1}
     TIME_HIGH_BYTE = 0
     TIME_LOW_BYTE = 0
+
+    SETTABLE_ATTRIBUTES = {"is_on": SettableAttribute("simple_relay.0.is_on", bool, [True, False])}
 
     @classmethod
     def COMM_TEST(cls) -> str:
@@ -193,6 +200,14 @@ class DT_03(CommTest):
         Shutter_state.Stop_down: Command.STOP_DOWN,
     }
 
+    SETTABLE_ATTRIBUTES = {
+        "state": SettableAttribute(
+            "shutters.0.state",
+            Shutter_state,
+            [Shutter_state.Open, Shutter_state.Closed, Shutter_state.Stop_up, Shutter_state.Stop_down],
+        ),
+    }
+
     @classmethod
     def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST, cls.TIME_HIGH_BYTE, cls.TIME_LOW_BYTE)
@@ -234,6 +249,10 @@ class DT_04(CommTest):
     TYPE_ID = "04"
 
     DATA: DataDict = {RF_DIMMER: [0, 1]}
+
+    SETTABLE_ATTRIBUTES = {
+        "brightness": SettableAttribute("simple_light.0.brightness", int, list(range(0, 101, 10))),
+    }
 
     @classmethod
     def COMM_TEST(cls) -> str:
@@ -279,6 +298,10 @@ class DT_05(CommTest):
 
     DATA: DataDict = {RF_DIMMER: [0, 1]}
 
+    SETTABLE_ATTRIBUTES = {
+        "brightness": SettableAttribute("simple_light.0.brightness", int, list(range(0, 101, 10))),
+    }
+
     @classmethod
     def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST)
@@ -320,6 +343,13 @@ class DT_06(CommTest):
     TYPE_ID = "06"
 
     DATA: DataDict = {RED: [1], GREEN: [2], BLUE: [3], OUT: [4]}
+
+    SETTABLE_ATTRIBUTES = {
+        "red": SettableAttribute("rgb.0.r", int, list(range(0, 256))),
+        "green": SettableAttribute("rgb.0.g", int, list(range(0, 256))),
+        "blue": SettableAttribute("rgb.0.b", int, list(range(0, 256))),
+        "brightness": SettableAttribute("rgb.0.brightness", int, list(range(0, 256))),
+    }
 
     @classmethod
     def COMM_TEST(cls) -> str:
@@ -377,6 +407,10 @@ class DT_07(CommTest):
         False: Command.OFF,
     }
 
+    SETTABLE_ATTRIBUTES = {
+        "is_on": SettableAttribute("simple_relay.0.is_on", bool, [True, False]),
+    }
+
     @classmethod
     def COMM_TEST(cls) -> str:
         return cls.create_command_payload(cls.Command.COMM_TEST)
@@ -416,6 +450,10 @@ class DT_09(CommTest):
         CURRENT_TEMP: [1],
         BATTERY: [2],
         REQUIRED_TEMP: [3],
+    }
+
+    SETTABLE_ATTRIBUTES = {
+        "required_temp": SettableAttribute("thermovalve.required", float, [x / 2 for x in range(0, 129)]),
     }
 
     @staticmethod
@@ -501,6 +539,11 @@ class DT_13(CommTest):
     TYPE_ID = "13"
 
     DATA: DataDict = {OUT: [4], WHITE: [5]}
+
+    SETTABLE_ATTRIBUTES = {
+        "brightness": SettableAttribute("warm_light.0.brightness", int, list(range(0, 101))),
+        "relative_ct": SettableAttribute("warm_light.0.relative_ct", int, list(range(0, 101))),
+    }
 
     @classmethod
     def COMM_TEST(cls) -> str:
@@ -708,6 +751,15 @@ class DT_21(CommTest):
         Shutter_state.Closed: Command.CLOSE,
         Shutter_state.Stop_up: Command.STOP_UP,
         Shutter_state.Stop_down: Command.STOP_DOWN,
+    }
+
+    SETTABLE_ATTRIBUTES = {
+        "state": SettableAttribute(
+            "shutters_with_pos.0.state",
+            Shutter_state,
+            [Shutter_state.Open, Shutter_state.Closed, Shutter_state.Stop_up, Shutter_state.Stop_down],
+        ),
+        "position": SettableAttribute("shutters_with_pos.0.position", int, list(range(0, 101))),
     }
 
     @classmethod
