@@ -429,6 +429,10 @@ class Test_RF_DEVICE_TYPE_13(BaseDeviceTestClass):
     def device_value_highest_brightness_lowest_white(self):
         return self.create_device_value(inels_value="07\n00\n00\n00\nFF\n00\n")
 
+    @pytest.fixture
+    def device_value_all_min(self):
+        return self.create_device_value(inels_value="07\n00\n00\n00\n00\n00\n")
+
     def test_create_ha_value_object_lowest_brightness_highest_white(self, device_value_lowest_brightness_highest_white):
         assert isinstance(device_value_lowest_brightness_highest_white.ha_value.warm_light[0], WarmLight)
         assert device_value_lowest_brightness_highest_white.ha_value.warm_light[0].brightness == 0
@@ -438,6 +442,11 @@ class Test_RF_DEVICE_TYPE_13(BaseDeviceTestClass):
         assert isinstance(device_value_highest_brightness_lowest_white.ha_value.warm_light[0], WarmLight)
         assert device_value_highest_brightness_lowest_white.ha_value.warm_light[0].brightness == 100
         assert device_value_highest_brightness_lowest_white.ha_value.warm_light[0].relative_ct == 0
+
+    def test_create_ha_value_object_all_min(self, device_value_all_min):
+        assert isinstance(device_value_all_min.ha_value.warm_light[0], WarmLight)
+        assert device_value_all_min.ha_value.warm_light[0].brightness == 0
+        assert device_value_all_min.ha_value.warm_light[0].relative_ct == 0
 
     def test_format_inels_set_value_lowest_brightness(self, device_value_lowest_brightness_highest_white):
         device_value = self.create_device_value(
@@ -1743,6 +1752,36 @@ class Test_CU_DEVICE_TYPE_153(BaseDeviceTestClass):
         return self.create_device_value(
             inels_value="00\n00\n00\n00\n01\n01\n01\n01\n0A\n28\n00\n00\n64\n01\n01\n01\n00\n00\n00\n00\n01\n64\n01\n01\n00\n00\n00\n00\n01\n01\n64\n"
         )
+
+    @pytest.fixture
+    def device_value_rgbw_all_max(self):
+        return self.create_device_value(
+            inels_value="00\n00\n00\n00\n64\n64\n64\n64\n0A\n28\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n64\n00\n00\n00\n00\n64\n64\n64\n"
+        )
+
+    @pytest.fixture
+    def device_value_rgbw_all_min(self):
+        return self.create_device_value(
+            inels_value="00\n00\n00\n00\n00\n00\n00\n00\n0A\n28\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
+        )
+
+    def test_create_ha_value_object_rgbw_all_max(self, device_value_rgbw_all_max):
+        assert device_value_rgbw_all_max.ha_value.temp_in == "0A28"
+        for led in device_value_rgbw_all_max.ha_value.rgbw:
+            assert led.r == 100
+            assert led.g == 100
+            assert led.b == 100
+            assert led.w == 100
+            assert led.brightness == 100
+
+    def test_create_ha_value_object_rgbw_all_min(self, device_value_rgbw_all_min):
+        assert device_value_rgbw_all_min.ha_value.temp_in == "0A28"
+        for led in device_value_rgbw_all_min.ha_value.rgbw:
+            assert led.r == 0
+            assert led.g == 0
+            assert led.b == 0
+            assert led.w == 0
+            assert led.brightness == 0
 
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.temp_in == "0A28"
