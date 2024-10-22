@@ -576,7 +576,7 @@ class InelsMqtt:
 
         if device_type == "gw" and message_type == "connected":
             mac = message_parts[2]
-            for stripped_topic in self.__listeners:
+            for stripped_topic in list(self.__listeners):
                 if stripped_topic.startswith(mac):
                     self.__notify_listeners(stripped_topic, True)
             return
