@@ -240,15 +240,18 @@ class Device(object):
         Returns:
             DeviceValue: latest values in many formats
         """
-        val = self.__mqtt.last_value(self.__state_topic)
-
-        dev_value = DeviceValue(
-            self.__device_type,
-            self.__inels_type,
-            self.__device_class,
-            inels_value=val.decode() if val is not None else None,  # type: ignore[attr-defined]
-        )
-        return dev_value
+        try:
+            if hasattr(self.__values.last_value.ha_value, "__dict__"):
+                return self.__values.last_value
+            raise AttributeError
+        except AttributeError:
+            val = self.__mqtt.last_value(self.__state_topic)
+            return DeviceValue(
+                self.__device_type,
+                self.__inels_type,
+                self.__device_class,
+                inels_value=val.decode() if val is not None else None,  # type: ignore[attr-defined]
+            )
 
     @property
     def mqtt(self) -> InelsMqtt:
@@ -267,7 +270,8 @@ class Device(object):
             self.__inels_type,
             self.__device_class,
             inels_value=(val.decode() if val is not None else None),
-            last_value=self.last_values,
+            # last_value=self.last_values,
+            last_value=self.__values,  # because it is already the last value at this moment
         )
         self.__state = dev_value.ha_value
         self.__values = dev_value
@@ -298,7 +302,8 @@ class Device(object):
             self.__inels_type,
             self.__device_class,
             ha_value=value,
-            last_value=self.__state,
+            # last_value=self.__state,
+            last_value=self.__values,  # because the last_value will be accessible
         )
 
         self.__state = dev.ha_value

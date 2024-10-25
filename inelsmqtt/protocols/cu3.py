@@ -1187,7 +1187,7 @@ class DT_128:
         card_id_int = int(card_id, 16)
         # if card removed before
         if card_id_int == 0 and device_value.last_value is not None:
-            card_id = device_value.last_value.card_id
+            card_id = device_value.last_value.ha_value.card_id
 
         interface = [state[0] == "1", state[12] == "1", state[10] == "1"]
 
@@ -2041,6 +2041,9 @@ class DT_166:
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
+        last_known_required = None
+        last_known_required_cool = None
+
         temp_current: float = int(
             trim_inels_status_values(device_value.inels_status_value, cls.DATA, CURRENT_TEMP, ""), 16
         )
@@ -2063,8 +2066,15 @@ class DT_166:
         )
         if temp_required_heat == 0x7FFFFFFB:
             temp_required_heat = 0
+            if hasattr(device_value.last_value, "ha_value"):
+                last_known_required = device_value.last_value.ha_value.climate_controller.last_known_required
         else:
             temp_required_heat /= 100
+            if temp_required_heat == 0 and hasattr(device_value.last_value, "ha_value"):
+                last_known_required = device_value.last_value.ha_value.climate_controller.last_known_required
+            else:
+                if temp_required_heat != 0:
+                    last_known_required = temp_required_heat
 
         temp_critical_min = (
             int(
@@ -2080,8 +2090,15 @@ class DT_166:
         )
         if temp_required_cool == 0x7FFFFFFB:
             temp_required_cool = 0
+            if hasattr(device_value.last_value, "ha_value"):
+                last_known_required_cool = device_value.last_value.ha_value.climate_controller.last_known_required_cool
         else:
             temp_required_cool /= 100
+            if temp_required_cool == 0 and hasattr(device_value.last_value, "ha_value"):
+                last_known_required_cool = device_value.last_value.ha_value.climate_controller.last_known_required_cool
+            else:
+                if temp_required_cool != 0:
+                    last_known_required_cool = temp_required_cool
 
         temp_correction = (
             int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_CORRECTION, ""), 16) / 100
@@ -2142,7 +2159,9 @@ class DT_166:
             climate_controller=new_object(
                 current=temp_current,  # current_temperature
                 required=temp_required_heat,  # target_temperature / target_temperature_high
+                last_known_required=last_known_required,
                 required_cool=temp_required_cool,  # target_temperature_low
+                last_known_required_cool=last_known_required_cool,
                 climate_mode=climate_mode,  # hvac_mode: Off/Heat_cool/Heat/Cool
                 # Off -> controller is turned off
                 # Heat_cool -> follow temp range
@@ -2173,14 +2192,6 @@ class DT_166:
         critical_temp = [int(x, 16) for x in break_into_bytes(f"{int(cc.critical_temp * 100):08X}")]
         critical_temp.reverse()
 
-        manual_temp = [int(x, 16) for x in break_into_bytes(f"{int((cc.required + cc.correction_temp) * 100):08X}")]
-        manual_temp.reverse()
-
-        manual_cool_temp = [
-            int(x, 16) for x in break_into_bytes(f"{int((cc.required_cool + cc.correction_temp) * 100):08X}")
-        ]
-        manual_cool_temp.reverse()
-
         plan_in = 0
         if cc.public_holiday > 0:
             plan_in = 128  # 0x80
@@ -2199,6 +2210,24 @@ class DT_166:
                 byte18 = 3
             else:
                 byte18 = 1
+
+        required_heat = cc.required
+        required_cool = cc.required_cool
+        if (required_heat == 0 or required_cool == 0) and manual_in == 7 and (byte18 == 1 or byte18 == 3):
+            try:
+                climate_controller = device_value.last_value.ha_value.climate_controller
+                required_heat = climate_controller.last_known_required or required_heat
+                required_cool = climate_controller.last_known_required_cool or required_cool
+            except AttributeError:
+                pass
+
+        manual_temp = [int(x, 16) for x in break_into_bytes(f"{int((required_heat + cc.correction_temp) * 100):08X}")]
+        manual_temp.reverse()
+
+        manual_cool_temp = [
+            int(x, 16) for x in break_into_bytes(f"{int((required_cool + cc.correction_temp) * 100):08X}")
+        ]
+        manual_cool_temp.reverse()
 
         set_val = current_temp + critical_temp + manual_temp + manual_cool_temp
         set_val += [plan_in, manual_in, byte18]

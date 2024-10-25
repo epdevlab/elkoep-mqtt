@@ -113,7 +113,7 @@ def test_device_callbacks(device):
 
 
 def test_device_callback_availability(device):
-    device.mqtt.messages.return_value.get.side_effect = [b"02\n01\n", b"02\n01\n"]
+    device.mqtt.messages.return_value.get.side_effect = [b"02\n01\n", b"02\n00\n"]
 
     callback = MagicMock()
     device.add_ha_callback("simple_relay", 0, callback)

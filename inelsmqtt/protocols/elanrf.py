@@ -225,7 +225,7 @@ class DT_03(CommTest):
         # So as to continue driving it down if it aisn't closed
         # and continue opening it if it isn't open
         if shutter_val not in [Shutter_state.Open, Shutter_state.Closed]:
-            shutter_val = device_value.last_value.shutters[0].state
+            shutter_val = device_value.last_value.ha_value.shutters[0].state
 
         shutters: List[Shutter] = []
         shutters.append(Shutter(state=shutter_val, is_closed=shutter_val == Shutter_state.Closed))
@@ -783,7 +783,7 @@ class DT_21(CommTest):
             shutter_val = Shutter_state.Open
 
         if (device_value.last_value is not None) and (shutter_val not in [Shutter_state.Open, Shutter_state.Closed]):
-            shutter_val = device_value.last_value.shutters_with_pos[0].state
+            shutter_val = device_value.last_value.ha_value.shutters_with_pos[0].state
 
         shutters_with_pos.append(
             Shutter_pos(
