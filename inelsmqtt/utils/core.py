@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from typing import Any, List, Optional, Protocol
 
 from inelsmqtt.protocols import cu3, elanrf
@@ -147,6 +148,13 @@ class ProtocolHandlerMapper:
         if handler is None:
             raise DeviceTypeNotFound(f"Unknown device type: {device_type}")
         return handler
+
+
+@dataclass
+class LastHAValue:
+    """Store the last known ha_value without creating reference chains."""
+
+    ha_value: Any
 
 
 class DeviceValue:

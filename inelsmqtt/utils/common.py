@@ -1,3 +1,4 @@
+import copy
 import json
 from dataclasses import dataclass
 from operator import itemgetter
@@ -96,7 +97,15 @@ DataDict: TypeAlias = dict[str, DataValue]
 
 def new_object(**kwargs: Any) -> Any:
     """Create new anonymous object."""
-    return type("Object", (), kwargs)
+    cls = type("Object", (), kwargs)
+    cls.copy = staticmethod(
+        lambda: type(
+            "Object",
+            (),
+            copy.deepcopy({k: v for k, v in dict(cls.__dict__).items() if not k.startswith("__") and k != "copy"}),
+        )
+    )
+    return cls
 
 
 def break_into_bytes(line: str) -> List[str]:

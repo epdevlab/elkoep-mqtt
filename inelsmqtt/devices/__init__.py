@@ -18,7 +18,14 @@ from inelsmqtt.const import (
     TOPIC_FRAGMENTS,
     VERSION,
 )
-from inelsmqtt.utils.core import DUMMY_VAL, DeviceClassProtocol, DeviceTypeNotFound, DeviceValue, ProtocolHandlerMapper
+from inelsmqtt.utils.core import (
+    DUMMY_VAL,
+    DeviceClassProtocol,
+    DeviceTypeNotFound,
+    DeviceValue,
+    LastHAValue,
+    ProtocolHandlerMapper,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -234,24 +241,23 @@ class Device(object):
         return self.__values
 
     @property
-    def last_values(self) -> DeviceValue:
+    def last_values(self) -> LastHAValue:
         """Get last value of the device
 
         Returns:
-            DeviceValue: latest values in many formats
+            LastHAValue: Container for the previous Home Assistant value.
         """
-        try:
-            if hasattr(self.__values.last_value.ha_value, "__dict__"):
-                return self.__values.last_value
-            raise AttributeError
-        except AttributeError:
+        if self.__values:  # previous state exists
+            return self.__values.last_value
+        else:
             val = self.__mqtt.last_value(self.__state_topic)
-            return DeviceValue(
+            device_value = DeviceValue(
                 self.__device_type,
                 self.__inels_type,
                 self.__device_class,
                 inels_value=val.decode() if val is not None else None,  # type: ignore[attr-defined]
             )
+            return LastHAValue(device_value.ha_value)
 
     @property
     def mqtt(self) -> InelsMqtt:
@@ -270,10 +276,9 @@ class Device(object):
             self.__inels_type,
             self.__device_class,
             inels_value=(val.decode() if val is not None else None),
-            # last_value=self.last_values,
-            last_value=self.__values,  # because it is already the last value at this moment
+            last_value=LastHAValue(self.__values.ha_value) if self.__values else self.last_values,
         )
-        self.__state = dev_value.ha_value
+        self.__state = dev_value.ha_value.copy() if dev_value.ha_value is not DUMMY_VAL else DUMMY_VAL
         self.__values = dev_value
 
         return dev_value
@@ -302,12 +307,11 @@ class Device(object):
             self.__inels_type,
             self.__device_class,
             ha_value=value,
-            # last_value=self.__state,
-            last_value=self.__values,  # because the last_value will be accessible
+            last_value=LastHAValue(self.__values.ha_value if self.__values else None),
         )
 
-        self.__state = dev.ha_value
-        self.__values = dev
+        # self.__state = dev.ha_value
+        # self.__values = dev
 
         ret = False
         if self.__set_topic is not None:
