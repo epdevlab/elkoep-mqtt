@@ -108,6 +108,10 @@ def new_object(**kwargs: Any) -> Any:
     return cls
 
 
+def twos_comp_4B(i):
+    return -(i & 0b10000000000000000000000000000000) | (i & 0b01111111111111111111111111111111)
+
+
 def break_into_bytes(line: str) -> List[str]:
     if len(line) % 2 == 0:
         return [line[i : i + 2] for i in range(0, len(line), 2)]

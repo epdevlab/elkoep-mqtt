@@ -2006,6 +2006,24 @@ class Test_CU_DEVICE_TYPE_166(BaseDeviceTestClass):
             inels_value="DD\n0A\n00\n00\nFB\nFF\nFF\n7F\n80\n0C\n00\n00\n88\n13\n00\n00\nBC\n02\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n05\n"
         )
 
+    @pytest.fixture
+    def device_value_all_negative(self):
+        return self.create_device_value(
+            inels_value="9C\nFF\nFF\nFF\n38\nFF\nFF\nFF\nD4\nFE\nFF\nFF\n70\nFE\nFF\nFF\n0C\nFE\nFF\nFF\nA8\nFD\nFF\nFF\n44\nFD\nFF\nFF\n00\n00\n00\n"
+        )
+
+    @pytest.fixture
+    def device_value_all_positive(self):
+        return self.create_device_value(
+            inels_value="64\n00\n00\n00\nC8\n00\n00\n00\n2C\n01\n00\n00\n90\n01\n00\n00\nF4\n01\n00\n00\n58\n02\n00\n00\nBC\n02\n00\n00\n00\n00\n00\n"
+        )
+
+    @pytest.fixture
+    def device_value_7FFFFFFB(self):
+        return self.create_device_value(
+            inels_value="FB\nFF\nFF\n7F\nC8\n00\n00\n00\nFB\nFF\nFF\n7F\n90\n01\n00\n00\nF4\n01\n00\n00\nFB\nFF\nFF\n7F\nBC\n02\n00\n00\n00\n00\n00\n"
+        )
+
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.climate_controller.current == 27.81
         assert device_value.ha_value.climate_controller.required == 32.0
@@ -2051,6 +2069,45 @@ class Test_CU_DEVICE_TYPE_166(BaseDeviceTestClass):
             hca_turned_on_device_value.inels_set_value
             == "DD\n0A\n00\n00\nFB\nFF\nFF\n7F\n80\n0C\n00\n00\n00\n00\n00\n00\n00\n07\n01\n"
         )
+
+    def test_last_value_does_not_overwrite_current_value(self, device_value):
+        assert device_value.ha_value.climate_controller.required == 32.0
+        assert device_value.ha_value.climate_controller.last_known_required == 32.0
+
+        dev_value_current = self.create_device_value(
+            inels_value="DD\n0A\n00\n00\nFB\nFF\nFF\n7F\n80\n0C\n00\n00\n88\n13\n00\n00\nBC\n02\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n05\n"
+        )
+        dev_value_current.ha_value.climate_controller.required = 16.0
+
+        hca_device_value = self.create_device_value(
+            ha_value=dev_value_current.ha_value,
+            last_value=device_value,
+        )
+
+        # the required value is 16.0, but the last known value is 32.0, so the set value must be 16.0
+        assert (
+            hca_device_value.inels_set_value
+            == "DD\n0A\n00\n00\nFB\nFF\nFF\n7F\n40\n06\n00\n00\n00\n00\n00\n00\n00\n07\n01\n"
+        )
+
+    def test_all_negative_temp(self, device_value_all_negative):
+        assert device_value_all_negative.ha_value.climate_controller.current == -1.0
+        assert device_value_all_negative.ha_value.climate_controller.critical_temp == -2.0
+        assert device_value_all_negative.ha_value.climate_controller.required == -3.0
+        assert device_value_all_negative.ha_value.climate_controller.required_cool == -6.0
+        assert device_value_all_negative.ha_value.climate_controller.correction_temp == -7.0
+
+    def test_all_positive_temp(self, device_value_all_positive):
+        assert device_value_all_positive.ha_value.climate_controller.current == 1.0
+        assert device_value_all_positive.ha_value.climate_controller.critical_temp == 2.0
+        assert device_value_all_positive.ha_value.climate_controller.required == 3.0
+        assert device_value_all_positive.ha_value.climate_controller.required_cool == 6.0
+        assert device_value_all_positive.ha_value.climate_controller.correction_temp == 7.0
+
+    def test_7FFFFFFB(self, device_value_7FFFFFFB):
+        assert device_value_7FFFFFFB.ha_value.climate_controller.current == 0
+        assert device_value_7FFFFFFB.ha_value.climate_controller.required == 0
+        assert device_value_7FFFFFFB.ha_value.climate_controller.required_cool == 0
 
 
 class Test_CU_DEVICE_TYPE_167(BaseDeviceTestClass):

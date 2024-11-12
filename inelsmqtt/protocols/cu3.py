@@ -133,6 +133,7 @@ from inelsmqtt.utils.common import (
     parse_formated_json,
     trim_inels_status_bytes,
     trim_inels_status_values,
+    twos_comp_4B,
 )
 
 
@@ -2044,8 +2045,8 @@ class DT_166:
         last_known_required = None
         last_known_required_cool = None
 
-        temp_current: float = int(
-            trim_inels_status_values(device_value.inels_status_value, cls.DATA, CURRENT_TEMP, ""), 16
+        temp_current: float = twos_comp_4B(
+            int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, CURRENT_TEMP, ""), 16)
         )
         if temp_current == 0x7FFFFFFB:
             temp_current = 0
@@ -2053,16 +2054,13 @@ class DT_166:
             temp_current /= 100
 
         temp_critical_max = (
-            int(
-                trim_inels_status_values(  # check if 0x7F FF FF FB -> make it 50
-                    device_value.inels_status_value, cls.DATA, CRITICAL_MAX_TEMP, ""
-                ),
-                16,
+            twos_comp_4B(
+                int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, CRITICAL_MAX_TEMP, ""), 16)
             )
             / 100
         )
-        temp_required_heat: float = int(
-            trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_HEAT_TEMP, ""), 16
+        temp_required_heat: float = twos_comp_4B(
+            int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_HEAT_TEMP, ""), 16)
         )
         if temp_required_heat == 0x7FFFFFFB:
             temp_required_heat = 0
@@ -2076,17 +2074,8 @@ class DT_166:
                 if temp_required_heat != 0:
                     last_known_required = temp_required_heat
 
-        temp_critical_min = (
-            int(
-                trim_inels_status_values(  # check if 0x7F FF FF FB -> make it -50
-                    device_value.inels_status_value, cls.DATA, CRITICAL_MIN_TEMP, ""
-                ),
-                16,
-            )
-            / 100
-        )
-        temp_required_cool: float = int(
-            trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_COOL_TEMP, ""), 16
+        temp_required_cool: float = twos_comp_4B(
+            int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_COOL_TEMP, ""), 16)
         )
         if temp_required_cool == 0x7FFFFFFB:
             temp_required_cool = 0
@@ -2101,7 +2090,10 @@ class DT_166:
                     last_known_required_cool = temp_required_cool
 
         temp_correction = (
-            int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_CORRECTION, ""), 16) / 100
+            twos_comp_4B(
+                int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_CORRECTION, ""), 16)
+            )
+            / 100
         )
         holiday_mode = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, PUBLIC_HOLIDAY, ""), 16)
         control_mode = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, CONTROL_MODE, ""))
@@ -2213,11 +2205,13 @@ class DT_166:
 
         required_heat = cc.required
         required_cool = cc.required_cool
-        if (required_heat == 0 or required_cool == 0) and manual_in == 7 and (byte18 == 1 or byte18 == 3):
+        if manual_in == 7 and byte18 in [1, 3]:
             try:
                 climate_controller = device_value.last_value.ha_value.climate_controller
-                required_heat = climate_controller.last_known_required or required_heat
-                required_cool = climate_controller.last_known_required_cool or required_cool
+                if required_heat == 0 and climate_controller.last_known_required:
+                    required_heat = climate_controller.last_known_required
+                if required_cool == 0 and climate_controller.last_known_required_cool:
+                    required_cool = climate_controller.last_known_required_cool
             except AttributeError:
                 pass
 
