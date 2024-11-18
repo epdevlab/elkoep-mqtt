@@ -278,7 +278,11 @@ class Device(object):
             inels_value=(val.decode() if val is not None else None),
             last_value=LastHAValue(self.__values.ha_value) if self.__values else self.last_values,
         )
-        self.__state = dev_value.ha_value.copy() if dev_value.ha_value is not DUMMY_VAL else DUMMY_VAL
+        self.__state = (
+            dev_value.ha_value.copy()
+            if (dev_value.ha_value is not DUMMY_VAL and dev_value.ha_value is not None)
+            else DUMMY_VAL
+        )
         self.__values = dev_value
 
         return dev_value
