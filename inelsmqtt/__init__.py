@@ -180,16 +180,43 @@ class InelsMqtt:
         """Test connection. It's used only for connection
             testing. After that is disconnected
         Returns:
-            bool: Is broker available or not
+            Optional[int]: Connection error code:
+                None: Success
+                1: Protocol version mismatch
+                2: Client identifier rejected
+                3: Server unavailable
+                4: Bad username/password
+                5: Not authorized
+                6: Unknown error
         """
-        try:
-            self.__connect()
-            self.disconnect()
-        except Exception as e:
-            if isinstance(e, ConnectionRefusedError):
-                self.__connection_error = 3  # cannot connect
+        self.__connection_error = None
+
+        def on_connect(client, userdata, flags, rc):
+            if rc != 0:
+                self.__connection_error = rc
             else:
-                self.__connection_error = 6  # unknown
+                self.__try_connect  = True
+
+        try:
+            default_connect_handler = self.__client.on_connect
+            self.__client.on_connect = on_connect
+
+            self.__connect()
+
+            start_time = time.time()
+            while time.time() - start_time < 5:
+                if self.__connection_error is not None or self.__try_connect:
+                    break
+                time.sleep(0.1)
+
+        except TimeoutError:
+            # In the Paho MQTT client implementation, the on_connect callback is only triggered when the client actually receives a CONNACK packet from the broker. If the connection attempt times out before receiving this packet, the callback is never executed.
+            self.__connection_error = 3  # Server unavailable
+        except Exception as e:
+            self.__connection_error = 6  # Unknown error
+        finally:
+            self.__client.on_connect = default_connect_handler
+            self.disconnect()
 
         return self.__connection_error
 
