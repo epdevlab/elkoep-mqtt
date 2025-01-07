@@ -66,6 +66,7 @@ from inelsmqtt.utils.common import (
     WarmLight,
     new_object,
     trim_inels_status_values,
+    twos_comp_1B,
 )
 
 
@@ -464,9 +465,9 @@ class DT_09(CommTest):
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
         # fetches all the status values and compacts them into a new object
         temp_current_hex = trim_inels_status_values(device_value.inels_status_value, cls.DATA, CURRENT_TEMP, "")
-        temp_current = int(temp_current_hex, 16) * 0.5
+        temp_current = twos_comp_1B(int(temp_current_hex, 16)) * 0.5
         temp_required_hex = trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_TEMP, "")
-        temp_required = int(temp_required_hex, 16) * 0.5
+        temp_required = twos_comp_1B(int(temp_required_hex, 16)) * 0.5
         battery = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, BATTERY, ""), 16)
         open_to_hex = trim_inels_status_values(device_value.inels_status_value, cls.DATA, OPEN_IN_PERCENTAGE, "")
         open_to_percentage = int(open_to_hex, 16) * 0.5
@@ -520,7 +521,10 @@ class DT_12(CommTest):
 
     @classmethod
     def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
-        temp_in = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_IN, ""), 16) * 0.5
+        temp_in = (
+            twos_comp_1B(int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_IN, ""), 16))
+            * 0.5
+        )
         battery = int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, BATTERY, ""), 16)
 
         return new_object(

@@ -372,12 +372,23 @@ class Test_RF_DEVICE_TYPE_09(BaseDeviceTestClass):
     def device_value(self):
         return self.create_device_value(inels_value="64\n3C\n08\n40\n00\n")
 
+    @pytest.fixture
+    def device_value_negative(self):
+        return self.create_device_value(inels_value="64\nC4\n08\nC0\n00\n")
+
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
         assert device_value.ha_value.thermovalve.current == 30
         assert device_value.ha_value.thermovalve.required == 32
         assert device_value.ha_value.thermovalve.climate_mode == 1
         assert device_value.ha_value.thermovalve.open_in_percentage == 50
+
+    def test_create_ha_value_object_negative(self, device_value_negative):
+        assert device_value_negative.ha_value.low_battery == True
+        assert device_value_negative.ha_value.thermovalve.current == -30
+        assert device_value_negative.ha_value.thermovalve.required == -32
+        assert device_value_negative.ha_value.thermovalve.climate_mode == 0
+        assert device_value_negative.ha_value.thermovalve.open_in_percentage == 50
 
     def test_format_inels_set_value(self, device_value):
         device_value.ha_value.thermovalve.required = 25
@@ -413,9 +424,17 @@ class Test_RF_DEVICE_TYPE_12(BaseDeviceTestClass):
     def device_value(self):
         return self.create_device_value(inels_value="30\n00\n81\n00\n00\n")
 
+    @pytest.fixture
+    def device_value_negative(self):
+        return self.create_device_value(inels_value="F2\n00\n80\n00\n00\n")
+
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery == True
         assert device_value.ha_value.temp_in == 24.0
+
+    def test_create_ha_value_object_negative(self, device_value_negative):
+        assert device_value_negative.ha_value.low_battery == False
+        assert device_value_negative.ha_value.temp_in == -7.0
 
 
 class Test_RF_DEVICE_TYPE_13(BaseDeviceTestClass):
@@ -611,10 +630,19 @@ class Test_RF_DEVICE_TYPE_30(BaseDeviceTestClass):
     def device_value(self):
         return self.create_device_value(inels_value="01\nD8\n09\n24\n00")
 
+    @pytest.fixture
+    def device_value_negative(self):
+        return self.create_device_value(inels_value="01\nF6\nFF\n24\n00")
+
     def test_create_ha_value_object(self, device_value):
         assert device_value.ha_value.low_battery
         assert device_value.ha_value.temp_in == "09D8"
         assert device_value.ha_value.humidity == 36
+
+    def test_create_ha_value_object_negative(self, device_value_negative):
+        assert device_value_negative.ha_value.low_battery
+        assert device_value_negative.ha_value.temp_in == "FFF6"
+        assert device_value_negative.ha_value.humidity == 36
 
 
 class Test_CU_DEVICE_TYPE_100(BaseDeviceTestClass):
@@ -1070,19 +1098,19 @@ class Test_CU_DEVICE_TYPE_112(BaseDeviceTestClass):
     @pytest.fixture
     def device_value_all_on(self):
         return self.create_device_value(
-            inels_value="07\n07\n07\n07\n07\n07\n07\n07\n7F\nFF\nFF\nFF\n7F\nFF\nFF\nFF\n00\n00\n00\n00\n00\n00\n00\n00\nFF\nFF\nFF\n"
+            inels_value="07\n07\n07\n07\n07\n07\n07\n07\n00\n00\n12\n33\n7F\nFF\nFF\nFF\n00\n00\n00\n00\n00\n00\n00\n00\nFF\nFF\nFF\n"
         )
 
     @pytest.fixture
     def device_value_all_off(self):
         return self.create_device_value(
-            inels_value="06\n06\n06\n06\n06\n06\n06\n06\n7F\nFF\nFF\nFF\n7F\nFF\nFF\nFF\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
+            inels_value="06\n06\n06\n06\n06\n06\n06\n06\nFF\nFF\nFB\n33\n7F\nFF\nFF\nFF\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n"
         )
 
     def test_create_ha_value_object_all_on(self, device_value_all_on):
         assert isinstance(device_value_all_on.ha_value.relay[0], Relay)
         assert device_value_all_on.ha_value.din == [True] * 8
-        assert device_value_all_on.ha_value.temps == ["7FFFFFFF", "7FFFFFFF"]
+        assert device_value_all_on.ha_value.temps == ["00001233", "7FFFFFFF"]
         for r in device_value_all_on.ha_value.relay:
             assert r.is_on
             assert r.overflow
@@ -1090,7 +1118,7 @@ class Test_CU_DEVICE_TYPE_112(BaseDeviceTestClass):
     def test_create_ha_value_object_all_off(self, device_value_all_off):
         assert isinstance(device_value_all_off.ha_value.relay[0], Relay)
         assert device_value_all_off.ha_value.din == [False] * 8
-        assert device_value_all_off.ha_value.temps == ["7FFFFFFF", "7FFFFFFF"]
+        assert device_value_all_off.ha_value.temps == ["FFFFFB33", "7FFFFFFF"]
         for r in device_value_all_off.ha_value.relay:
             assert not r.is_on
             assert not r.overflow

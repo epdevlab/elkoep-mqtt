@@ -195,7 +195,7 @@ class InelsMqtt:
             if rc != 0:
                 self.__connection_error = rc
             else:
-                self.__try_connect  = True
+                self.__try_connect = True
 
         try:
             default_connect_handler = self.__client.on_connect

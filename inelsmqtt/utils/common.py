@@ -108,6 +108,14 @@ def new_object(**kwargs: Any) -> Any:
     return cls
 
 
+def twos_comp_1B(b):
+    return -(b & 0b10000000) | (b & 0b01111111)
+
+
+def twos_comp_2B(h):
+    return -(h & 0b1000000000000000) | (h & 0b0111111111111111)
+
+
 def twos_comp_4B(i):
     return -(i & 0b10000000000000000000000000000000) | (i & 0b01111111111111111111111111111111)
 
