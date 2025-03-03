@@ -191,9 +191,9 @@ class InelsMqtt:
         """
         self.__connection_error = None
 
-        def on_connect(client, userdata, flags, rc):
-            if rc != 0:
-                self.__connection_error = rc
+        def on_connect(client, userdata, connect_flags, reason_code, properties):
+            if reason_code != 0:
+                self.__connection_error = reason_code
             else:
                 self.__try_connect = True
 
