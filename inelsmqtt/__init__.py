@@ -4,7 +4,6 @@ import copy
 import logging
 import threading
 import time
-import uuid
 from collections import defaultdict
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
@@ -20,7 +19,6 @@ from .const import (
     DISCOVERY_TIMEOUT_IN_SEC,
     FRAGMENT_DEVICE_TYPE,
     FRAGMENT_STATE,
-    MQTT_CLIENT_ID,
     MQTT_HOST,
     MQTT_PASSWORD,
     MQTT_PORT,
@@ -68,10 +66,12 @@ class InelsMqtt:
         if _t not in MQTT_TRANSPORTS:
             raise Exception
 
-        if (client_id := config.get(MQTT_CLIENT_ID)) is None:
-            client_id = mqtt.base62(uuid.uuid4().int, padding=22)
-
-        self.__client = mqtt.Client(client_id, protocol=self.__proto, transport=_t)
+        self.__client = mqtt.Client(
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
+            protocol=self.__proto,
+            transport=_t,
+            reconnect_on_failure=True,
+        )
 
         self.__client.on_connect = self.__on_connect
         self.__client.on_subscribe = self.__on_subscribe
@@ -270,6 +270,7 @@ class InelsMqtt:
         self,
         client: mqtt.Client,  # pylint: disable=unused-argument
         userdata: Any,  # pylint: disable=unused-argument
+        disconnect_flags: dict,
         reason_code: int,
         properties: Optional[Properties] = None,
     ) -> None:
@@ -278,6 +279,7 @@ class InelsMqtt:
         Args:
             client (mqtt.Client): instance of the mqtt client
             userdata (Any): user's data
+            disconnect_flags (dict): response flags sent by the broker
             reason_code (int): reason code for disconnection
             properties (Optional[Properties]): MQTT v5 properties
         """
@@ -298,7 +300,7 @@ class InelsMqtt:
         self,
         client: mqtt.Client,  # pylint: disable=unused-argument
         userdata: Any,  # pylint: disable=unused-argument
-        flags: dict,
+        connect_flags: dict,
         reason_code: int,
         properties: Optional[Properties] = None,  # pylint: disable=unused-argument
     ) -> None:
@@ -307,7 +309,7 @@ class InelsMqtt:
         Args:
             client (mqtt.Client): instance of mqtt client
             userdata (Any): user data as set in Client() or user_data_set()
-            flags (dict): response flags sent by the broker
+            connect_flags (dict): response flags sent by the broker
             reason_code (int): the connection result
             properties (Optional[Properties]): the MQTT v5 properties returned from the broker
         """
@@ -425,7 +427,7 @@ class InelsMqtt:
         client: mqtt.Client,  # pylint: disable=unused-argument
         userdata: Any,  # pylint: disable=unused-argument
         mid: int,  # pylint: disable=unused-argument
-        granted_qos: List[int],  # pylint: disable=unused-argument
+        reason_code_list: List[int],  # pylint: disable=unused-argument
         properties: Optional[Any] = None,  # pylint: disable=unused-argument
     ) -> None:
         """Callback for subscribe function."""
@@ -448,7 +450,7 @@ class InelsMqtt:
         userdata: Any,
         mid: int,
         properties: Optional[Any] = None,
-        reasoncodes: Optional[List[int]] = None,
+        reason_code_list: Optional[List[int]] = None,
     ) -> None:
         """Callback for when the client receives an UNSUBACK response from the broker."""
         topic_to_remove = None
