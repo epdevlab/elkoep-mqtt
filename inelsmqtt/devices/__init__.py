@@ -314,8 +314,10 @@ class Device(object):
             last_value=LastHAValue(self.__values.ha_value if self.__values else None),
         )
 
-        # self.__state = dev.ha_value
-        # self.__values = dev
+        # This is a workaround to the last value before turn off since ramp increments are built into mqtt events
+        if hasattr(value, 'light_coa_toa'):
+            self.__state = dev.ha_value
+            self.__values = dev
 
         ret = False
         if self.__set_topic is not None:

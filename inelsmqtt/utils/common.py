@@ -49,9 +49,10 @@ class Shutter_pos(Shutter):
     set_pos: bool
 
 
-@dataclass
+@dataclass(kw_only=True)
 class SimpleLight:
-    brightness: int
+    brightness: int = 0
+    brightness_before_off: Optional[int] = None
 
 
 @dataclass
