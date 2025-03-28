@@ -1664,7 +1664,7 @@ class DT_151:
             light_coa_toa.append(
                 LightCoaToa(
                     brightness=out[i],
-                    brightness_before_off=device_value.last_value.ha_value.light_coa_toa[i].brightness_before_off if device_value.last_value else 0,
+                    brightness_before_off=device_value.last_value.ha_value.light_coa_toa[i].brightness_before_off if device_value.last_value else None,
                     toa=toa[i],
                     coa=coa[i],
                 )
