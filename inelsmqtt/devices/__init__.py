@@ -376,7 +376,7 @@ class Device(object):
 
     def complete_callback(self) -> None:
         if self.__entity_callbacks:
-            for v in self.__entity_callbacks.values():
+            for v in tuple(self.__entity_callbacks.values()):
                 v()
 
     def callback(self, availability_update: bool) -> None:
