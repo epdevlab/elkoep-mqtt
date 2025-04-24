@@ -2036,6 +2036,7 @@ class DT_166:
         CONTROL_MODE: [29],
         VIRT_CONTR: [30],
     }
+    ERR_CODES = [0x7FFFFFFF, 0x7FFFFFFE, 0x7FFFFFFD, 0x7FFFFFFC, 0x7FFFFFFB, 0x7FFFFFFA, 0x7FFFFFF9]
 
     @staticmethod
     def create_command_payload(out1: int = 0, out2: int = 0) -> str:
@@ -2049,7 +2050,7 @@ class DT_166:
         temp_current: float = twos_comp_4B(
             int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, CURRENT_TEMP, ""), 16)
         )
-        if temp_current == 0x7FFFFFFB:
+        if temp_current in cls.ERR_CODES:
             temp_current = 0
         else:
             temp_current /= 100
@@ -2063,7 +2064,7 @@ class DT_166:
         temp_required_heat: float = twos_comp_4B(
             int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_HEAT_TEMP, ""), 16)
         )
-        if temp_required_heat == 0x7FFFFFFB:
+        if temp_required_heat in cls.ERR_CODES:
             temp_required_heat = 0
             if hasattr(device_value.last_value, "ha_value"):
                 last_known_required = device_value.last_value.ha_value.climate_controller.last_known_required
@@ -2078,7 +2079,7 @@ class DT_166:
         temp_required_cool: float = twos_comp_4B(
             int(trim_inels_status_values(device_value.inels_status_value, cls.DATA, REQUIRED_COOL_TEMP, ""), 16)
         )
-        if temp_required_cool == 0x7FFFFFFB:
+        if temp_required_cool in cls.ERR_CODES:
             temp_required_cool = 0
             if hasattr(device_value.last_value, "ha_value"):
                 last_known_required_cool = device_value.last_value.ha_value.climate_controller.last_known_required_cool

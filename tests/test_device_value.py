@@ -2047,9 +2047,45 @@ class Test_CU_DEVICE_TYPE_166(BaseDeviceTestClass):
         )
 
     @pytest.fixture
+    def device_value_7FFFFFFF(self):
+        return self.create_device_value(
+            inels_value="FF\nFF\nFF\n7F\nC8\n00\n00\n00\nFF\nFF\nFF\n7F\n90\n01\n00\n00\nF4\n01\n00\n00\nFF\nFF\nFF\n7F\nBC\n02\n00\n00\n00\n00\n00\n"
+        )
+
+    @pytest.fixture
+    def device_value_7FFFFFFE(self):
+        return self.create_device_value(
+            inels_value="FE\nFF\nFF\n7F\nC8\n00\n00\n00\nFE\nFF\nFF\n7F\n90\n01\n00\n00\nF4\n01\n00\n00\nFE\nFF\nFF\n7F\nBC\n02\n00\n00\n00\n00\n00\n"
+        )
+
+    @pytest.fixture
+    def device_value_7FFFFFFD(self):
+        return self.create_device_value(
+            inels_value="FD\nFF\nFF\n7F\nC8\n00\n00\n00\nFD\nFF\nFF\n7F\n90\n01\n00\n00\nF4\n01\n00\n00\nFD\nFF\nFF\n7F\nBC\n02\n00\n00\n00\n00\n00\n"
+        )
+
+    @pytest.fixture
+    def device_value_7FFFFFFC(self):
+        return self.create_device_value(
+            inels_value="FC\nFF\nFF\n7F\nC8\n00\n00\n00\nFC\nFF\nFF\n7F\n90\n01\n00\n00\nF4\n01\n00\n00\nFC\nFF\nFF\n7F\nBC\n02\n00\n00\n00\n00\n00\n"
+        )
+
+    @pytest.fixture
     def device_value_7FFFFFFB(self):
         return self.create_device_value(
             inels_value="FB\nFF\nFF\n7F\nC8\n00\n00\n00\nFB\nFF\nFF\n7F\n90\n01\n00\n00\nF4\n01\n00\n00\nFB\nFF\nFF\n7F\nBC\n02\n00\n00\n00\n00\n00\n"
+        )
+
+    @pytest.fixture
+    def device_value_7FFFFFFA(self):
+        return self.create_device_value(
+            inels_value="FA\nFF\nFF\n7F\nC8\n00\n00\n00\nFA\nFF\nFF\n7F\n90\n01\n00\n00\nF4\n01\n00\n00\nFA\nFF\nFF\n7F\nBC\n02\n00\n00\n00\n00\n00\n"
+        )
+
+    @pytest.fixture
+    def device_value_7FFFFFF9(self):
+        return self.create_device_value(
+            inels_value="F9\nFF\nFF\n7F\nC8\n00\n00\n00\nF9\nFF\nFF\n7F\n90\n01\n00\n00\nF4\n01\n00\n00\nF9\nFF\nFF\n7F\nBC\n02\n00\n00\n00\n00\n00\n"
         )
 
     def test_create_ha_value_object(self, device_value):
@@ -2132,10 +2168,40 @@ class Test_CU_DEVICE_TYPE_166(BaseDeviceTestClass):
         assert device_value_all_positive.ha_value.climate_controller.required_cool == 6.0
         assert device_value_all_positive.ha_value.climate_controller.correction_temp == 7.0
 
+    def test_7FFFFFFF(self, device_value_7FFFFFFF):
+        assert device_value_7FFFFFFF.ha_value.climate_controller.current == 0
+        assert device_value_7FFFFFFF.ha_value.climate_controller.required == 0
+        assert device_value_7FFFFFFF.ha_value.climate_controller.required_cool == 0
+
+    def test_7FFFFFFE(self, device_value_7FFFFFFE):
+        assert device_value_7FFFFFFE.ha_value.climate_controller.current == 0
+        assert device_value_7FFFFFFE.ha_value.climate_controller.required == 0
+        assert device_value_7FFFFFFE.ha_value.climate_controller.required_cool == 0
+
+    def test_7FFFFFFD(self, device_value_7FFFFFFD):
+        assert device_value_7FFFFFFD.ha_value.climate_controller.current == 0
+        assert device_value_7FFFFFFD.ha_value.climate_controller.required == 0
+        assert device_value_7FFFFFFD.ha_value.climate_controller.required_cool == 0
+
+    def test_7FFFFFFC(self, device_value_7FFFFFFC):
+        assert device_value_7FFFFFFC.ha_value.climate_controller.current == 0
+        assert device_value_7FFFFFFC.ha_value.climate_controller.required == 0
+        assert device_value_7FFFFFFC.ha_value.climate_controller.required_cool == 0
+
     def test_7FFFFFFB(self, device_value_7FFFFFFB):
         assert device_value_7FFFFFFB.ha_value.climate_controller.current == 0
         assert device_value_7FFFFFFB.ha_value.climate_controller.required == 0
         assert device_value_7FFFFFFB.ha_value.climate_controller.required_cool == 0
+
+    def test_7FFFFFFA(self, device_value_7FFFFFFA):
+        assert device_value_7FFFFFFA.ha_value.climate_controller.current == 0
+        assert device_value_7FFFFFFA.ha_value.climate_controller.required == 0
+        assert device_value_7FFFFFFA.ha_value.climate_controller.required_cool == 0
+
+    def test_7FFFFFF9(self, device_value_7FFFFFF9):
+        assert device_value_7FFFFFF9.ha_value.climate_controller.current == 0
+        assert device_value_7FFFFFF9.ha_value.climate_controller.required == 0
+        assert device_value_7FFFFFF9.ha_value.climate_controller.required_cool == 0
 
 
 class Test_CU_DEVICE_TYPE_167(BaseDeviceTestClass):
