@@ -317,7 +317,7 @@ class Device(object):
         # This is a workaround to the last value before turn off since ramp increments are built into mqtt events
         if hasattr(value, 'light_coa_toa'):
             _values = self.__values
-            for i in range(6):
+            for i in range(len(_values.ha_value.light_coa_toa)):
                 _values.ha_value.light_coa_toa[i].brightness_before_off = value.light_coa_toa[i].brightness_before_off
             self.__values = _values
 
