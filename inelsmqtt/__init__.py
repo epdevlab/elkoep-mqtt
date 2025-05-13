@@ -570,7 +570,7 @@ class InelsMqtt:
                     self.__last_values[msg.topic] = msg.payload
                 _LOGGER.info("Device of type %s found [connected].\n", device_type)
         else:
-            if device_type == "gw" and action == "connected":
+            if device_type == "gw" and action in ["connected", "status"]:
                 if msg.topic not in self.__discovered:
                     self.__discovered[msg.topic] = GATEWAY
                     self.__last_values[msg.topic] = msg.payload
@@ -591,6 +591,7 @@ class InelsMqtt:
             userdata (Any): Data about user
             msg (mqtt.MQTTMessage): Topic with payload from broker
         """
+        _LOGGER.debug("Received message - Topic: %s, Payload: %s", msg.topic, msg.payload)
         message_parts = msg.topic.split("/")
         device_type = message_parts[TOPIC_FRAGMENTS[FRAGMENT_DEVICE_TYPE]]
 
