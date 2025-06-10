@@ -1708,11 +1708,13 @@ class DT_153(Base):
         temp_in = trim_inels_status_values(device_value.inels_status_value, cls.DATA, TEMP_IN, "")
 
         rgbw = []
+        rgbw_channels = []
         for led in [led_1, led_2, led_3]:
             r, g, b, w, y = [int(i, 16) for i in led]
             rgbw.append(RGBWLight(r=r, g=g, b=b, w=w, brightness=y))
+            rgbw_channels.extend([SimpleLight(brightness=x) for x in [r, g, b, w, y]])
 
-        return new_object(rgbw=rgbw, temp_in=temp_in)
+        return new_object(rgbw=rgbw, rgbw_channels=rgbw_channels, temp_in=temp_in)
 
     @classmethod
     def create_inels_set_value(cls, device_value: DeviceValue) -> str:
