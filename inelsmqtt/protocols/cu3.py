@@ -247,13 +247,16 @@ class DT_101(Base):
                 )
             )
 
+        din = [state_bin_str[5] == "1", state_bin_str[4] == "1"]
+
         return new_object(
             # May not be that interesting for HA
             sw=[
                 state_bin_str[7] == "1",  # 0
                 state_bin_str[6] == "1",  # 1
             ],
-            din=[state_bin_str[5] == "1", state_bin_str[4] == "1"],
+            din=din,
+            input=din,
             temp_in=temp,
             light_coa_toa=light_coa_toa,
         )
@@ -300,12 +303,15 @@ class DT_102(Base):
         humidity = trim_inels_status_values(device_value.inels_status_value, cls.DATA, HUMIDITY, "")
         dewpoint = trim_inels_status_values(device_value.inels_status_value, cls.DATA, DEW_POINT, "")
 
+        din = [  # 2
+            digital_inputs_bin_str[7] == "1",  # 0 -> 7, reverse endianness
+            digital_inputs_bin_str[6] == "1",
+        ]
+
         return new_object(
             # digital inputs
-            din=[  # 2
-                digital_inputs_bin_str[7] == "1",  # 0 -> 7, reverse endianness
-                digital_inputs_bin_str[6] == "1",
-            ],
+            din=din,
+            input=din,
             interface=[  # 5
                 digital_inputs_bin_str[5] == "1",
                 digital_inputs_bin_str[4] == "1",
@@ -354,6 +360,11 @@ class DT_103(Base):
 
         dewpoint = trim_inels_status_values(device_value.inels_status_value, cls.DATA, DEW_POINT, "")
 
+        din = [
+            digital_inputs[14] == "1",  # 9
+            digital_inputs[13] == "1",  # 10
+        ]
+
         return new_object(
             interface=[
                 digital_inputs[7] == "1",  # 0
@@ -366,10 +377,8 @@ class DT_103(Base):
                 digital_inputs[0] == "1",
                 digital_inputs[15] == "1",  # 8
             ],
-            din=[
-                digital_inputs[14] == "1",  # 9
-                digital_inputs[13] == "1",  # 10
-            ],
+            din=din,
+            input=din,
             prox=digital_inputs[12] == "1",  # 11
             temp_in=temp,
             light_in=light_in,
@@ -711,6 +720,7 @@ class DT_111:
 
         return new_object(
             din=din,
+            input=din,
             sw=sw,
             aout=aout,
             valves=valves,
@@ -782,6 +792,7 @@ class DT_112(DT_100):
             # re=re,
             temps=temps,
             din=din,
+            input=din,
             # relay_overflow=relay_overflow,
         )
 
@@ -883,6 +894,7 @@ class DT_114(Base):
             relay=relay,
             temps=temps,
             din=din,
+            input=din,
             aout=aout,
             dali=dali,
         )
@@ -1088,6 +1100,7 @@ class DT_122(Base):
         return new_object(
             interface=interface,
             din=din,
+            input=din,
             temp_in=temp_in,
             ain=ain,
         )
@@ -1140,6 +1153,7 @@ class DT_124(Base):
         return new_object(
             interface=interface,
             din=din,
+            input=din,
             temp_in=temp_in,
             ain=ain,
             humidity=humidity,
@@ -1254,6 +1268,7 @@ class DT_136(Base):
         return new_object(
             interface=interface,
             din=din,
+            input=din,
             temp_in=temp_in,
             light_in=light_in,
             ain=ain,
@@ -1297,6 +1312,7 @@ class DT_137(Base):
         return new_object(
             interface=interface,
             din=din,
+            input=din,
             temp_in=temp_in,
             light_in=light_in,
             ain=ain,
@@ -1343,6 +1359,7 @@ class DT_138(Base):
         return new_object(
             interface=interface,
             din=din,
+            input=din,
             temp_in=temp,
             light_in=light_in,
             ain=ain,
@@ -1426,6 +1443,7 @@ class DT_143(Base):
         return new_object(
             interface=interface,
             din=din,
+            input=din,
             prox=prox,
             temp_in=temp_in,
             light_in=light_in,
@@ -1673,6 +1691,7 @@ class DT_151:
         return new_object(
             sw=sw,
             din=din,
+            input=din,
             light_coa_toa=light_coa_toa,
         )
 
@@ -1842,6 +1861,7 @@ class DT_160(Base):
         return new_object(
             interface=interface,
             din=din,
+            input=din,
             temp_in=temp_in,
             temp_out=temp_out,
         )
@@ -2493,6 +2513,7 @@ class DT_180(Base):
 
         return new_object(
             din=din,
+            input=din,
             prox=prox,
             interface=[
                 switches_bin_str[7] == "1",
