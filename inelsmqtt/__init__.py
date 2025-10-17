@@ -329,7 +329,7 @@ class InelsMqtt:
         )
 
     def publish(
-        self, topic: str, payload: Any, qos: int = 0, retain: bool = True, properties: Optional[Properties] = None
+        self, topic: str, payload: Any, qos: int = 0, retain: bool = False, properties: Optional[Properties] = None
     ) -> bool:
         """
         Publish a message to a specified MQTT topic.
