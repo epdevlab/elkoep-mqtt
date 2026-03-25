@@ -2239,11 +2239,11 @@ class DT_166:
             except AttributeError:
                 pass
 
-        manual_temp = [int(x, 16) for x in break_into_bytes(f"{int((required_heat + cc.correction_temp) * 100):08X}")]
+        manual_temp = [int(x, 16) for x in break_into_bytes(f"{int((required_heat - cc.correction_temp) * 100):08X}")]
         manual_temp.reverse()
 
         manual_cool_temp = [
-            int(x, 16) for x in break_into_bytes(f"{int((required_cool + cc.correction_temp) * 100):08X}")
+            int(x, 16) for x in break_into_bytes(f"{int((required_cool - cc.correction_temp) * 100):08X}")
         ]
         manual_cool_temp.reverse()
 
