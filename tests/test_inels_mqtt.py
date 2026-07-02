@@ -46,7 +46,7 @@ def test_publish_successful(mqtt_client_mock, inels_mqtt):
 
     result = inels_mqtt.publish("inels/status/10e97f8b7d30/01/01E8", "data")
 
-    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, True, None)
+    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, False, None)
 
     assert result == True
 
@@ -60,7 +60,7 @@ def test_publish_unsuccessful(mqtt_client_mock, inels_mqtt):
 
     result = inels_mqtt.publish("inels/status/10e97f8b7d30/01/01E8", "data")
 
-    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, True, None)
+    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, False, None)
 
     assert result == False
 
@@ -76,7 +76,7 @@ def test_publish_exception(mqtt_client_mock, inels_mqtt):
 
     result = inels_mqtt.publish("inels/status/10e97f8b7d30/01/01E8", "data")
 
-    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, True, None)
+    mqtt_client_mock.publish.assert_called_once_with("inels/status/10e97f8b7d30/01/01E8", "data", 0, False, None)
 
     assert result == False
 
@@ -266,3 +266,72 @@ def test_unsubscribe_nonexistent_topic(mqtt_client_mock, inels_mqtt):
     inels_mqtt.unsubscribe("non_existent_topic")
 
     mqtt_client_mock.unsubscribe.assert_not_called()
+
+
+def test_on_disconnect_marks_topics_for_resubscribe(inels_mqtt):
+    """Disconnect should mark topics unsubscribed and flag resubscribe."""
+    topic = "inels/status/10e97f8b7d30/01/01E8"
+    inels_mqtt._InelsMqtt__is_subscribed_list = {topic: True}
+    inels_mqtt._InelsMqtt__subscription_qos = {topic: 0}
+    inels_mqtt._InelsMqtt__needs_resubscribe = False
+
+    inels_mqtt.client.on_disconnect(None, None, None, 0)
+
+    assert inels_mqtt._InelsMqtt__is_subscribed_list[topic] is False
+    assert inels_mqtt._InelsMqtt__needs_resubscribe is True
+    assert inels_mqtt.is_available is False
+
+
+def test_on_connect_resubscribes_after_disconnect(mqtt_client_mock, inels_mqtt):
+    """Reconnect should resubscribe known topics when the broker has no session."""
+    topics = [
+        ("inels/status/10e97f8b7d30/01/01E8", 0),
+        ("inels/status/10e97f8b7d30/01/01E9", 1),
+    ]
+    inels_mqtt._InelsMqtt__is_subscribed_list = {topic: False for topic, _ in topics}
+    inels_mqtt._InelsMqtt__subscription_qos = {topic: qos for topic, qos in topics}
+    inels_mqtt._InelsMqtt__needs_resubscribe = True
+
+    mqtt_client_mock.subscribe.return_value = (mqtt.MQTT_ERR_SUCCESS, 42)
+
+    inels_mqtt.client.on_connect(None, None, None, mqtt.CONNACK_ACCEPTED)
+
+    mqtt_client_mock.subscribe.assert_called_once_with(topics)
+    assert inels_mqtt._InelsMqtt__needs_resubscribe is False
+    assert inels_mqtt._InelsMqtt__expected_mid == {
+        "inels/status/10e97f8b7d30/01/01E8": 42,
+        "inels/status/10e97f8b7d30/01/01E9": 42,
+    }
+
+
+def test_on_connect_skips_resubscribe_when_mqtt_v5_session_present(mqtt_client_mock):
+    """MQTT v5 reconnect with session_present should not send SUBSCRIBE again."""
+    config = {
+        "host": "localhost",
+        "port": 1883,
+        "protocol": mqtt.MQTTv5,
+        "timeout": 0,
+    }
+    mqtt_client_mock = Mock()
+    with patch("paho.mqtt.client.Client", return_value=mqtt_client_mock):
+        inels_mqtt = InelsMqtt(config=config)
+
+    topic = "inels/status/10e97f8b7d30/01/01E8"
+    inels_mqtt._InelsMqtt__is_subscribed_list = {topic: False}
+    inels_mqtt._InelsMqtt__subscription_qos = {topic: 0}
+    inels_mqtt._InelsMqtt__needs_resubscribe = True
+
+    connect_flags = mqtt.ConnectFlags(session_present=True)
+    inels_mqtt.client.on_connect(None, None, connect_flags, mqtt.CONNACK_ACCEPTED)
+
+    mqtt_client_mock.subscribe.assert_not_called()
+    assert inels_mqtt._InelsMqtt__is_subscribed_list[topic] is True
+    assert inels_mqtt._InelsMqtt__needs_resubscribe is False
+
+
+def test_on_connect_does_not_resubscribe_on_first_connect(mqtt_client_mock, inels_mqtt):
+    """Initial connect must not resubscribe before subscribe() is called."""
+    inels_mqtt.client.on_connect(None, None, None, mqtt.CONNACK_ACCEPTED)
+
+    mqtt_client_mock.subscribe.assert_not_called()
+    assert inels_mqtt._InelsMqtt__needs_resubscribe is False

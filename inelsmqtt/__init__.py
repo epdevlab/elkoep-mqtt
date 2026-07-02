@@ -41,6 +41,12 @@ _LOGGER = logging.getLogger(__name__)
 # when no topic were detected, then stop discovery
 __DISCOVERY_TIMEOUT__ = DISCOVERY_TIMEOUT_IN_SEC
 
+__MQTT_PROTOCOL_LABELS__: dict[int, str] = {
+    mqtt.MQTTv31: "3.1",
+    mqtt.MQTTv311: "3.1.1",
+    mqtt.MQTTv5: "5",
+}
+
 
 class InelsMqtt:
     """Wrapper for mqtt client."""
@@ -93,6 +99,8 @@ class InelsMqtt:
 
         self.__listeners: dict[str, dict[str, Callable[[Any], Any]]] = defaultdict(lambda: dict())
         self.__is_subscribed_list = dict[str, bool]()
+        self.__subscription_qos = dict[str, int]()
+        self.__needs_resubscribe = False
         self.__last_values = dict[str, str]()
         self.__try_connect = False
         self.__messages = dict[str, Optional[str]]()
@@ -287,6 +295,7 @@ class InelsMqtt:
 
         self.__is_available = False
         self.__try_connect = False
+        self.__needs_resubscribe = True
 
         for item in self.__is_subscribed_list.keys():
             self.__is_subscribed_list[item] = False
@@ -300,7 +309,7 @@ class InelsMqtt:
         self,
         client: mqtt.Client,  # pylint: disable=unused-argument
         userdata: Any,  # pylint: disable=unused-argument
-        connect_flags: dict,
+        connect_flags: mqtt.ConnectFlags,
         reason_code: int,
         properties: Optional[Properties] = None,  # pylint: disable=unused-argument
     ) -> None:
@@ -309,7 +318,7 @@ class InelsMqtt:
         Args:
             client (mqtt.Client): instance of mqtt client
             userdata (Any): user data as set in Client() or user_data_set()
-            connect_flags (dict): response flags sent by the broker
+            connect_flags (mqtt.ConnectFlags): CONNACK flags from the broker
             reason_code (int): the connection result
             properties (Optional[Properties]): the MQTT v5 properties returned from the broker
         """
@@ -322,11 +331,49 @@ class InelsMqtt:
             self.__connection_error = reason_code
 
         _LOGGER.info(
-            "Mqtt broker %s:%s %s",
+            "Mqtt broker %s:%s (MQTT %s) %s",
             self.__host,
             self.__port,
+            __MQTT_PROTOCOL_LABELS__.get(self.__proto, str(self.__proto)),
             "is connected" if self.__is_available else "is not connected",
         )
+
+        if self.__is_available and self.__needs_resubscribe:
+            self.__resubscribe_known_topics(connect_flags)
+
+    def __session_present(self, connect_flags: Optional[mqtt.ConnectFlags]) -> bool:
+        """Return whether the broker restored a persistent MQTT session."""
+        return bool(connect_flags and connect_flags.session_present)
+
+    def __resubscribe_known_topics(self, connect_flags: Optional[mqtt.ConnectFlags]) -> None:
+        """Reapply subscriptions after reconnect."""
+        if not self.__is_subscribed_list:
+            self.__needs_resubscribe = False
+            return
+
+        if self.__proto == mqtt.MQTTv5 and self.__session_present(connect_flags):
+            for topic in self.__is_subscribed_list:
+                self.__is_subscribed_list[topic] = True
+            self.__needs_resubscribe = False
+            _LOGGER.info(
+                "MQTT v5 session restored by broker, %s subscription(s) resumed",
+                len(self.__is_subscribed_list),
+            )
+            return
+
+        topics_to_resubscribe = [
+            (topic, self.__subscription_qos.get(topic, 0)) for topic in self.__is_subscribed_list
+        ]
+        r, mid = self.__client.subscribe(topics_to_resubscribe)
+        if r != mqtt.MQTT_ERR_SUCCESS:
+            _LOGGER.error("Failed to resubscribe to topics after reconnect: %s", topics_to_resubscribe)
+            return
+
+        for topic, _ in topics_to_resubscribe:
+            self.__expected_mid[topic] = mid
+
+        self.__needs_resubscribe = False
+        _LOGGER.info("Resubscribing to %s topic(s) after reconnect", len(topics_to_resubscribe))
 
     def publish(
         self, topic: str, payload: Any, qos: int = 0, retain: bool = False, properties: Optional[Properties] = None
@@ -338,7 +385,7 @@ class InelsMqtt:
             topic (str): The topic to publish to.
             payload (Any): The message payload.
             qos (int, optional): The Quality of Service level. Defaults to 0.
-            retain (bool, optional): If True, the message will be retained. Defaults to True.
+            retain (bool, optional): If True, the message will be retained. Defaults to False.
             properties (Any, optional): Additional properties for the message. Defaults to None.
 
         Returns:
@@ -395,6 +442,7 @@ class InelsMqtt:
             for t, q in topics:
                 if not self.__is_subscribed_list.get(t, False):
                     self.__is_subscribed_list[t] = False
+                    self.__subscription_qos[t] = q
                     filtered_topics.append((t, q))
 
             if filtered_topics:
@@ -404,6 +452,7 @@ class InelsMqtt:
                     # Clean up the state for failed subscriptions
                     for topic, _ in filtered_topics:
                         self.__is_subscribed_list.pop(topic, None)
+                        self.__subscription_qos.pop(topic, None)
                     return {}
 
                 for topic, _ in filtered_topics:
@@ -419,6 +468,7 @@ class InelsMqtt:
                 _LOGGER.error("Subscription to topic %s failed", topic)
                 self.__expected_mid.pop(topic, None)
                 self.__is_subscribed_list.pop(topic, None)
+                self.__subscription_qos.pop(topic, None)
 
         return {topic: self.__messages.get(topic) for topic, _ in topics}
 
@@ -457,6 +507,7 @@ class InelsMqtt:
         for topic, expected_mid in self.__expected_mid.items():
             if expected_mid == mid:
                 self.__is_subscribed_list.pop(topic, None)
+                self.__subscription_qos.pop(topic, None)
                 self.__messages.pop(topic, None)
                 topic_to_remove = topic
                 break
