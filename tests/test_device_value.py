@@ -2581,5 +2581,106 @@ class Test_CU_DEVICE_TYPE_INTEGERS(BaseDeviceTestClass):
         )
 
 
+class Test_CU_DEVICE_TYPE_DALI_DMX_UNIT(BaseDeviceTestClass):
+    DEVICE_TYPE_ID = "DALI-DMX-Unit"
+
+    @pytest.fixture
+    def device_value_all_max(self):
+        return self.create_device_value(
+            inels_value='{"timestamp":"2026-08-04T07:43:30Z","channelA":100,"channelB":100,"channelC":100,"channelD":100}'
+        )
+
+    @pytest.fixture
+    def device_value_all_min(self):
+        return self.create_device_value(
+            inels_value='{"timestamp":"2026-08-04T07:43:30Z","channelA":0,"channelB":0,"channelC":0,"channelD":0}'
+        )
+
+    def test_create_ha_value_object_all_max(self, device_value_all_max):
+        assert isinstance(device_value_all_max.ha_value.simple_light[0], SimpleLight)
+        for x in device_value_all_max.ha_value.simple_light:
+            assert x.brightness == 100
+
+    def test_create_ha_value_object_all_min(self, device_value_all_min):
+        assert isinstance(device_value_all_min.ha_value.simple_light[0], SimpleLight)
+        for x in device_value_all_min.ha_value.simple_light:
+            assert not x.brightness
+
+    def test_format_inels_set_value_all_max(self, device_value_all_min):
+        for x in device_value_all_min.ha_value.simple_light:
+            x.brightness = 100
+
+        device_value = self.create_device_value(
+            ha_value=device_value_all_min.ha_value,
+        )
+        assert (
+            device_value.inels_set_value
+            == '{"cmd": {"channelA": 100, "channelB": 100, "channelC": 100, "channelD": 100}}'
+        )
+
+    def test_format_inels_set_value_all_min(self, device_value_all_max):
+        for x in device_value_all_max.ha_value.simple_light:
+            x.brightness = 0
+
+        device_value = self.create_device_value(
+            ha_value=device_value_all_max.ha_value,
+        )
+        assert device_value.inels_set_value == '{"cmd": {"channelA": 0, "channelB": 0, "channelC": 0, "channelD": 0}}'
+
+
+class Test_CU_DEVICE_TYPE_DALI_DMX_UNIT_02(BaseDeviceTestClass):
+    DEVICE_TYPE_ID = "DALI-DMX-Unit-02"
+
+    @pytest.fixture
+    def device_value_all_max(self):
+        return self.create_device_value(
+            inels_value='{"timestamp":"1970-04-23T07:11:18Z","unit1_channelA":100,"unit1_channelB":100,"unit2_channelA":100,"unit2_channelB":100}'
+        )
+
+    @pytest.fixture
+    def device_value_all_min(self):
+        return self.create_device_value(
+            inels_value='{"timestamp":"1970-04-23T07:11:18Z","unit1_channelA":0,"unit1_channelB":0,"unit2_channelA":0,"unit2_channelB":0}'
+        )
+
+    def test_create_ha_value_object_all_max(self, device_value_all_max):
+        assert isinstance(device_value_all_max.ha_value.warm_light[0], WarmLight)
+        for x in device_value_all_max.ha_value.warm_light:
+            assert x.brightness == 100
+            assert x.relative_ct == 100
+
+    def test_create_ha_value_object_all_min(self, device_value_all_min):
+        assert isinstance(device_value_all_min.ha_value.warm_light[0], WarmLight)
+        for x in device_value_all_min.ha_value.warm_light:
+            assert not x.brightness
+            assert not x.relative_ct
+
+    def test_format_inels_set_value_all_max(self, device_value_all_min):
+        for x in device_value_all_min.ha_value.warm_light:
+            x.brightness = 100
+            x.relative_ct = 100
+
+        device_value = self.create_device_value(
+            ha_value=device_value_all_min.ha_value,
+        )
+        assert (
+            device_value.inels_set_value
+            == '{"cmd": {"unit1_channelA": 100, "unit1_channelB": 100, "unit2_channelA": 100, "unit2_channelB": 100}}'
+        )
+
+    def test_format_inels_set_value_all_min(self, device_value_all_max):
+        for x in device_value_all_max.ha_value.warm_light:
+            x.brightness = 0
+            x.relative_ct = 0
+
+        device_value = self.create_device_value(
+            ha_value=device_value_all_max.ha_value,
+        )
+        assert (
+            device_value.inels_set_value
+            == '{"cmd": {"unit1_channelA": 0, "unit1_channelB": 0, "unit2_channelA": 0, "unit2_channelB": 0}}'
+        )
+
+
 if __name__ == "__main__":
     pytest.main()

@@ -171,7 +171,7 @@ class Device(object):
             val = val.decode()  # type: ignore[unreachable]
 
         # Temporary workaround to provide an always-online status for DT [164, 165, 166, 167, 168]
-        if self.__device_class.TYPE_ID in ["164", "165", "166", "167", "168"]:
+        if self.__device_class.TYPE_ID in ["164", "165", "166", "167", "168", "DALI-DMX-Unit", "DALI-DMX-Unit-02"]:
             return self.__values is not None and self.__values.ha_value is not None
         else:
             return bool(

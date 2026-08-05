@@ -131,6 +131,7 @@ from inelsmqtt.utils.common import (
     break_into_bytes,
     new_object,
     parse_formated_json,
+    parse_json,
     trim_inels_status_bytes,
     trim_inels_status_values,
     twos_comp_4B,
@@ -2584,5 +2585,78 @@ class DT_INTEGERS:
         set_val = {}
         for number in device_value.ha_value.number:
             set_val[number.addr] = int(number.value)
+
+        return cls.create_command_payload(set_val)
+
+
+class DT_DALI_DMX_UNIT(Base):
+    INELS_TYPE = DALI_DMX_UNIT
+    HA_TYPE = LIGHT
+    TYPE_ID = "DALI-DMX-Unit"
+
+    CHANNELS = ["channelA", "channelB", "channelC", "channelD"]
+
+    @staticmethod
+    def create_command_payload(cmd: Dict[str, int]) -> str:
+        return json.dumps({"cmd": cmd})
+
+    @classmethod
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
+        outs = parse_json(device_value.inels_status_value)
+        simple_light = []
+        for o in cls.CHANNELS:
+            brightness = min(outs.get(o, 0), 100)
+            simple_light.append(
+                SimpleLight(
+                    brightness=brightness,
+                )
+            )
+
+        return new_object(
+            simple_light=simple_light,
+        )
+
+    @classmethod
+    def create_inels_set_value(cls, device_value: DeviceValue) -> str:
+        set_val: dict[str, int] = {}
+        for i in range(4):
+            set_val[cls.CHANNELS[i]] = min(device_value.ha_value.simple_light[i].brightness, 100)
+        return cls.create_command_payload(set_val)
+
+
+class DT_DALI_DMX_UNIT_02(Base):
+    INELS_TYPE = DALI_DMX_UNIT_2
+    HA_TYPE = LIGHT
+    TYPE_ID = "DALI-DMX-Unit-02"
+
+    CHANNELS = [("unit1_channelA", "unit1_channelB"), ("unit2_channelA", "unit2_channelB")]
+
+    @staticmethod
+    def create_command_payload(cmd: Dict[str, int]) -> str:
+        return json.dumps({"cmd": cmd})
+
+    @classmethod
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
+        outs = parse_json(device_value.inels_status_value)
+        warm_light = []
+
+        for b, w in cls.CHANNELS:
+            warm_light.append(
+                WarmLight(
+                    brightness=min(outs.get(b, 0), 100),
+                    relative_ct=min(outs.get(w, 0), 100),
+                )
+            )
+
+        return new_object(
+            warm_light=warm_light,
+        )
+
+    @classmethod
+    def create_inels_set_value(cls, device_value: DeviceValue) -> str:
+        set_val: dict[str, int] = {}
+        for i in range(2):
+            set_val[cls.CHANNELS[i][0]] = min(device_value.ha_value.warm_light[i].brightness, 100)
+            set_val[cls.CHANNELS[i][1]] = min(device_value.ha_value.warm_light[i].relative_ct, 100)
 
         return cls.create_command_payload(set_val)

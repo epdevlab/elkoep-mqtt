@@ -158,6 +158,10 @@ def parse_formated_json(data: str) -> List[Tuple[str, int]]:
     return addr_val_list
 
 
+def parse_json(data: str) -> Dict[str, Any]:
+    return json.loads(data)
+
+
 class Formatter:
     @staticmethod
     def format_data(data: List[int]) -> str:

@@ -128,6 +128,8 @@ class ProtocolHandlerMapper:
         "180": cu3.DT_180,
         "bits": cu3.DT_BITS,
         "integers": cu3.DT_INTEGERS,
+        "DALI-DMX-Unit": cu3.DT_DALI_DMX_UNIT,
+        "DALI-DMX-Unit-02": cu3.DT_DALI_DMX_UNIT_02,
     }
 
     @staticmethod
