@@ -627,7 +627,7 @@ class InelsMqtt:
                     self.__last_values[msg.topic] = msg.payload
                     _LOGGER.info("Device of type %s found [gw].\n", device_type)
             elif device_type != "gw":
-                _LOGGER.error("No handler found for device_type: %s", device_type)
+                _LOGGER.debug("No handler found for device_type: %s", device_type)
 
     def __on_message(
         self,
