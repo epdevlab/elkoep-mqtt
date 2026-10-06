@@ -679,7 +679,7 @@ class DT_18(CommTest):
         if device_value.last_value is None:
             btn = [False, False]
         else:
-            btn = device_value.last_value.ha_value.btn
+            btn = list(device_value.last_value.ha_value.btn)
 
         if identity in BUTTON_NUMBER:
             number = BUTTON_NUMBER[identity]
@@ -719,7 +719,7 @@ class DT_19(CommTest):
                 False,
             ]
         else:
-            btn = device_value.last_value.ha_value.btn
+            btn = list(device_value.last_value.ha_value.btn)
 
         if identity in BUTTON_NUMBER:
             number = BUTTON_NUMBER[identity]
