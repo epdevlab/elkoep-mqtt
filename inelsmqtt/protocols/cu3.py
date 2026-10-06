@@ -26,6 +26,7 @@ from inelsmqtt.const import (
     DAC3_04B,
     DAC3_04M,
     DALI,
+    DALI_2_UNIT,
     DALI_DMX_UNIT,
     DALI_DMX_UNIT_2,
     DCDA_33M,
@@ -1683,7 +1684,9 @@ class DT_151:
             light_coa_toa.append(
                 LightCoaToa(
                     brightness=out[i],
-                    brightness_before_off=device_value.last_value.ha_value.light_coa_toa[i].brightness_before_off if device_value.last_value else None,
+                    brightness_before_off=device_value.last_value.ha_value.light_coa_toa[i].brightness_before_off
+                    if device_value.last_value
+                    else None,
                     toa=toa[i],
                     coa=coa[i],
                 )
@@ -2660,3 +2663,30 @@ class DT_DALI_DMX_UNIT_02(Base):
             set_val[cls.CHANNELS[i][1]] = min(device_value.ha_value.warm_light[i].relative_ct, 100)
 
         return cls.create_command_payload(set_val)
+
+
+class DALI_2_UNIT(Base):
+    INELS_TYPE = DALI_2_UNIT
+    HA_TYPE = SENSOR
+    TYPE_ID = "DALI-2-Unit"
+
+    @classmethod
+    def create_ha_value_object(cls, device_value: DeviceValue) -> Any:
+        data = parse_json(device_value.inels_status_value)
+
+        dali_status = data.get("status", ["OK"])
+
+        instances = data.get("instances", [])
+        for instance in instances:
+            if instance["type"] == "occupancy":
+                occupied = instance["occupied"]
+                motion = instance["movement"]
+            if instance["type"] == "light":
+                light_in = f"{instance['level']:08X}"
+
+        return new_object(
+            dali_status=dali_status,
+            light_in=light_in,
+            occupied=occupied,
+            motion=motion,
+        )

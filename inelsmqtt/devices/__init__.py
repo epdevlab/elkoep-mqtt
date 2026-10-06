@@ -7,6 +7,7 @@ from typing import Any, Callable, Optional, Union
 from inelsmqtt import InelsMqtt
 from inelsmqtt.const import (
     BUTTON,
+    DALI_2_UNIT,
     DEVICE_CONNECTED,
     FRAGMENT_DEVICE_TYPE,
     FRAGMENT_DOMAIN,
@@ -67,7 +68,13 @@ class Device(object):
         self.__device_type = self.__device_class.HA_TYPE
         self.__inels_type = self.__device_class.INELS_TYPE
 
-        self.__unique_id = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}_{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"  # fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]
+        if self.__device_class.INELS_TYPE == DALI_2_UNIT:
+            self.__unique_id = f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}_DALI2_{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"
+        else:
+            self.__unique_id = (
+                f"{fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]}_{fragments[TOPIC_FRAGMENTS[FRAGMENT_UNIQUE_ID]]}"
+            )
+
         self.__parent_id = self.__unique_id  # fragments[TOPIC_FRAGMENTS[FRAGMENT_SERIAL_NUMBER]]
         self.__state_topic = state_topic
         self.__set_topic = None
@@ -171,7 +178,16 @@ class Device(object):
             val = val.decode()  # type: ignore[unreachable]
 
         # Temporary workaround to provide an always-online status for DT [164, 165, 166, 167, 168]
-        if self.__device_class.TYPE_ID in ["164", "165", "166", "167", "168", "DALI-DMX-Unit", "DALI-DMX-Unit-02"]:
+        if self.__device_class.TYPE_ID in [
+            "164",
+            "165",
+            "166",
+            "167",
+            "168",
+            "DALI-DMX-Unit",
+            "DALI-DMX-Unit-02",
+            "DALI-2-Unit",
+        ]:
             return self.__values is not None and self.__values.ha_value is not None
         else:
             return bool(
@@ -315,7 +331,7 @@ class Device(object):
         )
 
         # This is a workaround to the last value before turn off since ramp increments are built into mqtt events
-        if hasattr(value, 'light_coa_toa'):
+        if hasattr(value, "light_coa_toa"):
             _values = self.__values
             for i in range(len(_values.ha_value.light_coa_toa)):
                 _values.ha_value.light_coa_toa[i].brightness_before_off = value.light_coa_toa[i].brightness_before_off
